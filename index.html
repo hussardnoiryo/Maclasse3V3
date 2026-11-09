@@ -95,7 +95,7 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 .psub{margin:10px 0 0 12px;padding:8px 0 4px 10px;border-left:3px solid #d6dce8}
 .pcomp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:5px 0 0 8px;padding:5px 7px;border:1.5px solid #e1e5ee;border-radius:10px;background:#fff}.pcomp .pmv{display:flex;gap:4px}
 .pcomp.ab{background:#fde8e8;border-color:#e9a3a3}.pcomp.ev{background:#e3f5ec;border-color:#8cc9a8}
-.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
+.pfold{width:30px;font-size:1.15rem;font-weight:800;line-height:1;background:#e7ecff;color:#3b5bdb;border-color:#b8c5f5;margin-right:8px}.pfold.on{background:#3b5bdb;color:#fff}.plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
 .psec{margin-bottom:18px}.psec h2{border-bottom:2px solid #3b5bdb;padding-bottom:3px;margin-bottom:4px}.psec h3{margin:12px 0 4px;color:#2a45b0}
@@ -207,7 +207,7 @@ function fix(d) {
   d.items = Object.assign({ sons: [], ecriture: [], vie: [], matos: [] }, d.items);
   ["counts", "term", "lent"].forEach(k => d[k] = d[k] || {});
   d.subjects = d.subjects || b.subjects; d.evals = d.evals || [];
-  d.fields = d.fields || b.fields; d.info = d.info || {};
+  d.abounds = d.abounds || {}; d.fields = d.fields || b.fields; d.info = d.info || {};
   return d;
 }
 let S = load();
@@ -244,6 +244,11 @@ function bump(sid, mod, it, d) {
    lignes de vie de classe marquées « consignes » / « règles » → EMC.
    Barème relatif à la classe : 10/10 = aucune erreur, 3/10 = le plus d'erreurs de la classe (jamais en dessous de 3). */
 let autoWarn = [];
+const AUTO_KEYS = [["ecriture", "✍️ Écriture (Français › Écriture)"], ["sons", "🔊 Sons (Français › Orthographe)"], ["emc-consignes", "🙂 EMC › Respect des consignes"], ["emc-regles", "🙂 EMC › Respect des règles de vie"]];
+function boundsOf(k) {
+  const b = (S.abounds || {})[k] || {}; let lo = Number.isFinite(+b.min) && b.min !== "" && b.min != null ? +b.min : 3, hi = Number.isFinite(+b.max) && b.max !== "" && b.max != null ? +b.max : 10;
+  lo = Math.max(0, Math.min(10, lo)); hi = Math.max(0, Math.min(10, hi)); return lo <= hi ? [lo, hi] : [3, 10];
+}
 function findSub(sjRe, subRe) {
   const sj = S.subjects.find(s => sjRe.test(norm(s.name))); const sb = sj && sj.subs.find(b => subRe.test(norm(b.name)));
   return sj && sb ? { sj, sb } : null;
@@ -266,7 +271,8 @@ function autoEvals() {
     if (!sp.t) { autoWarn.push(sp.where); return; }
     const vals = {}; S.students.forEach(s => vals[s.id] = sp.val(s.id));
     const mx = Math.max(0, ...counted().map(s => vals[s.id])); if (mx === 0) return;
-    const grades = {}; S.students.forEach(s => grades[s.id] = Math.round(Math.max(3, Math.min(10, 3 + 7 * (1 - vals[s.id] / mx))) * 10) / 10);
+    const [lo, hi] = boundsOf(sp.key);
+    const grades = {}; S.students.forEach(s => grades[s.id] = Math.round(Math.max(lo, Math.min(hi, lo + (hi - lo) * (1 - vals[s.id] / mx))) * 10) / 10);
     out.push({ id: "auto-" + sp.key, auto: true, date: today(), subjectId: sp.t.sj.id, subId: sp.t.sb.id, label: sp.label, max: 10, grades });
   });
   return out;
@@ -325,8 +331,8 @@ function classNotesTable(print) {
 }
 
 /* ===================== Interface ===================== */
-const PAGES = [["prog", "🧭 Progressions"], ["vie", "🙂 Vie de classe"], ["sons", "🔊 Sons"], ["ecriture", "✍️ Écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
-let page = localStorage.getItem(LS_PAGE) || "vie"; if (!PAGES.some(p => p[0] === page)) page = "vie";
+const PAGES = [["prog", "🧭 Progressions"], ["vie", "🙂 Vie de classe"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
+let page = localStorage.getItem(LS_PAGE) || "vie"; if (page === "ecriture") page = "sons"; if (!PAGES.some(p => p[0] === page)) page = "vie";
 let sel = {};            // élève sélectionné par module
 let showTable = {};      // vue classe (tableau) par module
 let ntab = "saisie", histF = "";
@@ -393,9 +399,10 @@ function viewCounters(p) {
 /* ===================== Progressions =====================
    Même arbre que les notes : S.subjects[matière › sous-matière › compétence]. Ajouter ou renommer ici = visible dans Notes (et inversement).
    Par compétence : période (champ libre : P1, P2…), « abordée » (rouge), « évaluée » (vert, automatique si une note existe). */
-let ptab = "edit", pclosed = {}, pfSubj = "all", pfPer = "all";
+let ptab = "edit", popen = {}, pfSubj = "all", pfPer = "all";
 const compEvals = c => S.evals.filter(e => e.compId === c.id && Object.values(e.grades || {}).some(v => typeof v === "number"));
 const periodsOf = c => [...new Set((String(c.per || "").match(/P\s*[1-9]/gi) || []).map(x => "P" + x.replace(/\D/g, "")))].sort();
+const lk = c => c.url ? ` <a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener">🔗</a>` : "";
 const keysOf = c => { const p = periodsOf(c); return p.length ? p : ["—"]; };
 function perState(c, p) {
   const first = keysOf(c)[0], ev = compEvals(c).filter(e => (e.per || first) === p);
@@ -423,17 +430,17 @@ function viewProg() {
 function progEdit() {
   const note = `<div class="card muted">Les matières, sous-matières et compétences sont les mêmes que dans <b>📒 Notes</b> et ⚙️ Paramètres : ce que tu ajoutes ici s'y retrouve tout de suite (et inversement). Une compétence passe en <b style="color:#b02a2a">rouge</b> quand elle est abordée, en <b style="color:#1d7a50">vert</b> quand elle est évaluée — automatiquement si une note lui est rattachée.</div>`;
   const subjects = S.subjects.map((sj, i) => {
-    const st = progStats(sj), open = !pclosed[sj.id];
-    return `<div class="card"><div class="row"><button class="btn sm" data-ptog="${sj.id}">${open ? "▾" : "▸"}</button>${mvBtns("sj", sj.id, i, S.subjects.length)}
+    const st = progStats(sj), open = !!popen[sj.id];
+    return `<div class="card"><div class="row"><button class="btn sm pfold ${open ? "on" : ""}" data-ptog="${sj.id}" title="${open ? "Replier" : "Déplier"}">${open ? "−" : "+"}</button>${mvBtns("sj", sj.id, i, S.subjects.length)}
       <input type="text" class="sp pnm" value="${esc(sj.name)}" data-pn="sj|${sj.id}"><span class="muted">${st.n ? `${st.ab}/${st.n} abordées · ${st.ev} évaluées` : ""}</span><button class="btn sm dan" data-pdel="sj|${sj.id}">✕</button></div>
       ${open ? (sj.subs.length ? "" : `<p class="muted" style="margin:8px 0 0">Ajoute une sous-matière pour pouvoir y placer des compétences.</p>`) + sj.subs.map((sb, j) => {
-        const op = !pclosed[sb.id], cs = sb.comps || [];
-        return `<div class="psub"><div class="row"><button class="btn sm" data-ptog="${sb.id}">${op ? "▾" : "▸"}</button>${mvBtns("sb", sj.id + "|" + sb.id, j, sj.subs.length)}<input type="text" class="sp pnm" style="font-weight:700" value="${esc(sb.name)}" data-pn="sb|${sj.id}|${sb.id}"><span class="muted">${cs.length} compétence${cs.length > 1 ? "s" : ""}</span><button class="btn sm dan" data-pdel="sb|${sj.id}|${sb.id}">✕</button></div>
+        const op = !!popen[sb.id], cs = sb.comps || [];
+        return `<div class="psub"><div class="row"><button class="btn sm pfold ${op ? "on" : ""}" data-ptog="${sb.id}" title="${op ? "Replier" : "Déplier"}">${op ? "−" : "+"}</button>${mvBtns("sb", sj.id + "|" + sb.id, j, sj.subs.length)}<input type="text" class="sp pnm" style="font-weight:700" value="${esc(sb.name)}" data-pn="sb|${sj.id}|${sb.id}"><span class="muted">${cs.length} compétence${cs.length > 1 ? "s" : ""}</span><button class="btn sm dan" data-pdel="sb|${sj.id}|${sb.id}">✕</button></div>
           ${op ? cs.map((c, k) => { const s = compStatus(c); return `<div class="pcomp ${s.st}"><span class="pmv">${mvBtns("cp", sj.id + "|" + sb.id + "|" + c.id, k, cs.length)}</span>
             <input type="text" class="sp pnm" value="${esc(c.name)}" data-pn="cp|${sj.id}|${sb.id}|${c.id}">
             <input type="text" class="pper" value="${esc(c.per || "")}" placeholder="P1" title="Période(s) : P1, P2, P3… (champ libre)" data-pper="${c.id}">
 <span class="pbts">${keysOf(c).map(p => { const x = perState(c, p); return `<span class="pgrp ${x.st}">${p === "—" ? "" : `<b>${p}</b>`}<button class="chip ${x.st !== "no" ? "on" : ""}" style="padding:4px 9px" data-pab="${c.id}|${p}" title="Compétence abordée">Abordé</button><button class="chip ${x.st === "ev" ? "on" : ""}" style="padding:4px 9px" data-pev="${c.id}|${p}" title="${x.auto ? "Évaluée automatiquement : une note est rattachée (période " + p + ")" : "Marquer comme évaluée"}">${x.auto ? "Évalué ⚙" : "Évalué"}</button></span>`; }).join("")}</span>
-            <button class="btn sm dan" data-pdel="cp|${sj.id}|${sb.id}|${c.id}">✕</button></div>`; }).join("") + `<div class="row" style="margin:6px 0 0 8px"><input type="text" id="add-p-cp-${sb.id}" placeholder="Nouvelle compétence" class="sp"><button class="btn sm pri" data-padd="cp|${sj.id}|${sb.id}">+ Compétence</button></div>` : ""}</div>`;
+            <button class="chip ${c.url ? "on" : ""}" style="padding:4px 9px" data-plink="${c.id}" title="${c.url ? esc(c.url) : "Ajouter un lien vers une ressource"}">🔗${c.url ? "" : " Lien"}</button>${c.url ? `<a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener" title="Ouvrir le lien">↗</a>` : ""}<button class="btn sm dan" data-pdel="cp|${sj.id}|${sb.id}|${c.id}">✕</button></div>`; }).join("") + `<div class="row" style="margin:6px 0 0 8px"><input type="text" id="add-p-cp-${sb.id}" placeholder="Nouvelle compétence" class="sp"><button class="btn sm pri" data-padd="cp|${sj.id}|${sb.id}">+ Compétence</button></div>` : ""}</div>`;
       }).join("") + `<div class="row" style="margin-top:8px"><input type="text" id="add-p-sb-${sj.id}" placeholder="Nouvelle sous-matière" class="sp"><button class="btn sm" data-padd="sb|${sj.id}">+ Sous-matière</button></div>` : ""}</div>`;
   }).join("");
   return note + subjects + `<div class="card"><div class="row"><input type="text" id="add-p-sj" placeholder="Nouvelle matière" class="sp"><button class="btn pri" data-padd="sj">+ Matière</button></div></div>`;
@@ -443,7 +450,7 @@ function progMatiere() {
   const list = pfSubj === "all" ? S.subjects : S.subjects.filter(s => s.id === pfSubj);
   const body = list.map(sj => { const st = progStats(sj);
     return `<section class="psec"><h2>${esc(sj.name)}</h2><div class="muted" style="margin-bottom:6px">${st.n ? `${st.n} compétences · ${st.ab} abordées · ${st.ev} évaluées` : "Aucune compétence"} </div>
-      ${sj.subs.map(sb => `<h3>${esc(sb.name)}</h3>${(sb.comps || []).length ? `<table class="ptab"><thead><tr><th>Compétence</th><th style="width:5.5em">Période</th><th >Statut</th></tr></thead><tbody>${sb.comps.map(c => `<tr class="r-${compStatus(c).st}"><td>${esc(c.name)}</td><td>${esc(c.per || "")}</td><td>${keysOf(c).map(p => pPill(c, p)).join(" ")}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Aucune compétence.</p>`}`).join("") || '<p class="muted">Aucune sous-matière.</p>'}</section>`; }).join("");
+      ${sj.subs.map(sb => `<h3>${esc(sb.name)}</h3>${(sb.comps || []).length ? `<table class="ptab"><thead><tr><th>Compétence</th><th style="width:5.5em">Période</th><th >Statut</th></tr></thead><tbody>${sb.comps.map(c => `<tr class="r-${compStatus(c).st}"><td>${esc(c.name)}${lk(c)}</td><td>${esc(c.per || "")}</td><td>${keysOf(c).map(p => pPill(c, p)).join(" ")}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Aucune compétence.</p>`}`).join("") || '<p class="muted">Aucune sous-matière.</p>'}</section>`; }).join("");
   return { title: "Progression par matière", filter: `<label>Matière : <select data-pf="subj"><option value="all">Toutes (une page par matière)</option>${S.subjects.map(s => `<option value="${s.id}" ${s.id === pfSubj ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>`, body: body || '<p class="muted">Aucune matière.</p>' };
 }
 function progPeriode() {
@@ -453,7 +460,7 @@ function progPeriode() {
   const body = shown.map(k => { const items = map[k], bySj = {}; items.forEach(x => ((bySj[x.sj.id + "|" + x.sb.id] = bySj[x.sj.id + "|" + x.sb.id] || { sj: x.sj, sb: x.sb, cs: [] }).cs.push(x.c)));
     const ev = items.filter(x => compStatus(x.c, k).st === "ev").length;
     return `<section class="psec"><h2>${k === "—" ? "Sans période" : "Période " + k.slice(1)}</h2><div class="muted" style="margin-bottom:6px">${items.length} compétence${items.length > 1 ? "s" : ""} · ${items.filter(x => compStatus(x.c, k).st !== "no").length} abordées · ${ev} évaluées</div>
-      ${Object.values(bySj).map(g => `<h3>${esc(g.sj.name)} <span style="color:#777;font-weight:500">› ${esc(g.sb.name)}</span></h3><table class="ptab"><tbody>${g.cs.map(c => `<tr class="r-${compStatus(c, k).st}"><td>${esc(c.name)}</td><td style="width:11em">${stPill(compStatus(c, k))}</td></tr>`).join("")}</tbody></table>`).join("")}</section>`; }).join("");
+      ${Object.values(bySj).map(g => `<h3>${esc(g.sj.name)} <span style="color:#777;font-weight:500">› ${esc(g.sb.name)}</span></h3><table class="ptab"><tbody>${g.cs.map(c => `<tr class="r-${compStatus(c, k).st}"><td>${esc(c.name)}${lk(c)}</td><td style="width:11em">${stPill(compStatus(c, k))}</td></tr>`).join("")}</tbody></table>`).join("")}</section>`; }).join("");
   return { title: "Progression par période", filter: `<label>Période : <select data-pf="per"><option value="all">Toutes (une page par période)</option>${keys.map(k => `<option value="${k}" ${k === pfPer ? "selected" : ""}>${k === "—" ? "Sans période" : "Période " + k.slice(1)}</option>`).join("")}</select></label>`, body: body || '<p class="muted">Aucune compétence.</p>' };
 }
 function progViewCard(v) {
@@ -504,7 +511,7 @@ function viewNotes() {
 function autoNote() {
   let h = "";
   if (allEvals().some(e => e.auto)) h += `<p class="muted" style="margin-top:10px">🤖 Les lignes « automatique » viennent des compteurs (sons, écriture, consignes, règles de vie) : 10/10 = aucune erreur, 3/10 = l'élève qui en a le plus dans la classe (jamais moins de 3). Elles évoluent avec les compteurs et ne sont pas enregistrées avec tes notes.</p>`;
-  if (autoWarn.length) h += `<p class="muted" style="margin-top:6px;color:var(--o)">⚠ Note automatique non affichée : la sous-matière « ${autoWarn.map(esc).join(" », « ")} » n'existe pas (⚙️ Paramètres › Matières).</p>`;
+  if (autoWarn.length) h += `<p class="muted" style="margin-top:6px;color:var(--o)">⚠ Note automatique non affichée : la sous-matière « ${autoWarn.map(esc).join(" », « ")} » n'existe pas (🧭 Progressions).</p>`;
   return h;
 }
 function notesSaisie() {
@@ -516,7 +523,7 @@ function notesSaisie() {
     <div class="fl">
       <label>Matière<br><select data-d="subjectId"><option value="">— choisir —</option>${S.subjects.map(s => `<option value="${s.id}" ${s.id === draft.subjectId ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>
       <label>Sous-matière<br><select data-d="subId"><option value="">—</option>${subs.map(s => `<option value="${s.id}" ${s.id === draft.subId ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>
-      <label>Compétence évaluée<br><select data-d="compId"><option value="">—</option>${comps.map(c => `<option value="${c.id}" ${c.id === draft.compId ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>${sb0 && !comps.length ? '<span class="muted">Ajoute des compétences dans ⚙️ Paramètres › Matières.</span>' : ""}</label>
+      <label>Compétence évaluée<br><select data-d="compId"><option value="">—</option>${comps.map(c => `<option value="${c.id}" ${c.id === draft.compId ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>${sb0 && !comps.length ? '<span class="muted">Ajoute des compétences dans 🧭 Progressions.</span>' : ""}</label>
       <label>Intitulé<br><input type="text" list="lbls" data-d="label" value="${esc(draft.label)}" placeholder="ex. Dictée 3"><datalist id="lbls">${labels.map(l => `<option value="${esc(l)}">`).join("")}</datalist></label>
       <div class="row"><label>Période<br><select data-d="per">${["", "P1", "P2", "P3", "P4", "P5"].map(p => `<option value="${p}" ${p === (draft.per || "") ? "selected" : ""}>${p || "—"}</option>`).join("")}</select></label><label>Date<br><input type="date" data-d="date" value="${draft.date}"></label><label>Barème<br><input type="number" min="1" data-d="max" value="${draft.max}" style="width:80px"></label></div>
     </div>
@@ -777,10 +784,13 @@ function viewSettings() {
       <h3 style="margin-top:14px">🔊 Sons</h3>${itemList("sons")}${addRow("sons", "Nouveau son (ex. ou, ch, an…)")}
       <h3 style="margin-top:14px">✍️ Écriture</h3>${itemList("ecriture")}${addRow("ecriture", "Nouvelle ligne d'écriture")}
       <h3 style="margin-top:14px">📦 Matériel</h3>${itemList("matos")}${addRow("matos", "Nouvel objet (ex. ✏️ Crayon)")}</div>
-    <div class="card"><h2>📚 Matières et sous-matières</h2><p class="muted">Sous chaque sous-matière, ajoute les compétences évaluées (elles se choisissent ensuite à la saisie). Pour les notes automatiques, garde « Français › Écriture », « Français › Orthographe », « EMC › Respect des consignes » et « EMC › Respect des règles de vie ». Le détail par sous-matière s'affiche pour Français et Mathématiques.</p>${subjs}${addRow("subject", "Nouvelle matière")}</div>
     <div class="card"><h2>🗓️ Semaine et trimestre</h2>
       <p class="muted">Vie de classe et matériel se comptent par semaine (« Fin de semaine » les archive dans le cumul) ; sons et écriture se cumulent sur tout le trimestre. Les analyses utilisent le cumul + la semaine en cours.</p>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="newWeek">🧹 Fin de semaine</button><button class="btn" data-act="parents">🖨️ Bilan parents</button><button class="btn dan" data-act="newTerm">Nouveau trimestre…</button></div></div>
+    <div class="card"><h2>🎯 Bornes des notes automatiques</h2>
+      <p class="muted">Les notes calculées à partir des compteurs vont de la <b>note minimale</b> (l'élève qui a le plus d'erreurs ou de remarques) à la <b>note maximale</b> (aucune erreur), sur 10. Par défaut : 3 et 10.</p>
+      ${AUTO_KEYS.map(([k, l]) => { const [lo, hi] = boundsOf(k); return `<div class="row" style="margin-top:6px"><span class="sp">${l}</span><label>min <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${lo}" data-ab="${k}|min"></label><label>max <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${hi}" data-ab="${k}|max"></label></div>`; }).join("")}
+      <div class="row" style="margin-top:8px"><button class="btn sm" data-act="abReset">Remettre 3 et 10</button></div></div>
     <div class="card"><h2>💾 Données</h2><div class="row"><button class="btn pri" data-act="csv">Exporter le CSV unique</button><button class="btn" data-act="json">Sauvegarde complète (JSON)</button><button class="btn" data-act="import">Importer une sauvegarde…</button></div><input type="file" id="imp" accept=".json,application/json" style="display:none"></div>
     <div class="card"><h2>☁️ Synchronisation Supabase</h2>
       <p class="muted" id="cfgst">${st}</p>
@@ -934,6 +944,7 @@ const actions = {
     printMode = "parents"; buildSheet(); window.print();
   },
   clearDraft() { draft = { subjectId: draft.subjectId, subId: "", compId: "", per: draft.per || "", label: "", date: today(), max: 10, grades: {}, editId: null }; saveDraft(); render(); },
+  abReset() { S.abounds = {}; save(); render(); toast("Bornes remises à 3 et 10"); },
   saveEval() {
     const e = evalFromDraft();
     if (!e.subjectId) return toast("Choisis une matière");
@@ -981,7 +992,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cat) { ccat.vie = d.cat; return render(); }
@@ -1013,7 +1024,15 @@ document.addEventListener("click", ev => {
   if (d.dcp) { const [a, b, c] = d.dcp.split("|"); if (!confirm("Supprimer cette compétence ? Les évaluations gardent leur intitulé.")) return; const sb = subOf(subj(a), b); sb.comps = sb.comps.filter(x => x.id !== c); S.evals.forEach(e => { if (e.compId === c) e.compId = ""; }); save(); return render(); }
   if (d.addsb) { const i = $("#add-sb-" + d.addsb), v = i.value.trim(); if (!v) return; subj(d.addsb).subs.push({ id: uid(), name: v }); save(); return render(); }
   if (d.ptab) { ptab = d.ptab; return render(); }
-  if (d.ptog) { pclosed[d.ptog] = !pclosed[d.ptog]; return render(); }
+  if (d.ptog) { popen[d.ptog] = !popen[d.ptog]; return render(); }
+  if (d.pall) { const o = d.pall === "open"; S.subjects.forEach(sj => { popen[sj.id] = o; sj.subs.forEach(sb => popen[sb.id] = o); }); return render(); }
+  if (d.plink) {
+    const c = findComp(d.plink); if (!c) return;
+    let u = prompt("Lien vers la ressource (laisser vide pour retirer le lien) :", c.url || ""); if (u === null) return;
+    u = u.trim(); if (u && !/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u;
+    if (u && !/^https?:\/\//i.test(u)) return toast("Le lien doit commencer par http ou https");
+    if (u) c.url = u; else delete c.url; save(); return render();
+  }
   if (d.pab || d.pev) {
     const [cid, p] = (d.pab || d.pev).split("|"), c = findComp(cid); if (!c) return;
     const first = keysOf(c)[0]; c.abP = c.abP || {}; c.evP = c.evP || {};
@@ -1032,7 +1051,7 @@ document.addEventListener("click", ev => {
     else { if (!confirm("Supprimer cette compétence ? Les évaluations déjà saisies sont conservées (sans compétence rattachée).")) return; const sb = subOf(subj(a), b); sb.comps = sb.comps.filter(x => x.id !== c); S.evals.forEach(e => { if (e.compId === c) e.compId = ""; }); }
     save(); return render(); }
   if (d.padd) { const [kind, a, b] = d.padd.split("|"), id = kind === "sj" ? "add-p-sj" : kind === "sb" ? "add-p-sb-" + a : "add-p-cp-" + b, inp = $("#" + id), v = inp.value.trim(); if (!v) return;
-    if (kind === "sj") S.subjects.push({ id: uid(), name: v, subs: [] }); else if (kind === "sb") subj(a).subs.push({ id: uid(), name: v, comps: [] }); else { const sb = subOf(subj(a), b); (sb.comps = sb.comps || []).push({ id: uid(), name: v }); }
+    if (kind === "sj") { const n = { id: uid(), name: v, subs: [] }; S.subjects.push(n); popen[n.id] = true; } else if (kind === "sb") { const n = { id: uid(), name: v, comps: [] }; subj(a).subs.push(n); popen[n.id] = true; } else { const sb = subOf(subj(a), b); (sb.comps = sb.comps || []).push({ id: uid(), name: v }); }
     save(); render(); setTimeout(() => { const n = $("#" + id); n && n.focus(); }, 30); return; }
   if (d.sort) { const [id, k, ty] = d.sort.split("|"), s = sorts[id]; if (!s || s.k !== k) sorts[id] = { k, d: ty === "n" ? "desc" : "asc" }; else if ((ty === "n" && s.d === "desc") || (ty !== "n" && s.d === "asc")) sorts[id].d = ty === "n" ? "asc" : "desc"; else delete sorts[id]; return render(); }
   if (d.fmove) { const [id, k] = d.fmove.split("|"), i = S.fields.findIndex(f => f.id === id), j = i + (+k); if (i < 0 || j < 0 || j >= S.fields.length) return; [S.fields[i], S.fields[j]] = [S.fields[j], S.fields[i]]; save(); return render(); }
@@ -1052,6 +1071,7 @@ document.addEventListener("click", ev => {
 document.addEventListener("change", ev => {
   const t = ev.target, d = t.dataset;
   if (d.pn) { const [kind, a, b, c] = d.pn.split("|"), v = t.value.trim(); if (v) { if (kind === "sj") subj(a).name = v; else if (kind === "sb") subOf(subj(a), b).name = v; else subOf(subj(a), b).comps.find(x => x.id === c).name = v; save(); } return render(); }
+  if (d.ab) { const [k, w] = d.ab.split("|"), v = parseFloat(String(t.value).replace(",", ".")); S.abounds = S.abounds || {}; const o = S.abounds[k] = S.abounds[k] || {}; const prev = o[w]; if (Number.isFinite(v)) o[w] = Math.max(0, Math.min(10, v)); if ((o.min ?? 3) > (o.max ?? 10)) { toast("Le minimum doit rester ≤ au maximum"); if (prev === undefined) delete o[w]; else o[w] = prev; } save(); return render(); }
   if (d.pper) { const c = findComp(d.pper); if (c) { c.per = t.value.trim(); save(); render(); } return; }
   if (d.pf) { if (d.pf === "subj") pfSubj = t.value; else pfPer = t.value; return render(); }
   if (d.selfiche !== undefined) { ficheSel = t.value; return render(); }
