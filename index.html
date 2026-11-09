@@ -403,6 +403,26 @@ let ptab = "edit", popen = {}, pfSubj = "all", pfPer = "all";
 const compEvals = c => S.evals.filter(e => e.compId === c.id && Object.values(e.grades || {}).some(v => typeof v === "number"));
 const periodsOf = c => [...new Set((String(c.per || "").match(/P\s*[1-9]/gi) || []).map(x => "P" + x.replace(/\D/g, "")))].sort();
 const lk = c => c.url ? ` <a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener">🔗</a>` : "";
+let perBusy = false;
+function splitComp(c) {   // « P1 P2 P3 » → une compétence par période (« Fluence P1 », « Fluence P2 »…)
+  const ps = periodsOf(c); if (ps.length < 2) return 0;
+  let host = null; S.subjects.forEach(sj => sj.subs.forEach(sb => { if ((sb.comps || []).includes(c)) host = sb; }));
+  if (!host) return 0;
+  const first = ps[0], base = c.name.replace(/\s+P[1-9]$/i, "").trim(), ab = c.abP || {}, ev = c.evP || {}, copies = [];
+  const lab = (k) => `${base} ${k}`;
+  ps.slice(1).forEach(k => {
+    const n = { id: uid(), name: lab(k), per: k };
+    if (c.url) n.url = c.url;
+    if (ab[k]) n.abP = { [k]: 1 }; if (ev[k]) n.evP = { [k]: 1 };
+    S.evals.forEach(e => { if (e.compId === c.id && e.per === k) e.compId = n.id; });
+    copies.push(n);
+  });
+  if (c.ab) { ab[first] = 1; delete c.ab; } if (c.ev) { ev[first] = 1; delete c.ev; }
+  c.abP = ab[first] ? { [first]: 1 } : undefined; c.evP = ev[first] ? { [first]: 1 } : undefined; if (!c.abP) delete c.abP; if (!c.evP) delete c.evP;
+  c.name = lab(first); c.per = first;
+  host.comps.splice(host.comps.indexOf(c) + 1, 0, ...copies);
+  return ps.length;
+}
 const keysOf = c => { const p = periodsOf(c); return p.length ? p : ["—"]; };
 function perState(c, p) {
   const first = keysOf(c)[0], ev = compEvals(c).filter(e => (e.per || first) === p);
@@ -1072,7 +1092,7 @@ document.addEventListener("change", ev => {
   const t = ev.target, d = t.dataset;
   if (d.pn) { const [kind, a, b, c] = d.pn.split("|"), v = t.value.trim(); if (v) { if (kind === "sj") subj(a).name = v; else if (kind === "sb") subOf(subj(a), b).name = v; else subOf(subj(a), b).comps.find(x => x.id === c).name = v; save(); } return render(); }
   if (d.ab) { const [k, w] = d.ab.split("|"), v = parseFloat(String(t.value).replace(",", ".")); S.abounds = S.abounds || {}; const o = S.abounds[k] = S.abounds[k] || {}; const prev = o[w]; if (Number.isFinite(v)) o[w] = Math.max(0, Math.min(10, v)); if ((o.min ?? 3) > (o.max ?? 10)) { toast("Le minimum doit rester ≤ au maximum"); if (prev === undefined) delete o[w]; else o[w] = prev; } save(); return render(); }
-  if (d.pper) { const c = findComp(d.pper); if (c) { c.per = t.value.trim(); save(); render(); } return; }
+  if (d.pper) { const c = findComp(d.pper); if (c && !perBusy && c.per !== t.value.trim()) { perBusy = true; c.per = t.value.trim(); const n = splitComp(c); save(); try { render(); } finally { perBusy = false; } if (n > 1) toast(`Compétence dupliquée sur ${n} périodes ✓`); } return; }
   if (d.pf) { if (d.pf === "subj") pfSubj = t.value; else pfPer = t.value; return render(); }
   if (d.selfiche !== undefined) { ficheSel = t.value; return render(); }
   if (d.fi) { const [s, f] = d.fi.split("|"); ((S.info = S.info || {})[s] = S.info[s] || {})[f] = t.value; save(); if (t.type === "tel" || t.type === "email") render(); return; }
