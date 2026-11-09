@@ -403,6 +403,13 @@ let ptab = "edit", popen = {}, pfSubj = "all", pfPer = "all";
 const compEvals = c => S.evals.filter(e => e.compId === c.id && Object.values(e.grades || {}).some(v => typeof v === "number"));
 const periodsOf = c => [...new Set((String(c.per || "").match(/P\s*[1-9]/gi) || []).map(x => "P" + x.replace(/\D/g, "")))].sort();
 const lk = c => c.url ? ` <a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener">🔗</a>` : "";
+function sortByPeriod(c) {   // range les compétences de la sous-matière : P1 d'abord, puis P2…, sans période en dernier (ordre conservé à égalité)
+  S.subjects.forEach(sj => sj.subs.forEach(sb => {
+    if (!(sb.comps || []).includes(c)) return;
+    const rk = x => { const p = periodsOf(x)[0]; return p ? +p.slice(1) : 99; };
+    sb.comps = sb.comps.map((x, i) => [x, i]).sort((a, b) => rk(a[0]) - rk(b[0]) || a[1] - b[1]).map(a => a[0]);
+  }));
+}
 let perBusy = false;
 function splitComp(c) {   // « P1 P2 P3 » → une compétence par période (« Fluence P1 », « Fluence P2 »…)
   const ps = periodsOf(c); if (ps.length < 2) return 0;
@@ -1092,7 +1099,7 @@ document.addEventListener("change", ev => {
   const t = ev.target, d = t.dataset;
   if (d.pn) { const [kind, a, b, c] = d.pn.split("|"), v = t.value.trim(); if (v) { if (kind === "sj") subj(a).name = v; else if (kind === "sb") subOf(subj(a), b).name = v; else subOf(subj(a), b).comps.find(x => x.id === c).name = v; save(); } return render(); }
   if (d.ab) { const [k, w] = d.ab.split("|"), v = parseFloat(String(t.value).replace(",", ".")); S.abounds = S.abounds || {}; const o = S.abounds[k] = S.abounds[k] || {}; const prev = o[w]; if (Number.isFinite(v)) o[w] = Math.max(0, Math.min(10, v)); if ((o.min ?? 3) > (o.max ?? 10)) { toast("Le minimum doit rester ≤ au maximum"); if (prev === undefined) delete o[w]; else o[w] = prev; } save(); return render(); }
-  if (d.pper) { const c = findComp(d.pper); if (c && !perBusy && c.per !== t.value.trim()) { perBusy = true; c.per = t.value.trim(); const n = splitComp(c); save(); try { render(); } finally { perBusy = false; } if (n > 1) toast(`Compétence dupliquée sur ${n} périodes ✓`); } return; }
+  if (d.pper) { const c = findComp(d.pper); if (c && !perBusy && c.per !== t.value.trim()) { perBusy = true; c.per = t.value.trim(); const n = splitComp(c); sortByPeriod(c); save(); try { render(); } finally { perBusy = false; } if (n > 1) toast(`Compétence dupliquée sur ${n} périodes ✓`); } return; }
   if (d.pf) { if (d.pf === "subj") pfSubj = t.value; else pfPer = t.value; return render(); }
   if (d.selfiche !== undefined) { ficheSel = t.value; return render(); }
   if (d.fi) { const [s, f] = d.fi.split("|"); ((S.info = S.info || {})[s] = S.info[s] || {})[f] = t.value; save(); if (t.type === "tel" || t.type === "email") render(); return; }
