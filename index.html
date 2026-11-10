@@ -953,6 +953,10 @@ function viewSettings() {
     <div class="card"><h2>📅 Jours de classe</h2>
       <p class="muted">Les blocs « quotidiens » du cahier journal se répètent uniquement ces jours-là, et les flèches ◀ ▶ du cahier sautent les autres jours.</p>
       <div class="chips">${[[1, "Lundi"], [2, "Mardi"], [3, "Mercredi"], [4, "Jeudi"], [5, "Vendredi"], [6, "Samedi"], [0, "Dimanche"]].map(([n, l]) => `<button class="chip ${S.schoolDays.includes(n) ? "on" : ""}" data-sday="${n}">${l}</button>`).join("")}</div></div>
+    <div class="card"><h2>📓 Cahier journal : archiver / supprimer</h2>
+      <p class="muted">${Object.keys(S.journal).length} journée(s) enregistrée(s). À la fin du trimestre, exporte le cahier puis supprime les journées anciennes. Les blocs « quotidiens » (modèles) sont conservés.</p>
+      <div class="row"><button class="btn" data-act="exportJournalAll">⬇️ Exporter tout le cahier (texte)</button></div>
+      <div class="row" style="margin-top:8px"><label>Supprimer les journées <b>avant le</b> <input type="date" id="jpurge" value="${today()}"></label><button class="btn dan" data-act="purgeJournal">🗑️ Supprimer</button></div></div>
     <div class="card"><h2>🎯 Bornes des notes automatiques</h2>
       <p class="muted">Les notes calculées à partir des compteurs vont de la <b>note minimale</b> (l'élève qui a le plus d'erreurs ou de remarques) à la <b>note maximale</b> (aucune erreur), sur 10. Par défaut : 3 et 10. Le <b>coef</b> pèse dans les moyennes (1 par défaut ; 0 = la note automatique ne compte pas).</p>
       ${AUTO_KEYS.map(([k, l]) => { const [lo, hi] = boundsOf(k); return `<div class="row" style="margin-top:6px"><span class="sp">${l}</span><label>min <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${lo}" data-ab="${k}|min"></label><label>max <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${hi}" data-ab="${k}|max"></label><label>coef <input type="number" min="0" step="0.5" inputmode="decimal" style="width:70px" value="${((S.abounds || {})[k] || {}).coef ?? 1}" data-ab="${k}|coef"></label></div>`; }).join("")}
@@ -1103,6 +1107,14 @@ const actions = {
   printProg() { if (ptab === "edit") return toast("Choisis « Par matière » ou « Par période »"); printMode = "prog"; buildSheet(); window.print(); },
   printJournalDay() { if (!jviews(jdate).length) return toast("Rien à imprimer pour cette journée"); jprintDays = [jdate]; printMode = "journal"; buildSheet(); window.print(); },
   printJournalWeek() { jprintDays = jWeek(); if (!jprintDays.length) return toast("Aucune journée remplie cette semaine"); printMode = "journal"; buildSheet(); window.print(); },
+  exportJournalAll() { const ds = Object.keys(S.journal).filter(d => (S.journal[d] || []).length).sort(); if (!ds.length) return toast("Le cahier journal est vide"); download("cahier-journal-complet-" + today() + ".txt", ds.map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain"); },
+  purgeJournal() {
+    const lim = ($("#jpurge") || {}).value; if (!/^\d{4}-\d{2}-\d{2}$/.test(lim || "")) return toast("Choisis une date");
+    const ds = Object.keys(S.journal).filter(d => d < lim); if (!ds.length) return toast("Aucune journée avant cette date");
+    if (!confirm(`Supprimer ${ds.length} journée(s) du cahier journal antérieure(s) au ${frDate(lim)} ?\n\nUne copie en texte est d'abord téléchargée. Les blocs quotidiens sont conservés.`)) return;
+    download("cahier-journal-avant-suppression-" + today() + ".txt", ds.filter(d => (S.journal[d] || []).length).sort().map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain");
+    ds.forEach(d => { delete S.journal[d]; delete (S.jskip || {})[d]; }); save(); render(); toast(ds.length + " journée(s) supprimée(s) ✓");
+  },
   exportJournal() { if (!jviews(jdate).length) return toast("Rien à exporter pour cette journée"); download("cahier-journal-" + jdate + ".txt", journalText(jdate), "text/plain"); },
   copyJournal() { if (!jviews(jdate).length) return toast("Rien à copier pour cette journée"); try { navigator.clipboard.writeText(journalText(jdate)).then(() => toast("Texte copié ✓"), () => toast("Copie impossible : utilise l'export")); } catch (e) { toast("Copie impossible : utilise l'export"); } },
   printFiches() { if (!S.fields.length || !S.students.length) return toast("Rien à imprimer"); printMode = "fiches"; buildSheet(); window.print(); },
