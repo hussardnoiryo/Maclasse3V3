@@ -211,12 +211,19 @@ function load() {
   } catch (e) {}
   return defaults();
 }
+function jMigrate(d) {   // anciennes références {id, dailyOf} (contenu partagé) → vraies copies, sans rien perdre
+  if (!(d.jdaily || []).length) return;
+  Object.keys(d.journal || {}).forEach(day => d.journal[day] = d.journal[day].map(x => {
+    if (!x.dailyOf || x.type) return x; const t = d.jdaily.find(q => q.id === x.dailyOf); if (!t) return x;
+    const c = JSON.parse(JSON.stringify(t)); c.id = x.id; c.dailyOf = t.id; delete c.since; return c;
+  }));
+}
 function fix(d) {
   const b = defaults();
   d.items = Object.assign({ sons: [], ecriture: [], vie: [], matos: [] }, d.items);
   ["counts", "term", "lent"].forEach(k => d[k] = d[k] || {});
   d.subjects = d.subjects || b.subjects; d.evals = d.evals || [];
-  d.abounds = d.abounds || {}; d.journal = d.journal || {}; d.jdaily = d.jdaily || []; d.jskip = d.jskip || {}; if (!Array.isArray(d.schoolDays) || !d.schoolDays.length) d.schoolDays = [1, 2, 3, 4, 5]; d.fields = d.fields || b.fields; d.info = d.info || {};
+  d.abounds = d.abounds || {}; d.journal = d.journal || {}; d.jdaily = d.jdaily || []; d.jskip = d.jskip || {}; if (!Array.isArray(d.schoolDays) || !d.schoolDays.length) d.schoolDays = [1, 2, 3, 4, 5]; jMigrate(d); d.fields = d.fields || b.fields; d.info = d.info || {};
   return d;
 }
 let S = fix(load());
@@ -567,25 +574,28 @@ const tAdd = (t, m) => { const x = String(t || "").match(/^(\d{1,2}):(\d{2})$/);
 const tFr = t => t ? t.replace(/^0/, "").replace(":", "h") : "";
 const jget = d => (S.journal || {})[d] || [];
 const jviews = d => { jEnsure(d); return jget(d).map(jview); };
-/* Blocs « quotidiens » : un modèle partagé (S.jdaily) ; chaque jour (lun–ven, à partir de sa création) en porte une référence {id, dailyOf} */
+/* Blocs « quotidiens » : un modèle (S.jdaily : créneau, titre et matière par défaut) ; chaque jour (jours de classe, à partir de sa création)
+   reçoit sa PROPRE copie, modifiable librement sans toucher aux autres jours. */
 const tplOf = id => (S.jdaily || []).find(t => t.id === id);
-const jview = b => { if (!b.dailyOf) return b; const t = tplOf(b.dailyOf); return t ? Object.assign({}, t, { id: b.id, daily: true }) : b; };
+const jview = b => Object.assign({}, b, { daily: !!(b.dailyOf && tplOf(b.dailyOf)) });
+const TPL_KEYS = ["type", "from", "to", "label", "title", "subjectId", "subId", "compId"];
+const fromTpl = t => { const b = { id: uid(), dailyOf: t.id }; TPL_KEYS.forEach(k => { if (t[k] !== undefined) b[k] = t[k]; }); if (t.type !== "sep") { b.text = ""; b.links = []; } return b; };
 function jEnsure(d) {
   const wd = new Date(d + "T12:00:00").getDay(); if (!S.schoolDays.includes(wd)) return;
   let arr = (S.journal = S.journal || {})[d], ch = false; const skip = (S.jskip || {})[d] || [];
   (S.jdaily || []).forEach(t => {
     if (t.since > d || skip.includes(t.id)) return; arr = arr || (S.journal[d] = []);
     if (arr.some(x => x.dailyOf === t.id)) return;
-    let k = arr.findIndex(x => { const v = jview(x); return t.from && v.from && v.from > t.from; }); if (k < 0) k = arr.length;
-    arr.splice(k, 0, { id: uid(), dailyOf: t.id }); ch = true;
+    let k = arr.findIndex(x => t.from && x.from && x.from > t.from); if (k < 0) k = arr.length;
+    arr.splice(k, 0, fromTpl(t)); ch = true;
   });
   if (ch) save();
 }
-function jfind(id) { for (const d in (S.journal || {})) { const i = S.journal[d].findIndex(x => x.id === id); if (i >= 0) { const raw = S.journal[d][i]; return { arr: S.journal[d], i, raw, b: raw.dailyOf ? (tplOf(raw.dailyOf) || raw) : raw, d }; } } return null; }
+function jfind(id) { for (const d in (S.journal || {})) { const i = S.journal[d].findIndex(x => x.id === id); if (i >= 0) { const raw = S.journal[d][i]; return { arr: S.journal[d], i, raw, b: raw, d }; } } return null; }
 const jpath = b => { const sj = subj(b.subjectId), sb = subOf(sj, b.subId), cp = compOf(sb, b.compId); return [sj, sb, cp].filter(Boolean).map(x => x.name).join(" › "); };
 const jtime = b => b.from || b.to ? `${tFr(b.from)}${b.to ? " – " + tFr(b.to) : ""}` : "";
 function jblock(b, i, n) {
-  const mv = `<button class="chip ${b.daily ? "on" : ""}" style="padding:4px 9px" data-jdaily="${b.id}" title="${b.daily ? "Bloc quotidien (lun–ven) : cliquer pour ne plus le répéter" : "Répéter ce bloc tous les jours (lun–ven)"}">🔁${b.daily ? " Quotidien" : ""}</button><button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
+  const mv = `<button class="chip ${b.daily ? "on" : ""}" style="padding:4px 9px" data-jdaily="${b.id}" title="${b.daily ? "Bloc quotidien (jours de classe) : cliquer pour ne plus le répéter" : "Répéter ce bloc chaque jour de classe (chaque jour garde sa propre copie, modifiable)"}">🔁${b.daily ? " Quotidien" : ""}</button>${b.daily ? `<button class="btn sm" data-jtpl="${b.id}" title="Les prochains jours reprendront ce créneau, ce titre et cette matière">↻ Modèle</button>` : ""}<button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
   const times = `<div class="jtime"><label>de<input type="time" data-jt="${b.id}|from" value="${esc(b.from || "")}"></label><label>à<input type="time" data-jt="${b.id}|to" value="${esc(b.to || "")}"></label></div>`;
   if (b.type === "sep") return `<div class="jsepb">${times}<input type="text" class="sp" data-jf="${b.id}|label" value="${esc(b.label || "")}" placeholder="Récréation, pause déjeuner…" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>`;
   const sj = subj(b.subjectId), sb = subOf(sj, b.subId);
@@ -1175,7 +1185,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-jdaily],[data-sday]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-jdaily],[data-jtpl],[data-sday]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1223,18 +1233,18 @@ document.addEventListener("click", ev => {
     arr.push(b); save(); render(); setTimeout(() => { const els = document.querySelectorAll(kind === "sep" ? '[data-jf$="|label"]' : '[data-jf$="|title"]'); const e = els[els.length - 1]; e && e.scrollIntoView({ block: "center" }); e && e.focus(); }, 30); return; }
   if (d.jmv) { const [id, k] = d.jmv.split("|"), r = jfind(id); if (!r) return; const j = r.i + +k; if (j < 0 || j >= r.arr.length) return; [r.arr[r.i], r.arr[j]] = [r.arr[j], r.arr[r.i]]; save(); return render(); }
   if (d.jdaily) { const r = jfind(d.jdaily); if (!r) return;
-    if (r.raw.dailyOf) {   // arrêter la répétition : chaque jour garde sa copie
-      if (!confirm("Ce bloc ne sera plus répété chaque jour. Il reste tel quel dans les journées où il apparaît déjà. Continuer ?")) return;
-      const t = r.b; Object.keys(S.journal).forEach(dd => S.journal[dd] = S.journal[dd].map(x => x.dailyOf === t.id ? Object.assign({}, JSON.parse(JSON.stringify(t)), { id: x.id, since: undefined }) : x));
-      S.jdaily = S.jdaily.filter(x => x.id !== t.id); Object.keys(S.jskip).forEach(dd => S.jskip[dd] = S.jskip[dd].filter(x => x !== t.id));
-      Object.values(S.journal).forEach(a => a.forEach(x => { delete x.since; }));
-    } else {   // rendre quotidien
-      const t = JSON.parse(JSON.stringify(r.raw)); t.id = uid(); t.since = jdate; S.jdaily.push(t); S.journal[r.d][r.i] = { id: r.raw.id, dailyOf: t.id };
-      toast("Bloc répété chaque jour (lun–ven) à partir de cette date 🔁");
+    if (r.raw.dailyOf && tplOf(r.raw.dailyOf)) {   // arrêter la répétition : chaque jour garde sa copie telle quelle
+      if (!confirm("Ce bloc ne sera plus ajouté chaque jour. Les journées où il figure déjà le gardent telles quelles. Continuer ?")) return;
+      const id = r.raw.dailyOf; Object.values(S.journal).forEach(a => a.forEach(x => { if (x.dailyOf === id) delete x.dailyOf; }));
+      S.jdaily = S.jdaily.filter(x => x.id !== id); Object.keys(S.jskip).forEach(dd => S.jskip[dd] = S.jskip[dd].filter(x => x !== id));
+    } else {   // rendre quotidien : modèle = créneau + titre + matière de ce bloc
+      const t = { id: uid(), since: jdate }; TPL_KEYS.forEach(k => { if (r.raw[k] !== undefined) t[k] = r.raw[k]; }); S.jdaily.push(t); r.raw.dailyOf = t.id;
+      toast("Bloc ajouté chaque jour de classe, à partir de cette date 🔁");
     }
     save(); return render(); }
+  if (d.jtpl) { const r = jfind(d.jtpl), t = r && tplOf(r.raw.dailyOf); if (!t) return; TPL_KEYS.forEach(k => { if (r.raw[k] !== undefined) t[k] = r.raw[k]; else delete t[k]; }); save(); return toast("Modèle mis à jour : les prochains jours reprendront ce bloc ✓"); }
   if (d.jdel) { const r = jfind(d.jdel); if (!r) return;
-    if (r.raw.dailyOf) { if (!confirm("Retirer ce bloc quotidien de cette journée seulement ?\n(Pour l'arrêter partout, clique sur « 🔁 Quotidien ».)")) return; ((S.jskip = S.jskip || {})[r.d] = S.jskip[r.d] || []).push(r.raw.dailyOf); r.arr.splice(r.i, 1); save(); return render(); } if ((r.b.text || r.b.title || (r.b.links || []).length) && !confirm("Supprimer ce bloc ?")) return; r.arr.splice(r.i, 1); save(); return render(); }
+    if (r.raw.dailyOf && tplOf(r.raw.dailyOf)) { if (!confirm("Retirer ce bloc quotidien de cette journée seulement ?\n(Pour l'arrêter partout, clique sur « 🔁 Quotidien ».)")) return; ((S.jskip = S.jskip || {})[r.d] = S.jskip[r.d] || []).push(r.raw.dailyOf); r.arr.splice(r.i, 1); save(); return render(); } if ((r.b.text || r.b.title || (r.b.links || []).length) && !confirm("Supprimer ce bloc ?")) return; r.arr.splice(r.i, 1); save(); return render(); }
   if (d.jsort !== undefined) { const a = (S.journal || {})[jdate]; if (!a) return; const k = a.map((x, i) => [x, i]).sort((p, q) => (jview(p[0]).from || "99:99").localeCompare(jview(q[0]).from || "99:99") || p[1] - q[1]).map(x => x[0]); a.splice(0, a.length, ...k); save(); return render(); }
   if (d.jlink) { const r = jfind(d.jlink); if (!r) return; let u = prompt("Adresse du lien (http…) :", ""); if (u === null) return; u = u.trim(); if (!u) return;
     if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u; if (!/^https?:\/\//i.test(u)) return toast("Le lien doit commencer par http ou https");
