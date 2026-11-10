@@ -96,6 +96,13 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 .pcomp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:5px 0 0 8px;padding:5px 7px;border:1.5px solid #e1e5ee;border-radius:10px;background:#fff}.pcomp .pmv{display:flex;gap:4px}
 .pcomp.ab{background:#fde8e8;border-color:#e9a3a3}.pcomp.ev{background:#e3f5ec;border-color:#8cc9a8}
 .pfold{width:30px;font-size:1.15rem;font-weight:800;line-height:1;background:#e7ecff;color:#3b5bdb;border-color:#b8c5f5;margin-right:8px}.pfold.on{background:#3b5bdb;color:#fff}.bsuivi .brow{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:3px 0;border-top:1px solid #eef0f5}.bsuivi .bl{flex:1 1 40%;font-weight:600}
+.jb{display:flex;gap:10px;margin:8px 0;padding:10px;border:1.5px solid #e1e5ee;border-radius:12px;background:#fff}.jtime{flex:0 0 112px;display:flex;flex-direction:column;gap:6px}.jtime label{font-size:.78rem;color:#667;display:flex;flex-direction:column}.jtime input{width:100%;padding:6px}.jmain{flex:1;min-width:0}
+.jsepb{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0;padding:8px 10px;border:2px dashed #b8c5f5;border-radius:12px;background:#f1f4ff}.jsepb .jtime{flex-direction:row;flex:none}.jsepb .jtime label{flex-direction:row;align-items:center;gap:4px}.jsepb .jtime input{width:128px}
+.jlk{display:inline-flex;gap:4px;align-items:center;background:#eef2ff;border-radius:9px;padding:2px 4px 2px 9px}.jlk a{font-weight:600;text-decoration:none;color:#2a45b0}
+@media(max-width:640px){.jb{flex-direction:column}.jtime{flex-direction:row;flex:none}.jtime label{flex:1}}
+#sheetIn .jday{break-after:page;page-break-after:always}#sheetIn .jday:last-child{break-after:auto;page-break-after:auto}#sheetIn .jdate{font-size:13px;font-weight:700;margin:2px 0 10px;color:#2a45b0}
+#sheetIn .jtab{width:100%;border-collapse:collapse;font-size:11px}#sheetIn .jtab td{padding:6px 7px;border-bottom:1px solid #d9dde8;vertical-align:top;font-size:11px}#sheetIn .jtab tr{break-inside:avoid}#sheetIn .jc{text-align:left}#sheetIn .jt{text-align:left;width:62px;font-weight:700;white-space:nowrap;color:#2a45b0}#sheetIn .jh{font-weight:800;font-size:12px}#sheetIn .jp{color:#777;font-size:10px}#sheetIn .jx{white-space:pre-wrap;margin-top:3px}#sheetIn .jl{margin-top:4px;font-size:10px}#sheetIn .jl a{color:#2a45b0}
+#sheetIn .jsep td{background:#eef1fb;text-align:center;font-weight:700;color:#2a45b0;padding:4px;font-size:10.5px}
 .plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
@@ -153,7 +160,8 @@ const MODS = { sons: "Sons", ecriture: "Écriture", vie: "Vie de classe", matos:
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const today = () => new Date().toISOString().slice(0, 10);
+const isoD = dt => dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0");
+const today = () => isoD(new Date());
 const frDate = d => { const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : d; };
 const fmt = n => (Math.round(n * 10) / 10).toString().replace(".", ",");
 const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
@@ -208,10 +216,10 @@ function fix(d) {
   d.items = Object.assign({ sons: [], ecriture: [], vie: [], matos: [] }, d.items);
   ["counts", "term", "lent"].forEach(k => d[k] = d[k] || {});
   d.subjects = d.subjects || b.subjects; d.evals = d.evals || [];
-  d.abounds = d.abounds || {}; d.fields = d.fields || b.fields; d.info = d.info || {};
+  d.abounds = d.abounds || {}; d.journal = d.journal || {}; d.jdaily = d.jdaily || []; d.jskip = d.jskip || {}; if (!Array.isArray(d.schoolDays) || !d.schoolDays.length) d.schoolDays = [1, 2, 3, 4, 5]; d.fields = d.fields || b.fields; d.info = d.info || {};
   return d;
 }
-let S = load();
+let S = fix(load());
 let cfg = (() => { try { return JSON.parse(localStorage.getItem(LS_CFG)) || {}; } catch (e) { return {}; } })();
 let dirty = false;
 function save(quiet) {
@@ -336,7 +344,7 @@ function classNotesTable(print) {
 }
 
 /* ===================== Interface ===================== */
-const PAGES = [["prog", "🧭 Progressions"], ["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
+const PAGES = [["prog", "🧭 Progressions"], ["journal", "📓 Cahier journal"], ["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
 let page = localStorage.getItem(LS_PAGE) || "vie"; if (page === "ecriture") page = "sons"; if (!PAGES.some(p => p[0] === page)) page = "vie";
 let sel = {};            // élève sélectionné par module
 let showTable = {};      // vue classe (tableau) par module
@@ -357,6 +365,7 @@ function render() {
   else if (page === "an") m.innerHTML = viewAnalyses();
   else if (page === "fiches") m.innerHTML = viewFiches();
   else if (page === "prog") m.innerHTML = viewProg();
+  else if (page === "journal") m.innerHTML = viewJournal();
   else m.innerHTML = viewSettings();
 }
 
@@ -549,6 +558,76 @@ function progSheet() {
   const v = ptab === "per" ? progPeriode() : ptab === "suivi" ? progSuivi() : progMatiere();
   return `<h1>${v.title}</h1><div style="color:#777;margin-bottom:6px">${new Date().toLocaleDateString("fr-FR")}${v.nolegend ? "" : " · " + legend}</div>${v.body}`;
 }
+
+/* ===================== Cahier journal ===================== */
+let jdate = today();
+const dAdd = (d, n) => { const t = new Date(d + "T12:00:00"); t.setDate(t.getDate() + n); return isoD(t); };
+const dLong = d => { const t = new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); return t.charAt(0).toUpperCase() + t.slice(1); };
+const tAdd = (t, m) => { const x = String(t || "").match(/^(\d{1,2}):(\d{2})$/); if (!x) return ""; const v = Math.min(23 * 60 + 59, +x[1] * 60 + +x[2] + m); return String(Math.floor(v / 60)).padStart(2, "0") + ":" + String(v % 60).padStart(2, "0"); };
+const tFr = t => t ? t.replace(/^0/, "").replace(":", "h") : "";
+const jget = d => (S.journal || {})[d] || [];
+const jviews = d => { jEnsure(d); return jget(d).map(jview); };
+/* Blocs « quotidiens » : un modèle partagé (S.jdaily) ; chaque jour (lun–ven, à partir de sa création) en porte une référence {id, dailyOf} */
+const tplOf = id => (S.jdaily || []).find(t => t.id === id);
+const jview = b => { if (!b.dailyOf) return b; const t = tplOf(b.dailyOf); return t ? Object.assign({}, t, { id: b.id, daily: true }) : b; };
+function jEnsure(d) {
+  const wd = new Date(d + "T12:00:00").getDay(); if (!S.schoolDays.includes(wd)) return;
+  let arr = (S.journal = S.journal || {})[d], ch = false; const skip = (S.jskip || {})[d] || [];
+  (S.jdaily || []).forEach(t => {
+    if (t.since > d || skip.includes(t.id)) return; arr = arr || (S.journal[d] = []);
+    if (arr.some(x => x.dailyOf === t.id)) return;
+    let k = arr.findIndex(x => { const v = jview(x); return t.from && v.from && v.from > t.from; }); if (k < 0) k = arr.length;
+    arr.splice(k, 0, { id: uid(), dailyOf: t.id }); ch = true;
+  });
+  if (ch) save();
+}
+function jfind(id) { for (const d in (S.journal || {})) { const i = S.journal[d].findIndex(x => x.id === id); if (i >= 0) { const raw = S.journal[d][i]; return { arr: S.journal[d], i, raw, b: raw.dailyOf ? (tplOf(raw.dailyOf) || raw) : raw, d }; } } return null; }
+const jpath = b => { const sj = subj(b.subjectId), sb = subOf(sj, b.subId), cp = compOf(sb, b.compId); return [sj, sb, cp].filter(Boolean).map(x => x.name).join(" › "); };
+const jtime = b => b.from || b.to ? `${tFr(b.from)}${b.to ? " – " + tFr(b.to) : ""}` : "";
+function jblock(b, i, n) {
+  const mv = `<button class="chip ${b.daily ? "on" : ""}" style="padding:4px 9px" data-jdaily="${b.id}" title="${b.daily ? "Bloc quotidien (lun–ven) : cliquer pour ne plus le répéter" : "Répéter ce bloc tous les jours (lun–ven)"}">🔁${b.daily ? " Quotidien" : ""}</button><button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
+  const times = `<div class="jtime"><label>de<input type="time" data-jt="${b.id}|from" value="${esc(b.from || "")}"></label><label>à<input type="time" data-jt="${b.id}|to" value="${esc(b.to || "")}"></label></div>`;
+  if (b.type === "sep") return `<div class="jsepb">${times}<input type="text" class="sp" data-jf="${b.id}|label" value="${esc(b.label || "")}" placeholder="Récréation, pause déjeuner…" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>`;
+  const sj = subj(b.subjectId), sb = subOf(sj, b.subId);
+  const opt = (arr, cur) => `<option value="">—</option>` + arr.map(x => `<option value="${x.id}" ${x.id === cur ? "selected" : ""}>${esc(x.name)}</option>`).join("");
+  const links = (b.links || []).map((l, k) => `<span class="jlk"><a href="${esc(l.url)}" target="_blank" rel="noopener">🔗 ${esc(l.label || l.url)}</a><button class="btn sm dan" data-jldel="${b.id}|${k}" title="Retirer ce lien">✕</button></span>`).join("");
+  return `<div class="jb">${times}<div class="jmain">
+    <div class="row"><input type="text" class="sp" data-jf="${b.id}|title" value="${esc(b.title || "")}" placeholder="Titre (ex. Lecture – Le loup et les 7 chevreaux)" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>
+    <div class="row" style="margin-top:6px"><select data-jsel="${b.id}|subjectId" class="sp" title="Matière (issue des Progressions)">${opt(S.subjects, b.subjectId)}</select>
+      <select data-jsel="${b.id}|subId" class="sp" ${sj ? "" : "disabled"} title="Sous-matière">${opt(sj ? sj.subs : [], b.subId)}</select>
+      <select data-jsel="${b.id}|compId" class="sp" ${sb ? "" : "disabled"} title="Compétence">${opt(sb ? (sb.comps || []) : [], b.compId)}</select></div>
+    <textarea data-jf="${b.id}|text" rows="4" placeholder="Déroulé, consignes, matériel, différenciation…" style="width:100%;margin-top:6px">${esc(b.text || "")}</textarea>
+    <div class="row" style="margin-top:6px">${links}<button class="chip" style="padding:4px 9px" data-jlink="${b.id}">🔗 Ajouter un lien</button></div></div></div>`;
+}
+function viewJournal() {
+  const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)), days = [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => S.schoolDays.includes(new Date(d + "T12:00:00").getDay()) || jget(d).length);
+  if (!days.includes(jdate)) days.push(jdate);
+  const names = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
+  const chips = days.sort().map(d => { const t = new Date(d + "T12:00:00"); return `<button class="chip ${d === jdate ? "on" : ""}" data-jday="${d}">${names[t.getDay()]} ${t.getDate()}${jget(d).length ? " •" : ""}</button>`; }).join("");
+  const L = jviews(jdate);
+  return `<div class="card"><div class="row"><button class="btn" data-jnav="-1" title="Jour précédent">◀</button><input type="date" data-jdate value="${jdate}" style="font-size:1.05rem;font-weight:700;padding:8px"><button class="btn" data-jnav="1" title="Jour suivant">▶</button><button class="btn sm" data-jnav="0">Aujourd'hui</button><span class="sp"></span></div>
+    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div><div class="chips">${chips}</div></div>
+    ${L.map((b, i) => jblock(b, i, L.length)).join("") || `<div class="card muted">Aucun bloc pour cette journée. Ajoute le premier ci-dessous.</div>`}
+    <div class="card"><div class="row"><button class="btn pri" data-jadd="bloc">+ Bloc</button><button class="btn" data-jadd="sep|Récréation">☕ + Récréation</button><button class="btn" data-jadd="sep|Pause déjeuner">🍽️ + Pause déjeuner</button><button class="btn" data-jadd="sep|">➖ + Séparateur</button><span class="sp"></span><button class="btn sm" data-jsort title="Range les blocs par heure de début">⏱️ Trier par horaire</button></div>
+    <div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button><button class="btn" data-act="exportJournal">⬇️ Exporter (texte)</button><button class="btn" data-act="copyJournal">📋 Copier le texte</button></div></div>`;
+}
+function journalSheet(days) {
+  return days.map(d => { const L = jviews(d); return `<section class="jday"><h1>Cahier journal</h1><div class="jdate">${esc(dLong(d))}</div><table class="jtab"><tbody>${L.map(b => {
+    if (b.type === "sep") return `<tr class="jsep"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
+    const p = jpath(b), head = b.title ? `<div class="jh">${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh">${esc(p)}</div>` : "";
+    return `<tr><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(l.url)}">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table></section>`; }).join("");
+}
+function journalText(d) {
+  const L = jviews(d); let t = `Cahier journal — ${dLong(d)}\n`;
+  L.forEach(b => {
+    if (b.type === "sep") { t += `\n— ${[jtime(b), b.label].filter(Boolean).join(" · ")} —\n`; return; }
+    const p = jpath(b); t += `\n${jtime(b)}${jtime(b) ? "  " : ""}${[b.title, p].filter(Boolean).join(" — ")}\n`;
+    if (b.text) t += b.text.split("\n").map(x => "   " + x).join("\n") + "\n";
+    (b.links || []).forEach(l => { t += `   Lien : ${l.label ? l.label + " – " : ""}${l.url}\n`; });
+  });
+  return t;
+}
+const jWeek = () => { const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)); return [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => jviews(d).length); };
 
 let ficheSel = null, ficheTable = false;
 const infoOf = (sid, fid) => ((S.info || {})[sid] || {})[fid] || "";
@@ -817,7 +896,7 @@ function parentsHtml() {
       <div class="pm"><div class="pmat"><b>Matériel :</b>${mat.length ? mat.map(x => `<div>${x}</div>`).join("") : "<div>—</div>"}${nr.length ? `<div><b>Non rendu : ${nr.join(", ")}</b></div>` : ""}</div><div class="sg">Signature : <u>&nbsp;</u></div></div></div>`;
   }).join("")}</div>`).join("");
 }
-let printMode = "";
+let printMode = "", jprintDays = [];
 window.addEventListener("afterprint", () => { printMode = ""; });
 function buildSheet() {
   invalidate(); const w = $("#sheetIn"); w.style.zoom = 1;
@@ -829,6 +908,8 @@ function buildSheet() {
     w.innerHTML = progSheet();
     const maxW = 194 * 3.7795, need = Math.max(w.scrollWidth, ...[...w.querySelectorAll("table")].map(x => x.scrollWidth));
     if (need > maxW + 1) w.style.zoom = Math.max(0.5, maxW / need * 0.98);
+  } else if (printMode === "journal") {
+    w.innerHTML = journalSheet(jprintDays);
   } else if (printMode === "fiches") {   // plusieurs pages possibles : on ajuste seulement la largeur
     w.innerHTML = `<h1>Fiches élèves</h1><div style="color:#777;margin-bottom:6px">${new Date().toLocaleDateString("fr-FR")} · ${S.students.length} élèves — document confidentiel</div>${fichesTable(true)}`;
     const maxW = 194 * 3.7795, need = Math.max(w.scrollWidth, ...[...w.querySelectorAll("table")].map(x => x.scrollWidth));
@@ -869,6 +950,9 @@ function viewSettings() {
     <div class="card"><h2>🗓️ Semaine et trimestre</h2>
       <p class="muted">Vie de classe et matériel se comptent par semaine (« Fin de semaine » les archive dans le cumul) ; sons et écriture se cumulent sur tout le trimestre. Les analyses utilisent le cumul + la semaine en cours.</p>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="newWeek">🧹 Fin de semaine</button><button class="btn" data-act="parents">🖨️ Bilan parents</button><button class="btn dan" data-act="newTerm">Nouveau trimestre…</button></div></div>
+    <div class="card"><h2>📅 Jours de classe</h2>
+      <p class="muted">Les blocs « quotidiens » du cahier journal se répètent uniquement ces jours-là, et les flèches ◀ ▶ du cahier sautent les autres jours.</p>
+      <div class="chips">${[[1, "Lundi"], [2, "Mardi"], [3, "Mercredi"], [4, "Jeudi"], [5, "Vendredi"], [6, "Samedi"], [0, "Dimanche"]].map(([n, l]) => `<button class="chip ${S.schoolDays.includes(n) ? "on" : ""}" data-sday="${n}">${l}</button>`).join("")}</div></div>
     <div class="card"><h2>🎯 Bornes des notes automatiques</h2>
       <p class="muted">Les notes calculées à partir des compteurs vont de la <b>note minimale</b> (l'élève qui a le plus d'erreurs ou de remarques) à la <b>note maximale</b> (aucune erreur), sur 10. Par défaut : 3 et 10. Le <b>coef</b> pèse dans les moyennes (1 par défaut ; 0 = la note automatique ne compte pas).</p>
       ${AUTO_KEYS.map(([k, l]) => { const [lo, hi] = boundsOf(k); return `<div class="row" style="margin-top:6px"><span class="sp">${l}</span><label>min <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${lo}" data-ab="${k}|min"></label><label>max <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${hi}" data-ab="${k}|max"></label><label>coef <input type="number" min="0" step="0.5" inputmode="decimal" style="width:70px" value="${((S.abounds || {})[k] || {}).coef ?? 1}" data-ab="${k}|coef"></label></div>`; }).join("")}
@@ -1017,6 +1101,10 @@ function evalFromDraft() {
 }
 const actions = {
   printProg() { if (ptab === "edit") return toast("Choisis « Par matière » ou « Par période »"); printMode = "prog"; buildSheet(); window.print(); },
+  printJournalDay() { if (!jviews(jdate).length) return toast("Rien à imprimer pour cette journée"); jprintDays = [jdate]; printMode = "journal"; buildSheet(); window.print(); },
+  printJournalWeek() { jprintDays = jWeek(); if (!jprintDays.length) return toast("Aucune journée remplie cette semaine"); printMode = "journal"; buildSheet(); window.print(); },
+  exportJournal() { if (!jviews(jdate).length) return toast("Rien à exporter pour cette journée"); download("cahier-journal-" + jdate + ".txt", journalText(jdate), "text/plain"); },
+  copyJournal() { if (!jviews(jdate).length) return toast("Rien à copier pour cette journée"); try { navigator.clipboard.writeText(journalText(jdate)).then(() => toast("Texte copié ✓"), () => toast("Copie impossible : utilise l'export")); } catch (e) { toast("Copie impossible : utilise l'export"); } },
   printFiches() { if (!S.fields.length || !S.students.length) return toast("Rien à imprimer"); printMode = "fiches"; buildSheet(); window.print(); },
   classComps() { classComps = !classComps; delete sorts.class; render(); },
   ficheTable() { ficheTable = !ficheTable; render(); },
@@ -1075,7 +1163,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-jdaily],[data-sday]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1112,6 +1200,34 @@ document.addEventListener("click", ev => {
     if (kind === "suivi") { const v = !g.suivi; g.cs.forEach(c => { c.suivi = v; if (!v) c.suiviAn = false; }); }
     else { const v = !g.an; g.cs.forEach(c => { c.suiviAn = v; if (v) c.suivi = true; }); }
     save(); return render(); }
+  if (d.jnav !== undefined) { if (d.jnav === "0") jdate = today(); else { const st = +d.jnav; let n = dAdd(jdate, st); for (let k = 0; k < 7 && !S.schoolDays.includes(new Date(n + "T12:00:00").getDay()); k++) n = dAdd(n, st); jdate = n; } return render(); }   // ◀ ▶ sautent les jours sans classe
+  if (d.sday) { const w = +d.sday, a = S.schoolDays.includes(w) ? S.schoolDays.filter(x => x !== w) : [...S.schoolDays, w]; if (!a.length) return toast("Garde au moins un jour de classe"); S.schoolDays = a.sort((x, y) => (x || 7) - (y || 7)); save(); return render(); }
+  if (d.jday) { jdate = d.jday; return render(); }
+  if (d.jadd) {
+    jEnsure(jdate); const [kind, label] = d.jadd.split("|"), arr = ((S.journal = S.journal || {})[jdate] = S.journal[jdate] || []), last = arr.length ? jview(arr[arr.length - 1]).to || "" : "";
+    const from = last || (arr.length ? "" : "08:30"), dur = kind === "sep" ? (/d[ée]jeuner|midi/i.test(label) ? 90 : 15) : 45;
+    const b = { id: uid(), type: kind === "sep" ? "sep" : "bloc", from, to: tAdd(from, dur) };
+    if (kind === "sep") b.label = label || ""; else { b.title = ""; b.text = ""; b.links = []; }
+    arr.push(b); save(); render(); setTimeout(() => { const els = document.querySelectorAll(kind === "sep" ? '[data-jf$="|label"]' : '[data-jf$="|title"]'); const e = els[els.length - 1]; e && e.scrollIntoView({ block: "center" }); e && e.focus(); }, 30); return; }
+  if (d.jmv) { const [id, k] = d.jmv.split("|"), r = jfind(id); if (!r) return; const j = r.i + +k; if (j < 0 || j >= r.arr.length) return; [r.arr[r.i], r.arr[j]] = [r.arr[j], r.arr[r.i]]; save(); return render(); }
+  if (d.jdaily) { const r = jfind(d.jdaily); if (!r) return;
+    if (r.raw.dailyOf) {   // arrêter la répétition : chaque jour garde sa copie
+      if (!confirm("Ce bloc ne sera plus répété chaque jour. Il reste tel quel dans les journées où il apparaît déjà. Continuer ?")) return;
+      const t = r.b; Object.keys(S.journal).forEach(dd => S.journal[dd] = S.journal[dd].map(x => x.dailyOf === t.id ? Object.assign({}, JSON.parse(JSON.stringify(t)), { id: x.id, since: undefined }) : x));
+      S.jdaily = S.jdaily.filter(x => x.id !== t.id); Object.keys(S.jskip).forEach(dd => S.jskip[dd] = S.jskip[dd].filter(x => x !== t.id));
+      Object.values(S.journal).forEach(a => a.forEach(x => { delete x.since; }));
+    } else {   // rendre quotidien
+      const t = JSON.parse(JSON.stringify(r.raw)); t.id = uid(); t.since = jdate; S.jdaily.push(t); S.journal[r.d][r.i] = { id: r.raw.id, dailyOf: t.id };
+      toast("Bloc répété chaque jour (lun–ven) à partir de cette date 🔁");
+    }
+    save(); return render(); }
+  if (d.jdel) { const r = jfind(d.jdel); if (!r) return;
+    if (r.raw.dailyOf) { if (!confirm("Retirer ce bloc quotidien de cette journée seulement ?\n(Pour l'arrêter partout, clique sur « 🔁 Quotidien ».)")) return; ((S.jskip = S.jskip || {})[r.d] = S.jskip[r.d] || []).push(r.raw.dailyOf); r.arr.splice(r.i, 1); save(); return render(); } if ((r.b.text || r.b.title || (r.b.links || []).length) && !confirm("Supprimer ce bloc ?")) return; r.arr.splice(r.i, 1); save(); return render(); }
+  if (d.jsort !== undefined) { const a = (S.journal || {})[jdate]; if (!a) return; const k = a.map((x, i) => [x, i]).sort((p, q) => (jview(p[0]).from || "99:99").localeCompare(jview(q[0]).from || "99:99") || p[1] - q[1]).map(x => x[0]); a.splice(0, a.length, ...k); save(); return render(); }
+  if (d.jlink) { const r = jfind(d.jlink); if (!r) return; let u = prompt("Adresse du lien (http…) :", ""); if (u === null) return; u = u.trim(); if (!u) return;
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u; if (!/^https?:\/\//i.test(u)) return toast("Le lien doit commencer par http ou https");
+    const lb = prompt("Texte à afficher (facultatif) :", ""); (r.b.links = r.b.links || []).push({ url: u, label: (lb || "").trim() }); save(); return render(); }
+  if (d.jldel) { const [id, k] = d.jldel.split("|"), r = jfind(id); if (!r) return; (r.b.links || []).splice(+k, 1); save(); return render(); }
   if (d.eexcl) { const e = S.evals.find(x => x.id === d.eexcl); if (e) { e.excl = !e.excl; save(); render(); toast(e.excl ? "Évaluation exclue de la moyenne" : "Évaluation comptée dans la moyenne"); } return; }
   if (d.plink) {
     const c = findComp(d.plink); if (!c) return;
@@ -1158,6 +1274,9 @@ document.addEventListener("click", ev => {
 document.addEventListener("change", ev => {
   const t = ev.target, d = t.dataset;
   if (d.pn) { const [kind, a, b, c] = d.pn.split("|"), v = t.value.trim(); if (v) { if (kind === "sj") subj(a).name = v; else if (kind === "sb") subOf(subj(a), b).name = v; else subOf(subj(a), b).comps.find(x => x.id === c).name = v; save(); } return render(); }
+  if (d.jdate !== undefined && t.type === "date") { if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) { jdate = t.value; render(); } return; }
+  if (d.jt) { const [id, k] = d.jt.split("|"), r = jfind(id); if (r) { r.b[k] = t.value; save(); } return; }
+  if (d.jsel) { const [id, k] = d.jsel.split("|"), r = jfind(id); if (!r) return; r.b[k] = t.value; if (k === "subjectId") { r.b.subId = ""; r.b.compId = ""; } if (k === "subId") r.b.compId = ""; save(); return render(); }
   if (d.ab) { const [k, w] = d.ab.split("|"), v = parseFloat(String(t.value).replace(",", ".")); S.abounds = S.abounds || {}; const o = S.abounds[k] = S.abounds[k] || {}; const prev = o[w]; if (Number.isFinite(v)) o[w] = Math.max(0, Math.min(10, v)); if ((o.min ?? 3) > (o.max ?? 10)) { toast("Le minimum doit rester ≤ au maximum"); if (prev === undefined) delete o[w]; else o[w] = prev; } save(); return render(); }
   if (d.pper) { const c = findComp(d.pper); if (c && !perBusy && c.per !== t.value.trim()) { perBusy = true; c.per = t.value.trim(); const n = splitComp(c); sortByPeriod(c); save(); try { render(); } finally { perBusy = false; } if (n > 1) toast(`Compétence dupliquée sur ${n} périodes ✓`); } return; }
   if (d.pf) { if (d.pf === "subj") pfSubj = t.value; else pfPer = t.value; return render(); }
@@ -1191,6 +1310,7 @@ document.addEventListener("change", ev => {
   }
 });
 document.addEventListener("input", ev => {
+  if (ev.target.dataset.jf) { const [id, k] = ev.target.dataset.jf.split("|"), r = jfind(id); if (r) { r.b[k] = ev.target.value; save(); } return; }
   const g = ev.target.dataset.g; if (g === undefined) return;
   const v = ev.target.value.replace(",", "."); if (v === "") delete draft.grades[g]; else draft.grades[g] = parseFloat(v);
   const p = $("#gp-" + g); if (p) p.innerHTML = pill(on10(draft.grades[g], draft.max)); updDraftMean();
