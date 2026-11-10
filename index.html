@@ -95,7 +95,8 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 .psub{margin:10px 0 0 12px;padding:8px 0 4px 10px;border-left:3px solid #d6dce8}
 .pcomp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:5px 0 0 8px;padding:5px 7px;border:1.5px solid #e1e5ee;border-radius:10px;background:#fff}.pcomp .pmv{display:flex;gap:4px}
 .pcomp.ab{background:#fde8e8;border-color:#e9a3a3}.pcomp.ev{background:#e3f5ec;border-color:#8cc9a8}
-.pfold{width:30px;font-size:1.15rem;font-weight:800;line-height:1;background:#e7ecff;color:#3b5bdb;border-color:#b8c5f5;margin-right:8px}.pfold.on{background:#3b5bdb;color:#fff}.plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
+.pfold{width:30px;font-size:1.15rem;font-weight:800;line-height:1;background:#e7ecff;color:#3b5bdb;border-color:#b8c5f5;margin-right:8px}.pfold.on{background:#3b5bdb;color:#fff}.bsuivi .brow{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:3px 0;border-top:1px solid #eef0f5}.bsuivi .bl{flex:1 1 40%;font-weight:600}
+.plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
 .psec{margin-bottom:18px}.psec h2{border-bottom:2px solid #3b5bdb;padding-bottom:3px;margin-bottom:4px}.psec h3{margin:12px 0 4px;color:#2a45b0}
@@ -273,7 +274,7 @@ function autoEvals() {
     const mx = Math.max(0, ...counted().map(s => vals[s.id])); if (mx === 0) return;
     const [lo, hi] = boundsOf(sp.key);
     const grades = {}; S.students.forEach(s => grades[s.id] = Math.round(Math.max(lo, Math.min(hi, lo + (hi - lo) * (1 - vals[s.id] / mx))) * 10) / 10);
-    out.push({ id: "auto-" + sp.key, auto: true, date: today(), subjectId: sp.t.sj.id, subId: sp.t.sb.id, label: sp.label, max: 10, grades });
+    out.push({ id: "auto-" + sp.key, auto: true, coef: (() => { const c = (S.abounds || {})[sp.key]; return c && c.coef !== undefined && c.coef !== "" && Number.isFinite(+c.coef) ? Math.max(0, +c.coef) : 1; })(), date: today(), subjectId: sp.t.sj.id, subId: sp.t.sb.id, label: sp.label, max: 10, grades });
   });
   return out;
 }
@@ -283,7 +284,11 @@ const invalidate = () => { _ae = null; };
 
 /* ---------- Moyennes ---------- */
 const on10 = (v, m) => (typeof v === "number" && m) ? v / m * 10 : null;
-function avgOf(sid, f) { return mean(allEvals().filter(f).map(e => on10(e.grades[sid], e.max))); }
+function avgOf(sid, f) {   // moyenne pondérée par les coefficients ; les évaluations « hors moyenne » ne comptent pas
+  let sw = 0, sv = 0;
+  allEvals().filter(f).forEach(e => { if (e.excl) return; const v = on10(e.grades[sid], e.max), w = e.coef == null ? 1 : +e.coef; if (v === null || !(w > 0)) return; sw += w; sv += w * v; });
+  return sw ? sv / sw : null;
+}
 function classAvg(f) { return mean(counted().map(s => avgOf(s.id, f))); }
 const cls = v => v === null ? "" : v >= 7.5 ? "g" : v >= 5 ? "o" : "r";
 const pill = v => v === null ? `<span class="pill">–</span>` : `<span class="pill ${cls(v)}">${fmt(v)} / 10</span>`;
@@ -331,12 +336,13 @@ function classNotesTable(print) {
 }
 
 /* ===================== Interface ===================== */
-const PAGES = [["prog", "🧭 Progressions"], ["vie", "🙂 Vie de classe"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
+const PAGES = [["prog", "🧭 Progressions"], ["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
 let page = localStorage.getItem(LS_PAGE) || "vie"; if (page === "ecriture") page = "sons"; if (!PAGES.some(p => p[0] === page)) page = "vie";
 let sel = {};            // élève sélectionné par module
 let showTable = {};      // vue classe (tableau) par module
 let ntab = "saisie", histF = "";
 let draft = (() => { try { return JSON.parse(localStorage.getItem("classe-ce1-v2-draft")); } catch (e) { return null; } })() || { subjectId: "", subId: "", compId: "", label: "", date: today(), max: 10, grades: {}, editId: null };
+function freshDate() { if (!draft.editId && !draft.dateManual && draft.date !== today()) { draft.date = today(); saveDraft(); } }   // brouillon resté d'hier : on repart de la date du jour
 const saveDraft = () => { try { localStorage.setItem("classe-ce1-v2-draft", JSON.stringify(draft)); } catch (e) {} };
 let anSel = "class";
 
@@ -346,7 +352,7 @@ function render() {
   $("#nav").innerHTML = PAGES.map(([k, l]) => `<button data-go="${k}" class="${k === page ? "on" : ""}">${l}</button>`).join("") + `<span id="sync"></span>`;
   paintSync();
   const m = $("#main");
-  if (["vie", "sons", "ecriture"].includes(page)) m.innerHTML = viewCounters(page);
+  if (["vie", "matos", "sons", "ecriture"].includes(page)) m.innerHTML = viewCounters(page);
   else if (page === "notes") m.innerHTML = viewNotes();
   else if (page === "an") m.innerHTML = viewAnalyses();
   else if (page === "fiches") m.innerHTML = viewFiches();
@@ -374,18 +380,18 @@ function counterTiles(mod, view, sid, it) {
 function viewCounters(p) {
   if (!S.students.length) return emptyStudents();
   const combo = p === "sons" || p === "ecriture";                       // une seule page : Écriture en haut, Sons dessous
-  const mods = combo ? ["ecriture", "sons"] : [p === "vie" ? (ccat.vie || "vie") : p];
+  const mods = combo ? ["ecriture", "sons"] : [p];
   const key = combo ? "se" : mods[0], view = cview[skey(p)] || "eleve", sorted = [...S.students].sort(byName);
   if (!sel[key] || !stud(sel[key])) sel[key] = sorted[0].id;
   const sid = sel[key];
   const TITLE = { vie: "🙂 Vie de classe", sons: "🔊 Sons", ecriture: "✍️ Écriture", matos: "📦 Matériel prêté" };
   const seg = (attr, cur, opts) => `<div class="row" style="gap:6px">${opts.map(([k, l]) => `<button class="chip ${cur === k ? "on" : ""}" ${attr}="${k}">${l}</button>`).join("")}</div>`;
-  let h = `<div class="card"><div class="row">${p === "vie" ? seg("data-cat", mods[0], [["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"]]) : `<h2 style="margin:0">${combo ? "✍️ Écriture et 🔊 Sons" : TITLE[mods[0]]}</h2>`}<span class="sp"></span>${p === "vie" ? `<button class="btn sm" data-act="parents">🖨️ Bilan parents</button><button class="btn sm" data-act="newWeek">🧹 Fin de semaine</button>` : ""}${seg("data-cv", view, [["eleve", "👤 Par élève"], ["classe", "👥 Par classe"]])}</div></div>`;
+  let h = `<div class="card"><div class="row"><h2 style="margin:0">${combo ? "✍️ Écriture et 🔊 Sons" : TITLE[mods[0]]}</h2><span class="sp"></span>${p === "vie" || p === "matos" ? `<button class="btn sm" data-act="parents">🖨️ Bilan parents</button><button class="btn sm" data-act="newWeek">🧹 Fin de semaine</button>` : ""}${seg("data-cv", view, [["eleve", "👤 Par élève"], ["classe", "👥 Par classe"]])}</div></div>`;
   if (view === "eleve") h += `<div class="card"><div class="row"><button class="btn" data-nav="${key}|-1">◀</button>
       <select data-selst="${key}" class="sp" style="font-size:1.1rem;font-weight:700;padding:10px">${sorted.map(s => `<option value="${s.id}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
       <button class="btn" data-nav="${key}|1">▶</button></div></div>`;
   mods.forEach(mod => {
-    const items = S.items[mod], titre = combo || p !== "vie" ? `<h3 style="margin-bottom:10px">${TITLE[mod]}</h3>` : "";
+    const items = S.items[mod], titre = combo ? `<h3 style="margin-bottom:10px">${TITLE[mod]}</h3>` : "";
     if (!items.length) { h += `<div class="card">${titre}<p class="muted">Aucune ligne pour « ${TITLE[mod]} ». Ajoute-en dans ⚙️ Paramètres › Compteurs.</p></div>`; return; }
     if (view === "eleve") { h += `<div class="card">${combo ? titre : ""}<div class="tiles">${counterTiles(mod, "eleve", sid)}</div></div>`; return; }
     if (!items.some(i => i.id === citem[mod])) citem[mod] = items[0].id;
@@ -419,7 +425,7 @@ function splitComp(c) {   // « P1 P2 P3 » → une compétence par période («
   const lab = (k) => `${base} ${k}`;
   ps.slice(1).forEach(k => {
     const n = { id: uid(), name: lab(k), per: k };
-    if (c.url) n.url = c.url;
+    if (c.url) n.url = c.url; if (c.suivi) n.suivi = true; if (c.suiviAn) n.suiviAn = true;
     if (ab[k]) n.abP = { [k]: 1 }; if (ev[k]) n.evP = { [k]: 1 };
     S.evals.forEach(e => { if (e.compId === c.id && e.per === k) e.compId = n.id; });
     copies.push(n);
@@ -450,12 +456,57 @@ function progStats(sj) {
   return { n, ab, ev };
 }
 const mvBtns = (kind, ids, i, len) => `<button class="btn sm" data-pmv="${kind}|${ids}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-pmv="${kind}|${ids}|1" ${i === len - 1 ? "disabled" : ""} title="Descendre">▼</button>`;
+/* ---------- Suivi annuel : séries de compétences présentes sur plusieurs périodes ---------- */
+const baseName = c => c.name.replace(/\s+P[1-9]$/i, "").trim();
+function groupsOf() {
+  const out = [];
+  S.subjects.forEach(sj => sj.subs.forEach(sb => {
+    const by = {};
+    (sb.comps || []).forEach(c => { const k = norm(baseName(c)); (by[k] = by[k] || []).push(c); });
+    Object.values(by).forEach(cs => {
+      const ps = new Set(); cs.forEach(c => periodsOf(c).forEach(p => ps.add(p)));
+      if (ps.size >= 2) out.push({ sj, sb, cs, name: baseName(cs[0]), ps: [...ps].sort(), suivi: cs.some(c => c.suivi), an: cs.some(c => c.suiviAn) });
+    });
+  }));
+  return out;
+}
+function seriesEvals(g) { const ids = new Set(g.cs.map(c => c.id)); return allEvals().filter(e => !e.auto && !e.excl && ids.has(e.compId)).sort((a, b) => a.date.localeCompare(b.date)); }
+function suiviOf(g, sid, E) {   // 1re et dernière évaluation de l'élève sur la série (notes /10)
+  const l = (E || seriesEvals(g)).filter(e => typeof e.grades[sid] === "number");
+  if (!l.length) return null;
+  const a = l[0], b = l[l.length - 1], v1 = on10(a.grades[sid], a.max), v2 = l.length > 1 ? on10(b.grades[sid], b.max) : null;
+  return { v1, d1: a.date, v2, d2: l.length > 1 ? b.date : "", n: l.length, delta: v2 === null ? null : v2 - v1 };
+}
+function suiviClass(g) {
+  const E = seriesEvals(g), rows = counted().map(s => suiviOf(g, s.id, E)).filter(Boolean), two = rows.filter(r => r.v2 !== null);
+  return { v1: mean(rows.map(r => r.v1)), v2: mean(two.map(r => r.v2)), delta: mean(two.map(r => r.delta)), n: rows.length };
+}
+const dlt = d => d === null || d === undefined ? '<span class="muted">–</span>' : Math.abs(d) < 0.25 ? '<b style="color:#667">＝ stable</b>' : d > 0 ? `<b style="color:#1d7a50">▲ +${fmt(d)}</b>` : `<b style="color:#b02a2a">▼ −${fmt(-d)}</b>`;
+const periodsLabel = g => g.ps.length > 1 ? `${g.ps[0]}–${g.ps[g.ps.length - 1]}` : g.ps[0];
+function suiviBlock(sid) {   // bloc « suivi annuel » du bilan élève
+  const gs = groupsOf().filter(g => g.an); if (!gs.length) return "";
+  const E = gs.map(g => ({ g, r: suiviOf(g, sid) })).filter(x => x.r); if (!E.length) return "";
+  return `<div class="bbox bsuivi"><h5><span>📈 Suivi annuel</span></h5>${E.map(({ g, r }) => `<div class="brow"><span class="bl">${esc(g.name)} <small>(${esc(g.sb.name)})</small></span><span>${pl2(r.v1)}${r.v2 !== null ? ` → ${pl2(r.v2)}` : ' <small class="muted">1 seule évaluation</small>'}</span><span>${dlt(r.delta)}</span></div>`).join("")}</div>`;
+}
+function suiviClassCard() {
+  const gs = groupsOf().filter(g => g.an); if (!gs.length) return "";
+  return `<div class="card"><h2>📈 Suivi annuel de la classe</h2><div class="scroll"><table><thead><tr><th>Compétence</th><th>1re évaluation</th><th>Dernière</th><th>Évolution</th></tr></thead><tbody>${gs.map(g => { const c = suiviClass(g); return `<tr><td>${esc(g.sj.name)} › ${esc(g.sb.name)} › <b>${esc(g.name)}</b></td><td>${pill(c.v1)}</td><td>${pill(c.v2)}</td><td>${dlt(c.delta)}</td></tr>`; }).join("")}</tbody></table></div></div>`;
+}
+function progSuivi() {
+  const gs = groupsOf().filter(g => g.suivi), sorted = [...S.students].sort(byName);
+  const body = gs.map(g => { const E = seriesEvals(g), c = suiviClass(g);
+    return `<section class="psec"><h2>${esc(g.name)} <small style="font-weight:500;color:#777">${esc(g.sj.name)} › ${esc(g.sb.name)} · ${periodsLabel(g)}</small></h2>
+      <div class="muted" style="margin-bottom:6px">${E.length} évaluation${E.length > 1 ? "s" : ""} rattachée${E.length > 1 ? "s" : ""}${g.an ? " · affichée dans l'analyse" : ""}</div>
+      ${E.length ? `<table class="ptab"><thead><tr><th>Élève</th><th>1re évaluation</th><th>Dernière évaluation</th><th>Évolution</th></tr></thead><tbody>${sorted.map(s => { const r = suiviOf(g, s.id, E); return `<tr><td>${esc(s.name)}</td>${r ? `<td>${pl2(r.v1)} <small class="muted">${frDate(r.d1)}</small></td><td>${r.v2 !== null ? `${pl2(r.v2)} <small class="muted">${frDate(r.d2)}</small>` : "–"}</td><td>${dlt(r.delta)}</td>` : '<td>–</td><td>–</td><td>–</td>'}</tr>`; }).join("")}<tr><td><b>Classe</b></td><td>${pl2(c.v1)}</td><td>${pl2(c.v2)}</td><td>${dlt(c.delta)}</td></tr></tbody></table>` : `<p class="muted">Aucune évaluation rattachée à cette compétence pour le moment (choisis-la dans 📒 Notes).</p>`}</section>`; }).join("");
+  return { title: "Suivi annuel des compétences", filter: "", body: body || '<p class="muted">Aucun suivi activé. Dans « ✏️ Modifier », une compétence présente sur plusieurs périodes (ex. P1 P2 P3) a un bouton « 📈 Suivi annuel ».</p>', nolegend: true };
+}
 function viewProg() {
-  const tabs = `<div class="chips">${[["edit", "✏️ Modifier"], ["mat", "📚 Par matière"], ["per", "🗓️ Par période"]].map(([k, l]) => `<button class="chip ${ptab === k ? "on" : ""}" data-ptab="${k}">${l}</button>`).join("")}</div>`;
-  return tabs + (ptab === "edit" ? progEdit() : ptab === "mat" ? progViewCard(progMatiere()) : progViewCard(progPeriode()));
+  const tabs = `<div class="chips">${[["edit", "✏️ Modifier"], ["mat", "📚 Par matière"], ["per", "🗓️ Par période"], ["suivi", "📈 Suivi annuel"]].map(([k, l]) => `<button class="chip ${ptab === k ? "on" : ""}" data-ptab="${k}">${l}</button>`).join("")}</div>`;
+  return tabs + (ptab === "edit" ? progEdit() : ptab === "mat" ? progViewCard(progMatiere()) : ptab === "suivi" ? progViewCard(progSuivi()) : progViewCard(progPeriode()));
 }
 function progEdit() {
   const note = `<div class="card muted">Les matières, sous-matières et compétences sont les mêmes que dans <b>📒 Notes</b> et ⚙️ Paramètres : ce que tu ajoutes ici s'y retrouve tout de suite (et inversement). Une compétence passe en <b style="color:#b02a2a">rouge</b> quand elle est abordée, en <b style="color:#1d7a50">vert</b> quand elle est évaluée — automatiquement si une note lui est rattachée.</div>`;
+  const GR = groupsOf(), grOf = c => GR.find(g => g.cs[0] === c);
   const subjects = S.subjects.map((sj, i) => {
     const st = progStats(sj), open = !!popen[sj.id];
     return `<div class="card"><div class="row"><button class="btn sm pfold ${open ? "on" : ""}" data-ptog="${sj.id}" title="${open ? "Replier" : "Déplier"}">${open ? "−" : "+"}</button>${mvBtns("sj", sj.id, i, S.subjects.length)}
@@ -467,10 +518,11 @@ function progEdit() {
             <input type="text" class="sp pnm" value="${esc(c.name)}" data-pn="cp|${sj.id}|${sb.id}|${c.id}">
             <input type="text" class="pper" value="${esc(c.per || "")}" placeholder="P1" title="Période(s) : P1, P2, P3… (champ libre)" data-pper="${c.id}">
 <span class="pbts">${keysOf(c).map(p => { const x = perState(c, p); return `<span class="pgrp ${x.st}">${p === "—" ? "" : `<b>${p}</b>`}<button class="chip ${x.st !== "no" ? "on" : ""}" style="padding:4px 9px" data-pab="${c.id}|${p}" title="Compétence abordée">Abordé</button><button class="chip ${x.st === "ev" ? "on" : ""}" style="padding:4px 9px" data-pev="${c.id}|${p}" title="${x.auto ? "Évaluée automatiquement : une note est rattachée (période " + p + ")" : "Marquer comme évaluée"}">${x.auto ? "Évalué ⚙" : "Évalué"}</button></span>`; }).join("")}</span>
-            <button class="chip ${c.url ? "on" : ""}" style="padding:4px 9px" data-plink="${c.id}" title="${c.url ? esc(c.url) : "Ajouter un lien vers une ressource"}">🔗${c.url ? "" : " Lien"}</button>${c.url ? `<a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener" title="Ouvrir le lien">↗</a>` : ""}<button class="btn sm dan" data-pdel="cp|${sj.id}|${sb.id}|${c.id}">✕</button></div>`; }).join("") + `<div class="row" style="margin:6px 0 0 8px"><input type="text" id="add-p-cp-${sb.id}" placeholder="Nouvelle compétence" class="sp"><button class="btn sm pri" data-padd="cp|${sj.id}|${sb.id}">+ Compétence</button></div>` : ""}</div>`;
+            <button class="chip ${c.url ? "on" : ""}" style="padding:4px 9px" data-plink="${c.id}" title="${c.url ? esc(c.url) : "Ajouter un lien vers une ressource"}">🔗${c.url ? "" : " Lien"}</button>${c.url ? `<a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener" title="Ouvrir le lien">↗</a>` : ""}${(g => g ? `<button class="chip ${g.suivi ? "on" : ""}" style="padding:4px 9px" data-psv="${c.id}|suivi" title="Suivre l'évolution entre la 1re et la dernière évaluation de l'année">📈 Suivi annuel</button><button class="chip ${g.an ? "on" : ""}" style="padding:4px 9px" data-psv="${c.id}|an" title="Afficher cette évolution dans l'analyse (élève et classe)">📊 Dans l'analyse</button>` : "")(grOf(c))}<button class="btn sm dan" data-pdel="cp|${sj.id}|${sb.id}|${c.id}">✕</button></div>`; }).join("") + `<div class="row" style="margin:6px 0 0 8px"><input type="text" id="add-p-cp-${sb.id}" placeholder="Nouvelle compétence" class="sp"><button class="btn sm pri" data-padd="cp|${sj.id}|${sb.id}">+ Compétence</button></div>` : ""}</div>`;
       }).join("") + `<div class="row" style="margin-top:8px"><input type="text" id="add-p-sb-${sj.id}" placeholder="Nouvelle sous-matière" class="sp"><button class="btn sm" data-padd="sb|${sj.id}">+ Sous-matière</button></div>` : ""}</div>`;
   }).join("");
-  return note + subjects + `<div class="card"><div class="row"><input type="text" id="add-p-sj" placeholder="Nouvelle matière" class="sp"><button class="btn pri" data-padd="sj">+ Matière</button></div></div>`;
+  const bar = `<div class="row" style="margin-bottom:8px"><button class="btn sm" data-pall="close">⇧ Tout replier</button><button class="btn sm" data-pall="open">⇩ Tout déplier</button></div>`;
+  return note + bar + subjects + `<div class="card"><div class="row"><input type="text" id="add-p-sj" placeholder="Nouvelle matière" class="sp"><button class="btn pri" data-padd="sj">+ Matière</button></div></div>`;
 }
 const legend = `<span class="pst pno">Non abordée</span> <span class="pst pab">Abordée</span> <span class="pst pev">✓ Évaluée</span>`;
 function progMatiere() {
@@ -491,11 +543,11 @@ function progPeriode() {
   return { title: "Progression par période", filter: `<label>Période : <select data-pf="per"><option value="all">Toutes (une page par période)</option>${keys.map(k => `<option value="${k}" ${k === pfPer ? "selected" : ""}>${k === "—" ? "Sans période" : "Période " + k.slice(1)}</option>`).join("")}</select></label>`, body: body || '<p class="muted">Aucune compétence.</p>' };
 }
 function progViewCard(v) {
-  return `<div class="card"><div class="row" style="margin-bottom:10px">${v.filter}<span class="sp"></span><span class="muted">${legend}</span><button class="btn pri" data-act="printProg">🖨️ Imprimer</button></div>${v.body}</div>`;
+  return `<div class="card"><div class="row" style="margin-bottom:10px">${v.filter}<span class="sp"></span><span class="muted">${v.nolegend ? "" : legend}</span><button class="btn pri" data-act="printProg">🖨️ Imprimer</button></div>${v.body}</div>`;
 }
 function progSheet() {
-  const v = ptab === "per" ? progPeriode() : progMatiere();
-  return `<h1>${v.title}</h1><div style="color:#777;margin-bottom:6px">${new Date().toLocaleDateString("fr-FR")} · ${legend}</div>${v.body}`;
+  const v = ptab === "per" ? progPeriode() : ptab === "suivi" ? progSuivi() : progMatiere();
+  return `<h1>${v.title}</h1><div style="color:#777;margin-bottom:6px">${new Date().toLocaleDateString("fr-FR")}${v.nolegend ? "" : " · " + legend}</div>${v.body}`;
 }
 
 let ficheSel = null, ficheTable = false;
@@ -531,6 +583,7 @@ const emptyStudents = () => `<div class="card"><h2>Bienvenue 👋</h2><p class="
 
 /* ---------- Notes ---------- */
 function viewNotes() {
+  freshDate();
   const tabs = `<div class="chips">${[["saisie", "✏️ Saisie"], ["histo", "📜 Évaluations"], ["bilan", "📊 Bilan"]].map(([k, l]) => `<button class="chip ${ntab === k ? "on" : ""}" data-nt="${k}">${l}</button>`).join("")}</div>`;
   if (!S.students.length) return emptyStudents();
   return tabs + (ntab === "saisie" ? notesSaisie() : ntab === "histo" ? notesHisto() : notesBilan());
@@ -552,20 +605,21 @@ function notesSaisie() {
       <label>Sous-matière<br><select data-d="subId"><option value="">—</option>${subs.map(s => `<option value="${s.id}" ${s.id === draft.subId ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>
       <label>Compétence évaluée<br><select data-d="compId"><option value="">—</option>${comps.map(c => `<option value="${c.id}" ${c.id === draft.compId ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>${sb0 && !comps.length ? '<span class="muted">Ajoute des compétences dans 🧭 Progressions.</span>' : ""}</label>
       <label>Intitulé<br><input type="text" list="lbls" data-d="label" value="${esc(draft.label)}" placeholder="ex. Dictée 3"><datalist id="lbls">${labels.map(l => `<option value="${esc(l)}">`).join("")}</datalist></label>
-      <div class="row"><label>Période<br><select data-d="per">${["", "P1", "P2", "P3", "P4", "P5"].map(p => `<option value="${p}" ${p === (draft.per || "") ? "selected" : ""}>${p || "—"}</option>`).join("")}</select></label><label>Date<br><input type="date" data-d="date" value="${draft.date}"></label><label>Barème<br><input type="number" min="1" data-d="max" value="${draft.max}" style="width:80px"></label></div>
+      <div class="row"><label>Période<br><select data-d="per">${["", "P1", "P2", "P3", "P4", "P5"].map(p => `<option value="${p}" ${p === (draft.per || "") ? "selected" : ""}>${p || "—"}</option>`).join("")}</select></label><label>Coefficient<br><input type="number" min="0" step="0.5" inputmode="decimal" style="width:80px" data-d="coef" value="${draft.coef ?? 1}"></label><label class="chk" style="align-self:end"><input type="checkbox" data-d="excl" ${draft.excl ? "checked" : ""}> Ne compte pas dans la moyenne</label><label>Date<br><input type="date" data-d="date" value="${draft.date}"></label><label>Barème<br><input type="number" min="1" data-d="max" value="${draft.max}" style="width:80px"></label></div>
     </div>
     <div class="scroll" style="margin-top:10px"><table><thead><tr><th>Élève</th><th>Note</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="row" style="margin-top:10px"><span class="muted" id="dmean"></span><span class="sp"></span><button class="btn" data-act="clearDraft">Vider</button><button class="btn pri" data-act="saveEval">${draft.editId ? "Enregistrer les modifications" : "Enregistrer l'évaluation"}</button></div></div>`;
 }
 function updDraftMean() { const el = $("#dmean"); if (!el) return; const m = mean(Object.values(draft.grades).map(v => on10(v, draft.max))); el.textContent = m === null ? "" : "Moyenne : " + fmt(m) + " / 10"; }
+const badges = e => (e.excl ? ' <span class="auto" style="background:#fde8e8;color:#b42318">⛔ hors moyenne</span>' : "") + ((e.coef ?? 1) !== 1 ? ` <span class="auto">× ${String(e.coef).replace(".", ",")}</span>` : "");
 function notesHisto() {
   const list = allEvals().filter(e => !histF || e.subjectId === histF).sort((a, b) => b.date.localeCompare(a.date));
   const f = `<div class="card row"><label>Matière : <select data-hf><option value="">Toutes</option>${S.subjects.map(s => `<option value="${s.id}" ${s.id === histF ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label></div>`;
   if (!list.length) return f + `<div class="card muted">Aucune évaluation pour le moment.</div>`;
   return f + list.map(e => {
     const sj = subj(e.subjectId), sb = subOf(sj, e.subId), m = mean(counted().map(s => on10(e.grades[s.id], e.max)));
-    return `<div class="card"><div class="row"><div class="sp"><b>${esc(e.label || "(sans intitulé)")}</b>${e.auto ? '<span class="auto">🤖 automatique</span>' : ""}<br><span class="muted">${esc(sj ? sj.name : "?")}${sb ? " › " + esc(sb.name) : ""}${compOf(sb, e.compId) ? " › " + esc(compOf(sb, e.compId).name) : ""} · ${frDate(e.date)} · /${e.max}</span></div>${pill(m)}
-      ${e.auto ? "" : `<button class="btn sm" data-edit="${e.id}">Modifier</button><button class="btn sm dan" data-deval="${e.id}">Supprimer</button>`}</div></div>`;
+    return `<div class="card"><div class="row"><div class="sp"><b>${esc(e.label || "(sans intitulé)")}</b>${e.auto ? '<span class="auto">🤖 automatique</span>' : ""}${badges(e)}<br><span class="muted">${esc(sj ? sj.name : "?")}${sb ? " › " + esc(sb.name) : ""}${compOf(sb, e.compId) ? " › " + esc(compOf(sb, e.compId).name) : ""} · ${frDate(e.date)} · /${e.max}</span></div>${pill(m)}
+      ${e.auto ? "" : `<button class="btn sm" data-eexcl="${e.id}" title="Compter ou non cette évaluation dans la moyenne">${e.excl ? "Compter" : "Exclure"}</button><button class="btn sm" data-edit="${e.id}">Modifier</button><button class="btn sm dan" data-deval="${e.id}">Supprimer</button>`}</div></div>`;
   }).join("") + autoNote();
 }
 function notesBilan() {
@@ -581,7 +635,7 @@ function notesBilan() {
 function viewAnalyses() {
   if (!S.students.length) return emptyStudents();
   const chips = `<button class="chip ${anSel === "class" ? "on" : ""}" data-an="class">👥 Classe</button>` + [...S.students].sort(byName).map(s => `<button class="chip ${anSel === s.id ? "on" : ""}" data-an="${s.id}">${esc(s.name)}</button>`).join("");
-  const body = anSel === "class" || !stud(anSel) ? classHtml(false) : studentHtml(anSel, false);
+  const body = anSel === "class" || !stud(anSel) ? classHtml(false) + suiviClassCard() : studentHtml(anSel, false);
   return `<div class="chips">${chips}</div><div class="row" style="margin-bottom:10px"><span class="sp"></span><button class="btn" data-act="parents">🖨️ Bilan parents (6 élèves / page)</button><button class="btn pri" data-act="print">🖨️ Imprimer / PDF (1 page A4)</button></div>${body}`;
 }
 function modTotals(sid) {   // total par module et par ligne
@@ -699,13 +753,14 @@ function bilanEleve(sid) {
   return `<div class="bil"><div class="bhead"><h1>${esc(s.name)}</h1><span>Bilan de l'élève · ${date}</span></div>${s.excl ? `<div class="bmuted" style="margin:-6px 0 10px">ℹ️ Cet élève n'est pas compté dans les moyennes de la classe.</div>` : ""}${hero}
     <div class="bgrid2">${pf}${cards.join("")}</div>
     ${counters ? `<div class="bgrid4">${counters}</div>` : ""}
+    ${suiviBlock(sid) ? `<div class="bgrid4">${suiviBlock(sid)}</div>` : ""}
     ${fichBlock(sid)}
-    <div class="bfoot">Notes ramenées sur 10 · vert : acquis (7,5 et plus) · orange : en cours d'acquisition (5 à 7,5) · rouge : à renforcer (moins de 5) · repère noir : moyenne de la classe.<br>🤖 = note automatique calculée à partir des compteurs (de 3 à 10, relative à la classe).</div></div>`;
+    <div class="bfoot">Notes ramenées sur 10 · vert : acquis (7,5 et plus) · orange : en cours d'acquisition (5 à 7,5) · rouge : à renforcer (moins de 5) · repère noir : moyenne de la classe.<br>🤖 = note automatique calculée à partir des compteurs (relative à la classe).</div></div>`;
 }
 function detailTree(sid) {
   const E = allEvals().filter(e => typeof e.grades[sid] === "number");
   const evRow = e => { const sj = subj(e.subjectId), sb = subOf(sj, e.subId), cp = compOf(sb, e.compId), v = on10(e.grades[sid], e.max), c = mean(counted().map(s => on10(e.grades[s.id], e.max)));
-    return `<div class="dev"><span class="dd">${frDate(e.date)}</span><span class="dn">${esc(e.label || "(sans intitulé)")}${cp ? ` <small>· ${esc(cp.name)}</small>` : ""}${e.auto ? ' <small>🤖</small>' : ""}</span><span class="dm">${e.grades[sid]} / ${e.max}</span>${pl2(v)}<span class="bc">classe ${c === null ? "–" : fmt(c)}</span></div>`; };
+    return `<div class="dev"><span class="dd">${frDate(e.date)}</span><span class="dn">${esc(e.label || "(sans intitulé)")}${badges(e)}${cp ? ` <small>· ${esc(cp.name)}</small>` : ""}${e.auto ? ' <small>🤖</small>' : ""}</span><span class="dm">${e.grades[sid]} / ${e.max}</span>${pl2(v)}<span class="bc">classe ${c === null ? "–" : fmt(c)}</span></div>`; };
   const sum = (label, f, cls2) => `<summary class="${cls2 || ""}"><span class="sl">${esc(label)}</span>${pl2(avgOf(sid, f))}<span class="bc">classe ${fmt(classAvg(f) ?? 0)}</span></summary>`;
   const h = S.subjects.filter(sj => E.some(e => e.subjectId === sj.id)).map(sj => {
     const all = E.filter(e => e.subjectId === sj.id), direct = all.filter(e => !sj.subs.some(b => b.id === e.subId));
@@ -815,9 +870,9 @@ function viewSettings() {
       <p class="muted">Vie de classe et matériel se comptent par semaine (« Fin de semaine » les archive dans le cumul) ; sons et écriture se cumulent sur tout le trimestre. Les analyses utilisent le cumul + la semaine en cours.</p>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="newWeek">🧹 Fin de semaine</button><button class="btn" data-act="parents">🖨️ Bilan parents</button><button class="btn dan" data-act="newTerm">Nouveau trimestre…</button></div></div>
     <div class="card"><h2>🎯 Bornes des notes automatiques</h2>
-      <p class="muted">Les notes calculées à partir des compteurs vont de la <b>note minimale</b> (l'élève qui a le plus d'erreurs ou de remarques) à la <b>note maximale</b> (aucune erreur), sur 10. Par défaut : 3 et 10.</p>
-      ${AUTO_KEYS.map(([k, l]) => { const [lo, hi] = boundsOf(k); return `<div class="row" style="margin-top:6px"><span class="sp">${l}</span><label>min <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${lo}" data-ab="${k}|min"></label><label>max <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${hi}" data-ab="${k}|max"></label></div>`; }).join("")}
-      <div class="row" style="margin-top:8px"><button class="btn sm" data-act="abReset">Remettre 3 et 10</button></div></div>
+      <p class="muted">Les notes calculées à partir des compteurs vont de la <b>note minimale</b> (l'élève qui a le plus d'erreurs ou de remarques) à la <b>note maximale</b> (aucune erreur), sur 10. Par défaut : 3 et 10. Le <b>coef</b> pèse dans les moyennes (1 par défaut ; 0 = la note automatique ne compte pas).</p>
+      ${AUTO_KEYS.map(([k, l]) => { const [lo, hi] = boundsOf(k); return `<div class="row" style="margin-top:6px"><span class="sp">${l}</span><label>min <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${lo}" data-ab="${k}|min"></label><label>max <input type="number" min="0" max="10" step="0.5" inputmode="decimal" style="width:70px" value="${hi}" data-ab="${k}|max"></label><label>coef <input type="number" min="0" step="0.5" inputmode="decimal" style="width:70px" value="${((S.abounds || {})[k] || {}).coef ?? 1}" data-ab="${k}|coef"></label></div>`; }).join("")}
+      <div class="row" style="margin-top:8px"><button class="btn sm" data-act="abReset">Remettre les valeurs par défaut</button></div></div>
     <div class="card"><h2>💾 Données</h2><div class="row"><button class="btn pri" data-act="csv">Exporter le CSV unique</button><button class="btn" data-act="json">Sauvegarde complète (JSON)</button><button class="btn" data-act="import">Importer une sauvegarde…</button></div><input type="file" id="imp" accept=".json,application/json" style="display:none"></div>
     <div class="card"><h2>☁️ Synchronisation Supabase</h2>
       <p class="muted" id="cfgst">${st}</p>
@@ -956,8 +1011,9 @@ function addStudents(names) {
 }
 function inferEmc(name) { const n = norm(name); return /consigne/.test(n) ? "consignes" : /regle/.test(n) ? "regles" : ""; }
 function evalFromDraft() {
+  freshDate();
   const grades = {}; Object.keys(draft.grades).forEach(k => { const v = draft.grades[k]; if (typeof v === "number" && stud(k)) grades[k] = v; });
-  return { id: draft.editId || uid(), date: draft.date || today(), subjectId: draft.subjectId, subId: draft.subId, compId: draft.compId || "", per: draft.per || "", label: (draft.label || "").trim(), max: +draft.max || 10, grades };
+  return { id: draft.editId || uid(), date: draft.date || today(), subjectId: draft.subjectId, subId: draft.subId, compId: draft.compId || "", per: draft.per || "", label: (draft.label || "").trim(), max: +draft.max || 10, coef: (() => { const c = parseFloat(String(draft.coef ?? 1).replace(",", ".")); return Number.isFinite(c) && c >= 0 ? c : 1; })(), excl: !!draft.excl, grades };
 }
 const actions = {
   printProg() { if (ptab === "edit") return toast("Choisis « Par matière » ou « Par période »"); printMode = "prog"; buildSheet(); window.print(); },
@@ -970,7 +1026,7 @@ const actions = {
     if (!S.items.vie.length) return toast("Ajoute d'abord des lignes de vie de classe");
     printMode = "parents"; buildSheet(); window.print();
   },
-  clearDraft() { draft = { subjectId: draft.subjectId, subId: "", compId: "", per: draft.per || "", label: "", date: today(), max: 10, grades: {}, editId: null }; saveDraft(); render(); },
+  clearDraft() { draft = { subjectId: draft.subjectId, subId: "", compId: "", per: draft.per || "", label: "", date: today(), max: 10, coef: 1, excl: false, grades: {}, editId: null }; saveDraft(); render(); },
   abReset() { S.abounds = {}; save(); render(); toast("Bornes remises à 3 et 10"); },
   saveEval() {
     const e = evalFromDraft();
@@ -1019,10 +1075,9 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
-  if (d.cat) { ccat.vie = d.cat; return render(); }
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
   if (d.nav) { const [m, k] = d.nav.split("|"), so = [...S.students].sort(byName), cur = m === "fiche" ? ficheSel : sel[m], i = so.findIndex(s => s.id === cur), nid = so[(i + (+k) + so.length) % so.length].id; if (m === "fiche") ficheSel = nid; else sel[m] = nid; return render(); }
   if (d.dec2) { ev.stopPropagation(); const [m, s, it] = d.dec2.split("|"); bump(s, m, it, -1); save(); return render(); }
@@ -1035,7 +1090,7 @@ document.addEventListener("click", ev => {
   if (d.lend2) { const [s, it] = d.lend2.split("|"), k = s + "::" + it; if (S.lent[k]) delete S.lent[k]; else { S.lent[k] = true; bump(s, "matos", it, 1); } save(); return render(); }
   if (d.nt) { ntab = d.nt; return render(); }
   if (d.an) { anSel = d.an; return render(); }
-  if (d.edit) { const e = S.evals.find(x => x.id === d.edit); if (e) { draft = { subjectId: e.subjectId, subId: e.subId, compId: e.compId || "", per: e.per || "", label: e.label, date: e.date, max: e.max, grades: { ...e.grades }, editId: e.id }; saveDraft(); ntab = "saisie"; render(); } return; }
+  if (d.edit) { const e = S.evals.find(x => x.id === d.edit); if (e) { draft = { subjectId: e.subjectId, subId: e.subId, compId: e.compId || "", per: e.per || "", label: e.label, date: e.date, max: e.max, coef: e.coef ?? 1, excl: !!e.excl, grades: { ...e.grades }, editId: e.id }; saveDraft(); ntab = "saisie"; render(); } return; }
   if (d.deval) { if (confirm("Supprimer cette évaluation ?")) { S.evals = S.evals.filter(x => x.id !== d.deval); save(); render(); } return; }
   if (d.act) return actions[d.act]();
   if (d.ds) { const s = stud(d.ds); if (!confirm(`Supprimer ${s.name} ? Ses notes et compteurs seront supprimés.`)) return;
@@ -1053,6 +1108,11 @@ document.addEventListener("click", ev => {
   if (d.ptab) { ptab = d.ptab; return render(); }
   if (d.ptog) { popen[d.ptog] = !popen[d.ptog]; return render(); }
   if (d.pall) { const o = d.pall === "open"; S.subjects.forEach(sj => { popen[sj.id] = o; sj.subs.forEach(sb => popen[sb.id] = o); }); return render(); }
+  if (d.psv) { const [cid, kind] = d.psv.split("|"), g = groupsOf().find(x => x.cs.some(c => c.id === cid)); if (!g) return;
+    if (kind === "suivi") { const v = !g.suivi; g.cs.forEach(c => { c.suivi = v; if (!v) c.suiviAn = false; }); }
+    else { const v = !g.an; g.cs.forEach(c => { c.suiviAn = v; if (v) c.suivi = true; }); }
+    save(); return render(); }
+  if (d.eexcl) { const e = S.evals.find(x => x.id === d.eexcl); if (e) { e.excl = !e.excl; save(); render(); toast(e.excl ? "Évaluation exclue de la moyenne" : "Évaluation comptée dans la moyenne"); } return; }
   if (d.plink) {
     const c = findComp(d.plink); if (!c) return;
     let u = prompt("Lien vers la ressource (laisser vide pour retirer le lien) :", c.url || ""); if (u === null) return;
@@ -1108,7 +1168,7 @@ document.addEventListener("change", ev => {
   if (d.ftype) { S.fields.find(x => x.id === d.ftype).type = t.value; save(); return render(); }
   if (d.selst) { sel[d.selst] = t.value; return render(); }
   if (d.selit) { citem[d.selit] = t.value; return render(); }
-  if (d.d) { draft[d.d] = d.d === "max" ? (+t.value || 10) : t.value; if (d.d === "subjectId") { draft.subId = ""; draft.compId = ""; } if (d.d === "subId") draft.compId = ""; saveDraft(); if (["subjectId", "subId", "max"].includes(d.d)) render(); return; }
+  if (d.d) { draft[d.d] = d.d === "max" ? (+t.value || 10) : d.d === "excl" ? t.checked : t.value; if (d.d === "date") draft.dateManual = true; if (d.d === "subjectId") { draft.subId = ""; draft.compId = ""; } if (d.d === "subId") draft.compId = ""; saveDraft(); if (["subjectId", "subId", "max"].includes(d.d)) render(); return; }
   if (d.g) { const v = t.value.replace(",", "."); if (v === "") delete draft.grades[d.g]; else draft.grades[d.g] = parseFloat(v); saveDraft(); const p = $("#gp-" + d.g); if (p) p.innerHTML = pill(on10(draft.grades[d.g], draft.max)); updDraftMean(); return; }
   if (d.hf !== undefined) { histF = t.value; return render(); }
   if (d.rn) { const s = stud(d.rn), v = t.value.trim(); if (v) { s.name = v; save(); } return render(); }
