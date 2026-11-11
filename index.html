@@ -130,6 +130,17 @@ pre.sql{background:#1e1e2e;color:#d6e0ff;border-radius:10px;padding:10px;font-si
   #sheet{display:block}
 }
 #sheetIn{width:194mm;color:#222;font-size:10.5px;line-height:1.3}
+#sheetIn.land{width:281mm}
+#sheetIn .mg{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #8a93b0;border-left:1px solid #8a93b0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#sheetIn .mg>div{border-right:1px solid #8a93b0;border-bottom:1px solid #8a93b0;box-sizing:border-box}
+#sheetIn .mg .mh{background:#eef1fb;color:#2a45b0;font-weight:700;text-align:center;padding:3px;font-size:12px}
+#sheetIn .mg .mc{position:relative;overflow:hidden;padding:2px 3px}
+#sheetIn .mg .mc.out{background:#f4f5f9}
+#sheetIn .mg .mc .n{font-weight:800;font-size:13px}#sheetIn .mg .mc.now .n{color:#3b5bdb}
+#sheetIn .mg .mc .e{font-size:9.5px;line-height:1.25;border-radius:3px;padding:0 4px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(0,0,0,.08)}
+#sheetIn .mg .mc .more{font-size:9px;color:#667}
+#sheetIn .mg .mc .ov{position:absolute;inset:0;pointer-events:none}
+#sheetIn .mleg{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}#sheetIn .mleg span{font-size:10px;padding:1px 8px;border-radius:5px;border:1px solid rgba(0,0,0,.12)}
 #sheetIn .bil{font-size:11px}
 #sheetIn h1{font-size:19px;margin-bottom:2px}#sheetIn h4{font-size:11.5px;margin:9px 0 4px;border-bottom:1.5px solid #3b5bdb;padding-bottom:2px;color:#2a45b0}
 #sheetIn .ln{display:flex;gap:6px;align-items:center;padding:2px 0}
@@ -583,7 +594,7 @@ function viewCal() {
     return `<div class="calc ${inM ? "" : "out"} ${d === today() ? "today" : ""} ${d === calSel ? "sel" : ""}" data-cday="${d}" style="${off ? "background:" + catOf(off.cat)[2] : ""}"><div class="cnum">${+d.slice(8)}</div>${E.slice(0, 3).map(e => `<div class="cch" style="background:${catOf(e.cat)[2]}">${esc(evTitle(e))}</div>`).join("")}${E.length > 3 ? `<div class="cmore">+${E.length - 3}</div>` : ""}</div>`; }).join("");
   const sel = calOn(calSel), ed = calEdit && (S.cal || []).find(e => e.id === calEdit), v = ed || { date: calSel, end: "", time: "", title: "", cat: "autre", note: "" };
   const upcoming = (() => { const seen = new Set(), out = []; for (let k = 0; k < 150 && out.length < 8; k++) { const d = dAdd(today(), k); calOn(d).forEach(e => { if (seen.has(e.id) || out.length >= 8) return; seen.add(e.id); out.push({ ...e, date: d }); }); } return out; })();
-  return `<div class="card"><div class="row"><button class="btn" data-cmv="-1">◀</button><h2 style="margin:0;text-transform:capitalize">${MOIS[M - 1]} ${Y}</h2><button class="btn" data-cmv="1">▶</button><button class="btn sm" data-cmv="0">Aujourd'hui</button><span class="sp"></span><button class="btn sm" data-act="exportMonthImg" title="Télécharge le mois affiché en image (PNG)">🖼️ Image du mois</button></div>
+  return `<div class="card"><div class="row"><button class="btn" data-cmv="-1">◀</button><h2 style="margin:0;text-transform:capitalize">${MOIS[M - 1]} ${Y}</h2><button class="btn" data-cmv="1">▶</button><button class="btn sm" data-cmv="0">Aujourd'hui</button><span class="sp"></span><button class="btn sm" data-act="exportMonthImg" title="Télécharge le mois affiché en image (PNG)">🖼️ Image du mois</button><button class="btn sm" data-act="printCal" title="Imprime ou enregistre le mois affiché en PDF, format paysage">📄 PDF (paysage)</button></div>
     <div class="calg" style="margin-top:8px">${["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map(x => `<div class="calh">${x}</div>`).join("")}${grid}</div>
     <div class="row" style="margin-top:8px">${CATS.map(c => `<span class="cev" style="background:${c[2]}">${c[1]}</span>`).join("")}</div></div>
   <div class="card"><h2>${dLong(calSel)}</h2>${sel.length ? sel.map(e => `<div class="row" style="padding:4px 0;border-top:1px solid #eef0f5"><span class="cev" style="background:${catOf(e.cat)[2]}">${catOf(e.cat)[1]}</span><span class="sp"><b>${esc(e.time ? tFr(e.time) + " · " : "")}${esc(evTitle(e))}</b>${e.end && e.end !== e.date ? ` <small class="muted">(du ${frDate(e.date)} au ${frDate(e.end)})</small>` : ""}${e.note ? `<br><small class="muted">${esc(e.note)}</small>` : ""}</span>${e.virtual ? '<small class="muted">fiche élève</small>' : `<button class="btn sm" data-cedit="${e.id}">Modifier</button><button class="btn sm dan" data-cdel="${e.id}">✕</button>`}</div>`).join("") : '<p class="muted">Aucun événement ce jour-là.</p>'}</div>
@@ -624,6 +635,17 @@ function exportMonthImg() {
     if (navigator.canShare && /iPad|iPhone|Android/i.test(navigator.userAgent) && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }, "image/png");
+}
+function calSheet() {
+  const [Y, M] = calMonth.split("-").map(Number), first = new Date(Y, M - 1, 1), start = dAdd(isoD(first), -((first.getDay() + 6) % 7)), rows = Math.ceil((new Date(Y, M, 0).getDate() + (first.getDay() + 6) % 7) / 7);
+  const h = Math.floor(1580 / rows) / 10, mx = Math.max(2, Math.floor((h - 6) / 3.7)), td = today();
+  let cells = "";
+  for (let k = 0; k < rows * 7; k++) {
+    const d = dAdd(start, k), inM = d.slice(0, 7) === calMonth, E = inM ? calOn(d) : [], off = E.find(e => e.cat === "vacances" || e.cat === "ferie"), show = E.length > mx ? E.slice(0, mx - 1) : E;
+    cells += `<div class="mc ${inM ? "" : "out"} ${inM && d === td ? "now" : ""}" style="height:${h}mm${off ? ";background:" + catOf(off.cat)[2] : ""}"><div class="n">${+d.slice(8)}</div>${show.map(e => `<div class="e" style="background:${catOf(e.cat)[2]}">${esc((e.time ? tFr(e.time) + " " : "") + evTitle(e))}</div>`).join("")}${E.length > show.length ? `<div class="more">+${E.length - show.length} autres</div>` : ""}${inM && d === td ? '<div class="ov" style="background:rgba(255,214,0,.5)"></div>' : ""}${inM && d < td ? '<div class="ov" style="background:rgba(105,110,125,.38)"></div>' : ""}</div>`;
+  }
+  return `<h1 style="text-transform:capitalize;font-size:22px">${MOIS[M - 1]} ${Y}</h1><div class="mg">${["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map(x => `<div class="mh">${x}</div>`).join("")}${cells}</div>
+  <div class="mleg">${CATS.map(c => `<span style="background:${c[2]}">${c[1]}</span>`).join("")}<span style="background:rgba(255,214,0,.5)">Jour en cours</span><span style="background:rgba(105,110,125,.38)">Jours passés</span></div>`;
 }
 const icsDate = v => { const m = String(v).match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/); if (!m) return null; if (m[7]) { const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])); return { date: isoD(t), time: String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") }; } return { date: `${m[1]}-${m[2]}-${m[3]}`, time: m[4] ? `${m[4]}:${m[5]}` : "" }; };
 const icsUnesc = x => String(x || "").replace(/\\n/gi, "\n").replace(/\\([,;\\])/g, "$1").trim();
@@ -1004,9 +1026,10 @@ function parentsHtml() {
   }).join("")}</div>`).join("");
 }
 let printMode = "", jprintDays = [];
-window.addEventListener("afterprint", () => { printMode = ""; });
+window.addEventListener("afterprint", () => { printMode = ""; const pg = document.getElementById("pgland"); if (pg) pg.remove(); });
 function buildSheet() {
-  invalidate(); const w = $("#sheetIn"); w.style.zoom = 1;
+  invalidate(); const w = $("#sheetIn"); w.style.zoom = 1; w.classList.toggle("land", printMode === "cal");
+  let pg = document.getElementById("pgland"); if (printMode === "cal") { if (!pg) { pg = document.createElement("style"); pg.id = "pgland"; document.head.appendChild(pg); } pg.textContent = "@media print{@page{size:A4 landscape;margin:8mm}}"; } else if (pg) pg.remove();
   const sh = $("#sheet"); sh.style.cssText = "display:block;position:absolute;left:-10000px;top:0;visibility:hidden";   // mesurable hors écran
   if (printMode === "parents") {
     w.innerHTML = parentsHtml();
@@ -1015,6 +1038,8 @@ function buildSheet() {
     w.innerHTML = progSheet();
     const maxW = 194 * 3.7795, need = Math.max(w.scrollWidth, ...[...w.querySelectorAll("table")].map(x => x.scrollWidth));
     if (need > maxW + 1) w.style.zoom = Math.max(0.5, maxW / need * 0.98);
+  } else if (printMode === "cal") {
+    w.innerHTML = calSheet();
   } else if (printMode === "journal") {
     w.innerHTML = journalSheet(jprintDays);
   } else if (printMode === "fiches") {   // plusieurs pages possibles : on ajuste seulement la largeur
@@ -1216,6 +1241,7 @@ const actions = {
   printJournalWeek() { jprintDays = jWeek(); if (!jprintDays.length) return toast("Aucune journée remplie cette semaine"); printMode = "journal"; buildSheet(); window.print(); },
   copyDay() { /* remplacé par data-jcopy */ },
   exportMonthImg() { exportMonthImg(); },
+  printCal() { printMode = "cal"; buildSheet(); window.print(); },
   exportICS() { if (!(S.cal || []).length) return toast("Le calendrier est vide"); download("calendrier-classe.ics", exportICSText(), "text/calendar"); },
   exportJournalAll() { const ds = Object.keys(S.journal).filter(d => (S.journal[d] || []).length).sort(); if (!ds.length) return toast("Le cahier journal est vide"); download("cahier-journal-complet-" + today() + ".txt", ds.map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain"); },
   purgeJournal() {
