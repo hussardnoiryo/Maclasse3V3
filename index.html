@@ -608,13 +608,17 @@ function exportMonthImg() {
   g.textAlign = "left";
   for (let r = 0; r < rows; r++) for (let k = 0; k < 7; k++) {
     const d = dAdd(start, r * 7 + k), x = k * cw, y = top + hh + r * chh, inM = d.slice(0, 7) === calMonth, E = calOn(d), off = E.find(e => e.cat === "vacances" || e.cat === "ferie");
-    g.fillStyle = off && inM ? catOf(off.cat)[2] : inM ? "#fff" : "#f4f5f9"; g.fillRect(x, y, cw, chh); g.strokeStyle = "#cfd6e6"; g.lineWidth = 2; g.strokeRect(x, y, cw, chh);
+    g.fillStyle = off && inM ? catOf(off.cat)[2] : inM ? "#fff" : "#f4f5f9"; g.fillRect(x, y, cw, chh);
+    if (inM && d === today()) { g.fillStyle = "rgba(255,214,0,0.5)"; g.fillRect(x, y, cw, chh); }   // jour en cours : jaune à 50 %
+    g.strokeStyle = "#cfd6e6"; g.lineWidth = 2; g.strokeRect(x, y, cw, chh);
     g.fillStyle = inM ? (d === today() ? "#3b5bdb" : "#1c2340") : "#a7adbf"; g.font = "800 30px " + F; g.fillText(String(+d.slice(8)), x + 12, y + 40);
     if (!inM) continue;
     E.slice(0, 5).forEach((e, i) => { const yy = y + 56 + i * 32; g.fillStyle = catOf(e.cat)[2]; rr(x + 8, yy, cw - 16, 28, 7); g.fill(); g.strokeStyle = "rgba(0,0,0,.08)"; g.lineWidth = 1; g.stroke(); g.fillStyle = "#1c2340"; g.font = "600 20px " + F; g.fillText(fit((e.time ? tFr(e.time) + " " : "") + evTitle(e), cw - 32), x + 14, yy + 21); });
     if (E.length > 5) { g.fillStyle = "#667"; g.font = "600 20px " + F; g.fillText("+" + (E.length - 5) + " autres", x + 12, y + chh - 10); }
+    if (d < today()) { g.fillStyle = "rgba(105,110,125,0.38)"; g.fillRect(x + 1, y + 1, cw - 2, chh - 2); }   // jours déjà passés : grisés
   }
   let lx = 30; const ly = H - 24; g.font = "600 22px " + F; CATS.forEach(cc => { const w = g.measureText(cc[1]).width + 28; g.fillStyle = cc[2]; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = "#1c2340"; g.fillText(cc[1], lx + 14, ly); lx += w + 12; });
+  [["Jour en cours", "rgba(255,214,0,0.5)"], ["Jours passés", "rgba(105,110,125,0.38)"]].forEach(([t, col]) => { const w = g.measureText(t).width + 28; g.fillStyle = "#fff"; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = col; rr(lx, ly - 26, w, 34, 9); g.fill(); g.strokeStyle = "#cfd6e6"; g.lineWidth = 1.5; g.stroke(); g.fillStyle = "#1c2340"; g.fillText(t, lx + 14, ly); lx += w + 12; });
   c.toBlob(async blob => {
     const name = "calendrier-" + calMonth + ".png", file = new File([blob], name, { type: "image/png" });
     if (navigator.canShare && /iPad|iPhone|Android/i.test(navigator.userAgent) && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
