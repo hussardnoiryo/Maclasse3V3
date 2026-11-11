@@ -107,7 +107,7 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 .jev{margin-top:8px}.cev{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.82rem;font-weight:600}#sheetIn .jev{margin:0 0 8px;font-size:11px}
 .calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.calh{text-align:center;font-weight:700;font-size:.8rem;color:#667}.calc{min-height:78px;border:1.5px solid #e1e5ee;border-radius:9px;padding:3px 4px;cursor:pointer;background:#fff;overflow:hidden}.calc.out{opacity:.45}.calc.today{border-color:#3b5bdb}.calc.sel{box-shadow:0 0 0 2px #3b5bdb inset}.cnum{font-weight:800;font-size:.85rem}.cch{font-size:.68rem;border-radius:5px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmore{font-size:.68rem;color:#667}
 @media(max-width:640px){.calc{min-height:54px}.cch{font-size:.6rem}}
-:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jbig{font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
+:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jh1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;overflow:hidden}#sheetIn .jtt{font-family:var(--cursive);font-size:15px;font-weight:700;color:#2a45b0;overflow:hidden;text-overflow:ellipsis}#sheetIn .jbig{font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
 .plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
@@ -123,6 +123,9 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 #modal.on{display:flex}#mbox{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:90dvh;overflow:auto;padding:18px}
 details summary{cursor:pointer;font-weight:700;padding:6px 0}
 pre.sql{background:#1e1e2e;color:#d6e0ff;border-radius:10px;padding:10px;font-size:.72rem;overflow:auto;max-height:320px;white-space:pre}
+.jread tr[data-jgo]{cursor:pointer}.jread tr[data-jgo]:hover td{background:#f3f6ff}
+.goedit{border:0;background:none;cursor:pointer;font-size:.8em;opacity:.55;padding:0 4px}.goedit:hover{opacity:1}#sheetIn .goedit{display:none}
+@keyframes flash{0%,65%{box-shadow:0 0 0 3px #ffd600;background:#fffbe0}100%{box-shadow:none}}.flash{animation:flash 1.8s}
 #sheet{display:none}
 @media print{
   @page{size:A4;margin:8mm}
@@ -130,17 +133,7 @@ pre.sql{background:#1e1e2e;color:#d6e0ff;border-radius:10px;padding:10px;font-si
   #sheet{display:block}
 }
 #sheetIn{width:194mm;color:#222;font-size:10.5px;line-height:1.3}
-#sheetIn.land{width:281mm}
-#sheetIn .mg{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #8a93b0;border-left:1px solid #8a93b0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-#sheetIn .mg>div{border-right:1px solid #8a93b0;border-bottom:1px solid #8a93b0;box-sizing:border-box}
-#sheetIn .mg .mh{background:#eef1fb;color:#2a45b0;font-weight:700;text-align:center;padding:3px;font-size:12px}
-#sheetIn .mg .mc{position:relative;overflow:hidden;padding:2px 3px}
-#sheetIn .mg .mc.out{background:#f4f5f9}
-#sheetIn .mg .mc .n{font-weight:800;font-size:13px}#sheetIn .mg .mc.now .n{color:#3b5bdb}
-#sheetIn .mg .mc .e{font-size:9.5px;line-height:1.25;border-radius:3px;padding:0 4px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(0,0,0,.08)}
-#sheetIn .mg .mc .more{font-size:9px;color:#667}
-#sheetIn .mg .mc .ov{position:absolute;inset:0;pointer-events:none}
-#sheetIn .mleg{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}#sheetIn .mleg span{font-size:10px;padding:1px 8px;border-radius:5px;border:1px solid rgba(0,0,0,.12)}
+#sheetIn.land{width:auto}#sheetIn .calimg{display:block;margin:0 auto;max-width:100%;max-height:185mm;width:auto;height:auto}
 #sheetIn .bil{font-size:11px}
 #sheetIn h1{font-size:19px;margin-bottom:2px}#sheetIn h4{font-size:11.5px;margin:9px 0 4px;border-bottom:1.5px solid #3b5bdb;padding-bottom:2px;color:#2a45b0}
 #sheetIn .ln{display:flex;gap:6px;align-items:center;padding:2px 0}
@@ -240,6 +233,7 @@ function fix(d) {
   ["counts", "term", "lent"].forEach(k => d[k] = d[k] || {});
   d.subjects = d.subjects || b.subjects; d.evals = d.evals || [];
   d.abounds = d.abounds || {}; d.journal = d.journal || {};  if (!Array.isArray(d.schoolDays) || !d.schoolDays.length) d.schoolDays = [1, 2, 3, 4, 5]; jMigrate(d); Object.values(d.journal).forEach(a => a.forEach(x => { delete x.dailyOf; })); delete d.jdaily; delete d.jskip; d.cal = d.cal || []; d.jtitles = d.jtitles || {}; d.fields = d.fields || b.fields; d.info = d.info || {};
+  if (!d.autoFields) { d.autoFields = true; d.fields.unshift({ id: uid(), name: "Date de naissance", type: "text", auto: "birth" }, { id: uid(), name: "Redoublant", type: "text", auto: "redo" }); }
   return d;
 }
 let S = fix(load());
@@ -439,6 +433,8 @@ function viewCounters(p) {
    Même arbre que les notes : S.subjects[matière › sous-matière › compétence]. Ajouter ou renommer ici = visible dans Notes (et inversement).
    Par compétence : période (champ libre : P1, P2…), « abordée » (rouge), « évaluée » (vert, automatique si une note existe). */
 let ptab = "edit", popen = {}, pfSubj = "all", pfPer = "all";
+function goTo(id) { setTimeout(() => { const e = document.getElementById(id); if (!e) return; e.scrollIntoView({ block: "center", behavior: "smooth" }); e.classList.add("flash"); setTimeout(() => e.classList.remove("flash"), 1900); }, 30); }
+const goBtn = (a, b = "", c = "") => `<button class="goedit" data-pgo="${a}|${b}|${c}" title="Modifier dans l'onglet ✏️ Modifier">✏️</button>`;
 const compEvals = c => S.evals.filter(e => e.compId === c.id && Object.values(e.grades || {}).some(v => typeof v === "number"));
 const periodsOf = c => [...new Set((String(c.per || "").match(/P\s*[1-9]/gi) || []).map(x => "P" + x.replace(/\D/g, "")))].sort();
 const lk = c => c.url ? ` <a class="plk" href="${esc(c.url)}" target="_blank" rel="noopener">🔗</a>` : "";
@@ -528,7 +524,7 @@ function suiviClassCard() {
 function progSuivi() {
   const gs = groupsOf().filter(g => g.suivi), sorted = [...S.students].sort(byName);
   const body = gs.map(g => { const E = seriesEvals(g), c = suiviClass(g);
-    return `<section class="psec"><h2>${esc(g.name)} <small style="font-weight:500;color:#777">${esc(g.sj.name)} › ${esc(g.sb.name)} · ${periodsLabel(g)}</small></h2>
+    return `<section class="psec"><h2>${esc(g.name)} ${goBtn(g.sj.id, g.sb.id, g.cs[0].id)} <small style="font-weight:500;color:#777">${esc(g.sj.name)} › ${esc(g.sb.name)} · ${periodsLabel(g)}</small></h2>
       <div class="muted" style="margin-bottom:6px">${E.length} évaluation${E.length > 1 ? "s" : ""} rattachée${E.length > 1 ? "s" : ""}${g.an ? " · affichée dans l'analyse" : ""}</div>
       ${E.length ? `<table class="ptab"><thead><tr><th>Élève</th><th>1re évaluation</th><th>Dernière évaluation</th><th>Évolution</th></tr></thead><tbody>${sorted.map(s => { const r = suiviOf(g, s.id, E); return `<tr><td>${esc(s.name)}</td>${r ? `<td>${pl2(r.v1)} <small class="muted">${frDate(r.d1)}</small></td><td>${r.v2 !== null ? `${pl2(r.v2)} <small class="muted">${frDate(r.d2)}</small>` : "–"}</td><td>${dlt(r.delta)}</td>` : '<td>–</td><td>–</td><td>–</td>'}</tr>`; }).join("")}<tr><td><b>Classe</b></td><td>${pl2(c.v1)}</td><td>${pl2(c.v2)}</td><td>${dlt(c.delta)}</td></tr></tbody></table>` : `<p class="muted">Aucune évaluation rattachée à cette compétence pour le moment (choisis-la dans 📒 Notes).</p>`}</section>`; }).join("");
   return { title: "Suivi annuel des compétences", filter: "", body: body || '<p class="muted">Aucun suivi activé. Dans « ✏️ Modifier », une compétence présente sur plusieurs périodes (ex. P1 P2 P3) a un bouton « 📈 Suivi annuel ».</p>', nolegend: true };
@@ -542,12 +538,12 @@ function progEdit() {
   const GR = groupsOf(), grOf = c => GR.find(g => g.cs[0] === c);
   const subjects = S.subjects.map((sj, i) => {
     const st = progStats(sj), open = !!popen[sj.id];
-    return `<div class="card"><div class="row"><button class="btn sm pfold ${open ? "on" : ""}" data-ptog="${sj.id}" title="${open ? "Replier" : "Déplier"}">${open ? "−" : "+"}</button>${mvBtns("sj", sj.id, i, S.subjects.length)}
+    return `<div class="card" id="pe-${sj.id}"><div class="row"><button class="btn sm pfold ${open ? "on" : ""}" data-ptog="${sj.id}" title="${open ? "Replier" : "Déplier"}">${open ? "−" : "+"}</button>${mvBtns("sj", sj.id, i, S.subjects.length)}
       <input type="text" class="sp pnm" value="${esc(sj.name)}" data-pn="sj|${sj.id}"><span class="muted">${st.n ? `${st.ab}/${st.n} abordées · ${st.ev} évaluées` : ""}</span><button class="btn sm dan" data-pdel="sj|${sj.id}">✕</button></div>
       ${open ? (sj.subs.length ? "" : `<p class="muted" style="margin:8px 0 0">Ajoute une sous-matière pour pouvoir y placer des compétences.</p>`) + sj.subs.map((sb, j) => {
         const op = !!popen[sb.id], cs = sb.comps || [];
-        return `<div class="psub"><div class="row"><button class="btn sm pfold ${op ? "on" : ""}" data-ptog="${sb.id}" title="${op ? "Replier" : "Déplier"}">${op ? "−" : "+"}</button>${mvBtns("sb", sj.id + "|" + sb.id, j, sj.subs.length)}<input type="text" class="sp pnm" style="font-weight:700" value="${esc(sb.name)}" data-pn="sb|${sj.id}|${sb.id}"><span class="muted">${cs.length} compétence${cs.length > 1 ? "s" : ""}</span><button class="btn sm dan" data-pdel="sb|${sj.id}|${sb.id}">✕</button></div>
-          ${op ? cs.map((c, k) => { const s = compStatus(c); return `<div class="pcomp ${s.st}"><span class="pmv">${mvBtns("cp", sj.id + "|" + sb.id + "|" + c.id, k, cs.length)}</span>
+        return `<div class="psub" id="pe-${sb.id}"><div class="row"><button class="btn sm pfold ${op ? "on" : ""}" data-ptog="${sb.id}" title="${op ? "Replier" : "Déplier"}">${op ? "−" : "+"}</button>${mvBtns("sb", sj.id + "|" + sb.id, j, sj.subs.length)}<input type="text" class="sp pnm" style="font-weight:700" value="${esc(sb.name)}" data-pn="sb|${sj.id}|${sb.id}"><span class="muted">${cs.length} compétence${cs.length > 1 ? "s" : ""}</span><button class="btn sm dan" data-pdel="sb|${sj.id}|${sb.id}">✕</button></div>
+          ${op ? cs.map((c, k) => { const s = compStatus(c); return `<div class="pcomp ${s.st}" id="pe-${c.id}"><span class="pmv">${mvBtns("cp", sj.id + "|" + sb.id + "|" + c.id, k, cs.length)}</span>
             <input type="text" class="sp pnm" value="${esc(c.name)}" data-pn="cp|${sj.id}|${sb.id}|${c.id}">
             <input type="text" class="pper" value="${esc(c.per || "")}" placeholder="P1" title="Période(s) : P1, P2, P3… (champ libre)" data-pper="${c.id}">
 <span class="pbts">${keysOf(c).map(p => { const x = perState(c, p); return `<span class="pgrp ${x.st}">${p === "—" ? "" : `<b>${p}</b>`}<button class="chip ${x.st !== "no" ? "on" : ""}" style="padding:4px 9px" data-pab="${c.id}|${p}" title="Compétence abordée">Abordé</button><button class="chip ${x.st === "ev" ? "on" : ""}" style="padding:4px 9px" data-pev="${c.id}|${p}" title="${x.auto ? "Évaluée automatiquement : une note est rattachée (période " + p + ")" : "Marquer comme évaluée"}">${x.auto ? "Évalué ⚙" : "Évalué"}</button></span>`; }).join("")}</span>
@@ -561,8 +557,8 @@ const legend = `<span class="pst pno">Non abordée</span> <span class="pst pab">
 function progMatiere() {
   const list = pfSubj === "all" ? S.subjects : S.subjects.filter(s => s.id === pfSubj);
   const body = list.map(sj => { const st = progStats(sj);
-    return `<section class="psec"><h2>${esc(sj.name)}</h2><div class="muted" style="margin-bottom:6px">${st.n ? `${st.n} compétences · ${st.ab} abordées · ${st.ev} évaluées` : "Aucune compétence"} </div>
-      ${sj.subs.map(sb => `<h3>${esc(sb.name)}</h3>${(sb.comps || []).length ? `<table class="ptab"><thead><tr><th>Compétence</th><th style="width:5.5em">Période</th><th >Statut</th></tr></thead><tbody>${sb.comps.map(c => `<tr class="r-${compStatus(c).st}"><td>${esc(c.name)}${lk(c)}</td><td>${esc(c.per || "")}</td><td>${keysOf(c).map(p => pPill(c, p)).join(" ")}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Aucune compétence.</p>`}`).join("") || '<p class="muted">Aucune sous-matière.</p>'}</section>`; }).join("");
+    return `<section class="psec"><h2>${esc(sj.name)} ${goBtn(sj.id)}</h2><div class="muted" style="margin-bottom:6px">${st.n ? `${st.n} compétences · ${st.ab} abordées · ${st.ev} évaluées` : "Aucune compétence"} </div>
+      ${sj.subs.map(sb => `<h3>${esc(sb.name)} ${goBtn(sj.id, sb.id)}</h3>${(sb.comps || []).length ? `<table class="ptab"><thead><tr><th>Compétence</th><th style="width:5.5em">Période</th><th >Statut</th></tr></thead><tbody>${sb.comps.map(c => `<tr class="r-${compStatus(c).st}"><td>${esc(c.name)}${lk(c)} ${goBtn(sj.id, sb.id, c.id)}</td><td>${esc(c.per || "")}</td><td>${keysOf(c).map(p => pPill(c, p)).join(" ")}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Aucune compétence.</p>`}`).join("") || '<p class="muted">Aucune sous-matière.</p>'}</section>`; }).join("");
   return { title: "Progression par matière", filter: `<label>Matière : <select data-pf="subj"><option value="all">Toutes (une page par matière)</option>${S.subjects.map(s => `<option value="${s.id}" ${s.id === pfSubj ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>`, body: body || '<p class="muted">Aucune matière.</p>' };
 }
 function progPeriode() {
@@ -572,7 +568,7 @@ function progPeriode() {
   const body = shown.map(k => { const items = map[k], bySj = {}; items.forEach(x => ((bySj[x.sj.id + "|" + x.sb.id] = bySj[x.sj.id + "|" + x.sb.id] || { sj: x.sj, sb: x.sb, cs: [] }).cs.push(x.c)));
     const ev = items.filter(x => compStatus(x.c, k).st === "ev").length;
     return `<section class="psec"><h2>${k === "—" ? "Sans période" : "Période " + k.slice(1)}</h2><div class="muted" style="margin-bottom:6px">${items.length} compétence${items.length > 1 ? "s" : ""} · ${items.filter(x => compStatus(x.c, k).st !== "no").length} abordées · ${ev} évaluées</div>
-      ${Object.values(bySj).map(g => `<h3>${esc(g.sj.name)} <span style="color:#777;font-weight:500">› ${esc(g.sb.name)}</span></h3><table class="ptab"><tbody>${g.cs.map(c => `<tr class="r-${compStatus(c, k).st}"><td>${esc(c.name)}${lk(c)}</td><td style="width:11em">${stPill(compStatus(c, k))}</td></tr>`).join("")}</tbody></table>`).join("")}</section>`; }).join("");
+      ${Object.values(bySj).map(g => `<h3>${esc(g.sj.name)} <span style="color:#777;font-weight:500">› ${esc(g.sb.name)}</span> ${goBtn(g.sj.id, g.sb.id)}</h3><table class="ptab"><tbody>${g.cs.map(c => `<tr class="r-${compStatus(c, k).st}"><td>${esc(c.name)}${lk(c)} ${goBtn(g.sj.id, g.sb.id, c.id)}</td><td style="width:11em">${stPill(compStatus(c, k))}</td></tr>`).join("")}</tbody></table>`).join("")}</section>`; }).join("");
   return { title: "Progression par période", filter: `<label>Période : <select data-pf="per"><option value="all">Toutes (une page par période)</option>${keys.map(k => `<option value="${k}" ${k === pfPer ? "selected" : ""}>${k === "—" ? "Sans période" : "Période " + k.slice(1)}</option>`).join("")}</select></label>`, body: body || '<p class="muted">Aucune compétence.</p>' };
 }
 function progViewCard(v) {
@@ -608,9 +604,9 @@ function viewCal() {
   <div class="card"><h2>📥 Import / export iCal</h2><p class="muted">Importe un fichier <b>.ics</b> (calendrier scolaire, agenda Google/Apple/Outlook…). Pour <b>mettre à jour</b> un calendrier, réimporte simplement la nouvelle version : l'appli ajoute les nouveautés, met à jour les événements modifiés et retire ceux qui ont disparu, après t'avoir montré le détail.</p>
     <div class="row"><label class="btn pri" style="cursor:pointer">📥 Importer un fichier .ics<input type="file" accept=".ics,text/calendar" data-ics style="display:none"></label><button class="btn" data-act="exportICS">⬇️ Exporter le calendrier (.ics)</button></div>${(() => { const m = {}; S.cal.filter(e => e.uid).forEach(e => m[e.src || ""] = (m[e.src || ""] || 0) + 1); const k = Object.keys(m); return k.length ? `<div style="margin-top:10px"><b>Calendriers importés</b>${k.map(x => `<div class="row" style="padding:3px 0"><span class="sp">${esc(x || "Import précédent")} <small class="muted">(${m[x]} événements)</small></span><button class="btn sm dan" data-cimpdel="${esc(x)}">Retirer</button></div>`).join("")}</div>` : ""; })()}</div>`;
 }
-function exportMonthImg() {
+function monthCanvas(K = 1) {
   const [Y, M] = calMonth.split("-").map(Number), first = new Date(Y, M - 1, 1), start = dAdd(isoD(first), -((first.getDay() + 6) % 7)), rows = Math.ceil((new Date(Y, M, 0).getDate() + (first.getDay() + 6) % 7) / 7);
-  const W = 1800, cw = W / 7, top = 130, hh = 44, chh = 220, H = top + hh + rows * chh + 70, c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
+  const W = 1800, cw = W / 7, top = 130, hh = 44, chh = 220, H = top + hh + rows * chh + 70, c = document.createElement("canvas"); c.width = W * K; c.height = H * K; const g = c.getContext("2d"); g.scale(K, K);
   const F = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", fit = (t, w) => { if (g.measureText(t).width <= w) return t; while (t.length > 1 && g.measureText(t + "…").width > w) t = t.slice(0, -1); return t + "…"; };
   const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
   g.fillStyle = "#fff"; g.fillRect(0, 0, W, H); g.fillStyle = "#1c2340"; g.font = "800 62px " + F; g.textBaseline = "alphabetic";
@@ -630,22 +626,15 @@ function exportMonthImg() {
   }
   let lx = 30; const ly = H - 24; g.font = "600 22px " + F; CATS.forEach(cc => { const w = g.measureText(cc[1]).width + 28; g.fillStyle = cc[2]; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = "#1c2340"; g.fillText(cc[1], lx + 14, ly); lx += w + 12; });
   [["Jour en cours", "rgba(255,214,0,0.5)"], ["Jours passés", "rgba(105,110,125,0.38)"]].forEach(([t, col]) => { const w = g.measureText(t).width + 28; g.fillStyle = "#fff"; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = col; rr(lx, ly - 26, w, 34, 9); g.fill(); g.strokeStyle = "#cfd6e6"; g.lineWidth = 1.5; g.stroke(); g.fillStyle = "#1c2340"; g.fillText(t, lx + 14, ly); lx += w + 12; });
+  return c;
+}
+function exportMonthImg() {
+  const c = monthCanvas();
   c.toBlob(async blob => {
     const name = "calendrier-" + calMonth + ".png", file = new File([blob], name, { type: "image/png" });
     if (navigator.canShare && /iPad|iPhone|Android/i.test(navigator.userAgent) && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }, "image/png");
-}
-function calSheet() {
-  const [Y, M] = calMonth.split("-").map(Number), first = new Date(Y, M - 1, 1), start = dAdd(isoD(first), -((first.getDay() + 6) % 7)), rows = Math.ceil((new Date(Y, M, 0).getDate() + (first.getDay() + 6) % 7) / 7);
-  const h = Math.floor(1580 / rows) / 10, mx = Math.max(2, Math.floor((h - 6) / 3.7)), td = today();
-  let cells = "";
-  for (let k = 0; k < rows * 7; k++) {
-    const d = dAdd(start, k), inM = d.slice(0, 7) === calMonth, E = inM ? calOn(d) : [], off = E.find(e => e.cat === "vacances" || e.cat === "ferie"), show = E.length > mx ? E.slice(0, mx - 1) : E;
-    cells += `<div class="mc ${inM ? "" : "out"} ${inM && d === td ? "now" : ""}" style="height:${h}mm${off ? ";background:" + catOf(off.cat)[2] : ""}"><div class="n">${+d.slice(8)}</div>${show.map(e => `<div class="e" style="background:${catOf(e.cat)[2]}">${esc((e.time ? tFr(e.time) + " " : "") + evTitle(e))}</div>`).join("")}${E.length > show.length ? `<div class="more">+${E.length - show.length} autres</div>` : ""}${inM && d === td ? '<div class="ov" style="background:rgba(255,214,0,.5)"></div>' : ""}${inM && d < td ? '<div class="ov" style="background:rgba(105,110,125,.38)"></div>' : ""}</div>`;
-  }
-  return `<h1 style="text-transform:capitalize;font-size:22px">${MOIS[M - 1]} ${Y}</h1><div class="mg">${["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map(x => `<div class="mh">${x}</div>`).join("")}${cells}</div>
-  <div class="mleg">${CATS.map(c => `<span style="background:${c[2]}">${c[1]}</span>`).join("")}<span style="background:rgba(255,214,0,.5)">Jour en cours</span><span style="background:rgba(105,110,125,.38)">Jours passés</span></div>`;
 }
 const icsDate = v => { const m = String(v).match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/); if (!m) return null; if (m[7]) { const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])); return { date: isoD(t), time: String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") }; } return { date: `${m[1]}-${m[2]}-${m[3]}`, time: m[4] ? `${m[4]}:${m[5]}` : "" }; };
 const icsUnesc = x => String(x || "").replace(/\\n/gi, "\n").replace(/\\([,;\\])/g, "$1").trim();
@@ -698,11 +687,11 @@ const jtime = b => b.from || b.to ? `${tFr(b.from)}${b.to ? " – " + tFr(b.to) 
 function jblock(b, i, n) {
   const mv = `<button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
   const times = `<div class="jtime"><label>de<input type="time" data-jt="${b.id}|from" value="${esc(b.from || "")}"></label><label>à<input type="time" data-jt="${b.id}|to" value="${esc(b.to || "")}"></label></div>`;
-  if (b.type === "sep") return `<div class="jsepb">${times}<input type="text" class="sp" data-jf="${b.id}|label" value="${esc(b.label || "")}" placeholder="Récréation, pause déjeuner…" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>`;
+  if (b.type === "sep") return `<div class="jsepb" id="jb-${b.id}">${times}<input type="text" class="sp" data-jf="${b.id}|label" value="${esc(b.label || "")}" placeholder="Récréation, pause déjeuner…" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>`;
   const sj = subj(b.subjectId), sb = subOf(sj, b.subId);
   const opt = (arr, cur) => `<option value="">—</option>` + arr.map(x => `<option value="${x.id}" ${x.id === cur ? "selected" : ""}>${esc(x.name)}</option>`).join("");
   const links = (b.links || []).map((l, k) => `<span class="jlk"><a href="${esc(l.url)}" target="_blank" rel="noopener">🔗 ${esc(l.label || l.url)}</a><button class="btn sm dan" data-jldel="${b.id}|${k}" title="Retirer ce lien">✕</button></span>`).join("");
-  return `<div class="jb">${times}<div class="jmain">
+  return `<div class="jb" id="jb-${b.id}">${times}<div class="jmain">
     <div class="row"><input type="text" class="sp" data-jf="${b.id}|title" value="${esc(b.title || "")}" placeholder="Titre (ex. Lecture – Le loup et les 7 chevreaux)" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>
     <div class="row" style="margin-top:6px"><select data-jsel="${b.id}|subjectId" class="sp" title="Matière (issue des Progressions)">${opt(S.subjects, b.subjectId)}</select>
       <select data-jsel="${b.id}|subId" class="sp" ${sj ? "" : "disabled"} title="Sous-matière">${opt(sj ? sj.subs : [], b.subId)}</select>
@@ -721,13 +710,13 @@ const calOn = d => {   // événements du jour : agenda + anniversaires (annuels
 };
 const jEvents = d => { const E = calOn(d); return E.length ? `<div class="jev">📅 ${E.map(e => `<span class="cev" style="background:${catOf(e.cat)[2]}">${esc(e.time ? tFr(e.time) + " " : "")}${esc(evTitle(e))}</span>`).join(" ")}</div>` : ""; };
 const jPrevDays = () => Object.keys(S.journal || {}).filter(d => d < jdate && (S.journal[d] || []).length).sort().reverse().slice(0, 40);
-const jTitle = d => ((S.jtitles || {})[d] || "").trim();
+const jTitle = d => { const T = S.jtitles || {}; if (d in T) return (T[d] || "").trim(); let best = ""; for (const k in T) if (k < d && k > best) best = k; return best ? (T[best] || "").trim() : ""; };   // titre propre au jour, sinon celui du jour précédent
 const jTitleHtml = d => jTitle(d) ? `<div class="jbig">${esc(jTitle(d))}</div>` : "";
 function jTable(d) {
   return `<table class="jtab"><tbody>${jget(d).map(b => {
-    if (b.type === "sep") return `<tr class="jsep"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
+    if (b.type === "sep") return `<tr class="jsep" data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
     const p = jpath(b), head = b.title ? `<div class="jh">${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh">${esc(p)}</div>` : "";
-    return `<tr><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table>`;
+    return `<tr data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table>`;
 }
 function viewJournal() {
   const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)), days = [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => S.schoolDays.includes(new Date(d + "T12:00:00").getDay()) || jget(d).length);
@@ -736,15 +725,15 @@ function viewJournal() {
   const chips = days.sort().map(d => { const t = new Date(d + "T12:00:00"); return `<button class="chip ${d === jdate ? "on" : ""}" data-jday="${d}">${names[t.getDay()]} ${t.getDate()}${jget(d).length ? " •" : ""}</button>`; }).join("");
   const L = jget(jdate), prev = jPrevDays(), src = prev.includes(jsrc) ? jsrc : prev[0] || "";
   const head = `<div class="card"><div class="row"><button class="btn" data-jnav="-1" title="Jour précédent">◀</button><input type="date" data-jdate value="${jdate}" style="font-size:1.05rem;font-weight:700;padding:8px"><button class="btn" data-jnav="1" title="Jour suivant">▶</button><button class="btn sm" data-jnav="0">Aujourd'hui</button><span class="sp"></span>${`<div class="row" style="gap:6px">${[["read", "👁️ Lecture"], ["edit", "✏️ Édition"]].map(([k, l]) => `<button class="chip ${jmode === k ? "on" : ""}" style="padding:8px 14px;font-weight:700" data-jmode="${k}">${l}</button>`).join("")}</div>`}</div>
-    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div>${jmode === "edit" ? `<input type="text" data-jtitle value="${esc((S.jtitles || {})[jdate] || "")}" placeholder="✍️ Titre de la journée (facultatif) — affiché en grand en lecture et à l'impression" style="width:100%;margin-bottom:8px;font-family:var(--cursive);font-size:1.15rem">` : ""}<div class="chips">${chips}</div>${jEvents(jdate)}${jmode === "read" ? `<div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="printJournalDay" title="Imprimer / PDF la journée">🖨️ Journée</button><button class="btn sm" data-act="printJournalWeek" title="Imprimer la semaine">🖨️ Semaine</button><button class="btn sm" data-act="exportJournal" title="Exporter en texte">⬇️ Texte</button><button class="btn sm" data-act="copyJournal" title="Copier le texte">📋 Copier</button></div>` : ""}</div>`;
-  const out = `<div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button><button class="btn" data-act="exportJournal">⬇️ Exporter (texte)</button><button class="btn" data-act="copyJournal">📋 Copier le texte</button></div>`;
-  if (jmode === "read") return head + (L.length || jTitle(jdate) ? `<div class="card jread">${jTitleHtml(jdate)}${jTable(jdate)}</div>` : `<div class="card muted">Rien de prévu pour cette journée. Passe en <b>✏️ Édition</b> pour la remplir${prev.length ? " ou copier une journée précédente" : ""}.</div>`) + "";
+    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div>${jmode === "edit" ? `<input type="text" data-jtitle value="${esc(jTitle(jdate))}" placeholder="✍️ Titre du cahier journal (facultatif) — conservé d'un jour à l'autre, modifiable à tout moment" style="width:100%;margin-bottom:8px;font-family:var(--cursive);font-size:1.15rem">` : ""}<div class="chips">${chips}</div>${jEvents(jdate)}${jmode === "read" ? `<div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="printJournalDay" title="Imprimer / PDF la journée">🖨️ Journée</button><button class="btn sm" data-act="printJournalWeek" title="Imprimer la semaine">🖨️ Semaine</button></div>` : ""}</div>`;
+  const out = `<div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button></div>`;
+  if (jmode === "read") return head + (L.length || (S.jtitles || {})[jdate] ? `<div class="card jread">${jTitleHtml(jdate)}${jTable(jdate)}</div>` : `<div class="card muted">Rien de prévu pour cette journée. Passe en <b>✏️ Édition</b> pour la remplir${prev.length ? " ou copier une journée précédente" : ""}.</div>`) + "";
   const copy = prev.length ? `<div class="card"><div class="row"><b>📋 Copier la configuration d'une autre journée</b><select data-jsrc class="sp">${prev.map(d => `<option value="${d}" ${d === src ? "selected" : ""}>${dLong(d)} (${jget(d).length} bloc${jget(d).length > 1 ? "s" : ""})</option>`).join("")}</select><label><input type="checkbox" data-jwt ${jwt ? "checked" : ""}> avec textes et liens</label><button class="btn" data-jcopy>Copier ici</button></div><div class="muted" style="margin-top:4px">Reprend les créneaux, titres et matières (et séparateurs) ; tu modifies ensuite ce que tu veux. Par défaut : la dernière journée remplie.</div></div>` : "";
   return head + (L.length ? "" : copy) + (L.map((b, i) => jblock(b, i, L.length)).join("") || `<div class="card muted">Aucun bloc pour cette journée. Ajoute le premier ci-dessous${prev.length ? " ou copie une journée précédente" : ""}.</div>`) + (L.length ? copy : "") +
     `<div class="card"><div class="row"><button class="btn pri" data-jadd="bloc">+ Bloc</button><button class="btn" data-jadd="sep|Récréation">☕ + Récréation</button><button class="btn" data-jadd="sep|Pause déjeuner">🍽️ + Pause déjeuner</button><button class="btn" data-jadd="sep|">➖ + Séparateur</button><span class="sp"></span><button class="btn sm" data-jsort title="Range les blocs par heure de début">⏱️ Trier par horaire</button></div>${out}</div>`;
 }
 function journalSheet(days) {
-  return days.map(d => `<section class="jday"><h1>Cahier journal</h1><div class="jdate">${esc(dLong(d))}</div>${calOn(d).length ? `<div class="jev">📅 ${esc(calOn(d).map(e => (e.time ? tFr(e.time) + " " : "") + evTitle(e)).join(" · "))}</div>` : ""}${jTitleHtml(d)}${jTable(d)}</section>`).join("");
+  return days.map(d => `<section class="jday"><h1 class="jh1">Cahier journal${jTitle(d) ? `<span class="jtt">${esc(jTitle(d))}</span>` : ""}</h1><div class="jdate">${esc(dLong(d))}</div>${calOn(d).length ? `<div class="jev">📅 ${esc(calOn(d).map(e => (e.time ? tFr(e.time) + " " : "") + evTitle(e)).join(" · "))}</div>` : ""}${jTable(d)}</section>`).join("");
 }
 function journalText(d) {
   const L = jviews(d); let t = `Cahier journal — ${dLong(d)}\n${jTitle(d) ? jTitle(d) + "\n" : ""}`;
@@ -759,8 +748,17 @@ function journalText(d) {
 const jWeek = () => { const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)); return [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => jviews(d).length); };
 
 let ficheSel = null, ficheTable = false;
-const infoOf = (sid, fid) => ((S.info || {})[sid] || {})[fid] || "";
+const rentree = () => { const t = new Date(); return t.getMonth() >= 7 ? t.getFullYear() : t.getFullYear() - 1; };   // année de la rentrée scolaire en cours
+const redoAuto = sid => { const s = stud(sid); if (!s || !s.birth) return ""; return +s.birth.slice(0, 4) < rentree() - 7 ? "Oui" : "Non"; };   // CE1 = nés l'année (rentrée − 7)
+function infoOf(sid, fid) {
+  const f = (S.fields || []).find(x => x.id === fid), v = ((S.info || {})[sid] || {})[fid] || "";
+  if (f && f.auto === "birth") { const s = stud(sid); return s && s.birth ? frDate(s.birth) : ""; }
+  if (f && f.auto === "redo") return v === "Oui" || v === "Non" ? v : redoAuto(sid);
+  return v;
+}
 function ficheInput(sid, f) {
+  if (f.auto === "birth") return `<div>${infoOf(sid, f.id) ? "<b>" + esc(infoOf(sid, f.id)) + "</b>" : '<span class="muted">— non renseignée</span>'} <small class="muted">· remplie automatiquement depuis ⚙️ Paramètres › Élèves</small></div>`;
+  if (f.auto === "redo") { const m = ((S.info || {})[sid] || {})[f.id], a = redoAuto(sid); return `<div class="row"><b>${esc(infoOf(sid, f.id)) || '<span class="muted">— (date de naissance manquante)</span>'}</b><select data-fi="${sid}|${f.id}" title="Calcul automatique d'après la date de naissance ; tu peux le forcer"><option value="">Automatique${a ? " (" + a + ")" : ""}</option><option value="Oui" ${m === "Oui" ? "selected" : ""}>Forcer : Oui</option><option value="Non" ${m === "Non" ? "selected" : ""}>Forcer : Non</option></select></div><small class="muted">Oui si l'élève est né avant ${rentree() - 7} (un an de plus que l'âge normal en CE1).</small>`; }
   const v = infoOf(sid, f.id), at = `data-fi="${sid}|${f.id}"`;
   if (f.type === "long") return `<textarea ${at} rows="3" style="width:100%">${esc(v)}</textarea>`;
   const link = f.type === "tel" && v ? `<a class="btn sm" href="tel:${esc(v.replace(/\s+/g, ""))}">📞</a>` : f.type === "email" && v ? `<a class="btn sm" href="mailto:${esc(v)}">✉️</a>` : "";
@@ -792,9 +790,9 @@ const emptyStudents = () => `<div class="card"><h2>Bienvenue 👋</h2><p class="
 /* ---------- Notes ---------- */
 function viewNotes() {
   freshDate();
-  const tabs = `<div class="chips">${[["saisie", "✏️ Saisie"], ["histo", "📜 Évaluations"], ["bilan", "📊 Bilan"]].map(([k, l]) => `<button class="chip ${ntab === k ? "on" : ""}" data-nt="${k}">${l}</button>`).join("")}</div>`;
+  const tabs = `<div class="chips">${[["saisie", "✏️ Saisie"], ["histo", "📜 Évaluations"]].map(([k, l]) => `<button class="chip ${ntab === k ? "on" : ""}" data-nt="${k}">${l}</button>`).join("")}</div>`;
   if (!S.students.length) return emptyStudents();
-  return tabs + (ntab === "saisie" ? notesSaisie() : ntab === "histo" ? notesHisto() : notesBilan());
+  return tabs + (ntab === "histo" ? notesHisto() : notesSaisie());
 }
 function autoNote() {
   let h = "";
@@ -829,14 +827,6 @@ function notesHisto() {
     return `<div class="card"><div class="row"><div class="sp"><b>${esc(e.label || "(sans intitulé)")}</b>${e.auto ? '<span class="auto">🤖 automatique</span>' : ""}${badges(e)}<br><span class="muted">${esc(sj ? sj.name : "?")}${sb ? " › " + esc(sb.name) : ""}${compOf(sb, e.compId) ? " › " + esc(compOf(sb, e.compId).name) : ""} · ${frDate(e.date)} · /${e.max}</span></div>${pill(m)}
       ${e.auto ? "" : `<button class="btn sm" data-eexcl="${e.id}" title="Compter ou non cette évaluation dans la moyenne">${e.excl ? "Compter" : "Exclure"}</button><button class="btn sm" data-edit="${e.id}">Modifier</button><button class="btn sm dan" data-deval="${e.id}">Supprimer</button>`}</div></div>`;
   }).join("") + autoNote();
-}
-function notesBilan() {
-  const cols = columns();
-  if (!cols.length) return `<div class="card muted">Aucune note pour le moment.</div>`;
-  const cell = v => `<td>${pill(v)}</td>`;
-  return `<div class="card scroll"><table><thead><tr><th>Élève</th>${cols.map(c => `<th>${esc(c.label)}</th>`).join("")}<th>Général</th></tr></thead><tbody>
-    ${[...S.students].sort(byName).map(s => `<tr><td>${nm(s)}</td>${cols.map(c => cell(avgOf(s.id, c.f))).join("")}${cell(avgOf(s.id, () => true))}</tr>`).join("")}
-    <tr><td><b>Classe</b></td>${cols.map(c => cell(classAvg(c.f))).join("")}${cell(classAvg(() => true))}</tr></tbody></table>${autoNote()}</div>`;
 }
 
 /* ---------- Analyses ---------- */
@@ -1025,7 +1015,7 @@ function parentsHtml() {
       <div class="pm"><div class="pmat"><b>Matériel :</b>${mat.length ? mat.map(x => `<div>${x}</div>`).join("") : "<div>—</div>"}${nr.length ? `<div><b>Non rendu : ${nr.join(", ")}</b></div>` : ""}</div><div class="sg">Signature : <u>&nbsp;</u></div></div></div>`;
   }).join("")}</div>`).join("");
 }
-let printMode = "", jprintDays = [];
+let printMode = "", jprintDays = [], calImg = null;
 window.addEventListener("afterprint", () => { printMode = ""; const pg = document.getElementById("pgland"); if (pg) pg.remove(); });
 function buildSheet() {
   invalidate(); const w = $("#sheetIn"); w.style.zoom = 1; w.classList.toggle("land", printMode === "cal");
@@ -1038,8 +1028,8 @@ function buildSheet() {
     w.innerHTML = progSheet();
     const maxW = 194 * 3.7795, need = Math.max(w.scrollWidth, ...[...w.querySelectorAll("table")].map(x => x.scrollWidth));
     if (need > maxW + 1) w.style.zoom = Math.max(0.5, maxW / need * 0.98);
-  } else if (printMode === "cal") {
-    w.innerHTML = calSheet();
+  } else if (printMode === "cal") {   // image du mois : la mise en page ne dépend plus de l'orientation choisie à l'impression (iPhone/iPad)
+    w.innerHTML = ""; if (calImg) w.appendChild(calImg);
   } else if (printMode === "journal") {
     w.innerHTML = journalSheet(jprintDays);
   } else if (printMode === "fiches") {   // plusieurs pages possibles : on ajuste seulement la largeur
@@ -1241,7 +1231,11 @@ const actions = {
   printJournalWeek() { jprintDays = jWeek(); if (!jprintDays.length) return toast("Aucune journée remplie cette semaine"); printMode = "journal"; buildSheet(); window.print(); },
   copyDay() { /* remplacé par data-jcopy */ },
   exportMonthImg() { exportMonthImg(); },
-  printCal() { printMode = "cal"; buildSheet(); window.print(); },
+  async printCal() {
+    const img = new Image(); img.src = monthCanvas(1.6).toDataURL("image/png"); img.className = "calimg";
+    try { await img.decode(); } catch (e) { }
+    calImg = img; printMode = "cal"; buildSheet(); window.print();
+  },
   exportICS() { if (!(S.cal || []).length) return toast("Le calendrier est vide"); download("calendrier-classe.ics", exportICSText(), "text/calendar"); },
   exportJournalAll() { const ds = Object.keys(S.journal).filter(d => (S.journal[d] || []).length).sort(); if (!ds.length) return toast("Le cahier journal est vide"); download("cahier-journal-complet-" + today() + ".txt", ds.map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain"); },
   purgeJournal() {
@@ -1249,10 +1243,8 @@ const actions = {
     const ds = Object.keys(S.journal).filter(d => d < lim); if (!ds.length) return toast("Aucune journée avant cette date");
     if (!confirm(`Supprimer ${ds.length} journée(s) du cahier journal antérieure(s) au ${frDate(lim)} ?\n\nUne copie en texte est d'abord téléchargée. Les blocs quotidiens sont conservés.`)) return;
     download("cahier-journal-avant-suppression-" + today() + ".txt", ds.filter(d => (S.journal[d] || []).length).sort().map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain");
-    ds.forEach(d => { delete S.journal[d]; delete S.jtitles[d]; }); save(); render(); toast(ds.length + " journée(s) supprimée(s) ✓");
+    const eff = jTitle(lim), had = lim in S.jtitles; ds.forEach(d => { delete S.journal[d]; delete S.jtitles[d]; }); if (!had && eff) S.jtitles[lim] = eff; save(); render(); toast(ds.length + " journée(s) supprimée(s) ✓");
   },
-  exportJournal() { if (!jviews(jdate).length) return toast("Rien à exporter pour cette journée"); download("cahier-journal-" + jdate + ".txt", journalText(jdate), "text/plain"); },
-  copyJournal() { if (!jviews(jdate).length) return toast("Rien à copier pour cette journée"); try { navigator.clipboard.writeText(journalText(jdate)).then(() => toast("Texte copié ✓"), () => toast("Copie impossible : utilise l'export")); } catch (e) { toast("Copie impossible : utilise l'export"); } },
   printFiches() { if (!S.fields.length || !S.students.length) return toast("Rien à imprimer"); printMode = "fiches"; buildSheet(); window.print(); },
   classComps() { classComps = !classComps; delete sorts.class; render(); },
   ficheTable() { ficheTable = !ficheTable; render(); },
@@ -1311,7 +1303,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1342,6 +1334,8 @@ document.addEventListener("click", ev => {
   if (d.dcp) { const [a, b, c] = d.dcp.split("|"); if (!confirm("Supprimer cette compétence ? Les évaluations gardent leur intitulé.")) return; const sb = subOf(subj(a), b); sb.comps = sb.comps.filter(x => x.id !== c); S.evals.forEach(e => { if (e.compId === c) e.compId = ""; }); save(); return render(); }
   if (d.addsb) { const i = $("#add-sb-" + d.addsb), v = i.value.trim(); if (!v) return; subj(d.addsb).subs.push({ id: uid(), name: v }); save(); return render(); }
   if (d.ptab) { ptab = d.ptab; return render(); }
+  if (d.pgo) { const [a, b, c] = d.pgo.split("|"); ptab = "edit"; popen[a] = true; if (b) popen[b] = true; render(); return goTo("pe-" + (c || b || a)); }
+  if (d.jgo) { if (ev.target.closest("a")) return; jmode = "edit"; try { localStorage.setItem("classe-jmode", jmode); } catch (e) { } render(); return goTo("jb-" + d.jgo); }
   if (d.ptog) { popen[d.ptog] = !popen[d.ptog]; return render(); }
   if (d.pall) { const o = d.pall === "open"; S.subjects.forEach(sj => { popen[sj.id] = o; sj.subs.forEach(sb => popen[sb.id] = o); }); return render(); }
   if (d.psv) { const [cid, kind] = d.psv.split("|"), g = groupsOf().find(x => x.cs.some(c => c.id === cid)); if (!g) return;
@@ -1479,7 +1473,7 @@ document.addEventListener("change", ev => {
   }
 });
 document.addEventListener("input", ev => {
-  if (ev.target.dataset.jtitle !== undefined) { const v = ev.target.value; if (v.trim()) S.jtitles[jdate] = v; else delete S.jtitles[jdate]; save(); return; }
+  if (ev.target.dataset.jtitle !== undefined) { const v = ev.target.value; if (v.trim()) S.jtitles[jdate] = v; else { delete S.jtitles[jdate]; if (jTitle(jdate)) S.jtitles[jdate] = ""; } save(); return; }
   if (ev.target.dataset.jf) { const [id, k] = ev.target.dataset.jf.split("|"), r = jfind(id); if (r) { r.b[k] = ev.target.value; save(); } return; }
   const g = ev.target.dataset.g; if (g === undefined) return;
   const v = ev.target.value.replace(",", "."); if (v === "") delete draft.grades[g]; else draft.grades[g] = parseFloat(v);
