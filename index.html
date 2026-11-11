@@ -103,6 +103,11 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 #sheetIn .jday{break-after:page;page-break-after:always}#sheetIn .jday:last-child{break-after:auto;page-break-after:auto}#sheetIn .jdate{font-size:13px;font-weight:700;margin:2px 0 10px;color:#2a45b0}
 #sheetIn .jtab{width:100%;border-collapse:collapse;font-size:11px}#sheetIn .jtab td{padding:6px 7px;border-bottom:1px solid #d9dde8;vertical-align:top;font-size:11px}#sheetIn .jtab tr{break-inside:avoid}#sheetIn .jc{text-align:left}#sheetIn .jt{text-align:left;width:62px;font-weight:700;white-space:nowrap;color:#2a45b0}#sheetIn .jh{font-weight:800;font-size:12px}#sheetIn .jp{color:#777;font-size:10px}#sheetIn .jx{white-space:pre-wrap;margin-top:3px}#sheetIn .jl{margin-top:4px;font-size:10px}#sheetIn .jl a{color:#2a45b0}
 #sheetIn .jsep td{background:#eef1fb;text-align:center;font-weight:700;color:#2a45b0;padding:4px;font-size:10.5px}
+.jread{padding:6px 10px}.jread .jtab{width:100%;border-collapse:collapse}.jread .jtab td{padding:9px 8px;border-bottom:1px solid #e6e9f2;vertical-align:top;text-align:left}.jread .jt{width:78px;font-weight:800;color:#2a45b0;white-space:nowrap}.jread .jh{font-weight:800;font-size:1.02rem}.jread .jp{color:#777;font-size:.82rem}.jread .jx{white-space:pre-wrap;margin-top:4px}.jread .jl{margin-top:6px}.jread .jl a{color:#2a45b0;font-weight:600}.jread .jsep td{background:#eef1fb;text-align:center;font-weight:700;color:#2a45b0}
+.jev{margin-top:8px}.cev{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.82rem;font-weight:600}#sheetIn .jev{margin:0 0 8px;font-size:11px}
+.calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.calh{text-align:center;font-weight:700;font-size:.8rem;color:#667}.calc{min-height:78px;border:1.5px solid #e1e5ee;border-radius:9px;padding:3px 4px;cursor:pointer;background:#fff;overflow:hidden}.calc.out{opacity:.45}.calc.today{border-color:#3b5bdb}.calc.sel{box-shadow:0 0 0 2px #3b5bdb inset}.cnum{font-weight:800;font-size:.85rem}.cch{font-size:.68rem;border-radius:5px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmore{font-size:.68rem;color:#667}
+@media(max-width:640px){.calc{min-height:54px}.cch{font-size:.6rem}}
+:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jbig{font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
 .plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
@@ -223,7 +228,7 @@ function fix(d) {
   d.items = Object.assign({ sons: [], ecriture: [], vie: [], matos: [] }, d.items);
   ["counts", "term", "lent"].forEach(k => d[k] = d[k] || {});
   d.subjects = d.subjects || b.subjects; d.evals = d.evals || [];
-  d.abounds = d.abounds || {}; d.journal = d.journal || {}; d.jdaily = d.jdaily || []; d.jskip = d.jskip || {}; if (!Array.isArray(d.schoolDays) || !d.schoolDays.length) d.schoolDays = [1, 2, 3, 4, 5]; jMigrate(d); d.fields = d.fields || b.fields; d.info = d.info || {};
+  d.abounds = d.abounds || {}; d.journal = d.journal || {};  if (!Array.isArray(d.schoolDays) || !d.schoolDays.length) d.schoolDays = [1, 2, 3, 4, 5]; jMigrate(d); Object.values(d.journal).forEach(a => a.forEach(x => { delete x.dailyOf; })); delete d.jdaily; delete d.jskip; d.cal = d.cal || []; d.jtitles = d.jtitles || {}; d.fields = d.fields || b.fields; d.info = d.info || {};
   return d;
 }
 let S = fix(load());
@@ -351,7 +356,7 @@ function classNotesTable(print) {
 }
 
 /* ===================== Interface ===================== */
-const PAGES = [["prog", "🧭 Progressions"], ["journal", "📓 Cahier journal"], ["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
+const PAGES = [["prog", "🧭 Progressions"], ["journal", "📓 Cahier journal"], ["cal", "📅 Calendrier"], ["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
 let page = localStorage.getItem(LS_PAGE) || "vie"; if (page === "ecriture") page = "sons"; if (!PAGES.some(p => p[0] === page)) page = "vie";
 let sel = {};            // élève sélectionné par module
 let showTable = {};      // vue classe (tableau) par module
@@ -373,6 +378,7 @@ function render() {
   else if (page === "fiches") m.innerHTML = viewFiches();
   else if (page === "prog") m.innerHTML = viewProg();
   else if (page === "journal") m.innerHTML = viewJournal();
+  else if (page === "cal") m.innerHTML = viewCal();
   else m.innerHTML = viewSettings();
 }
 
@@ -566,6 +572,91 @@ function progSheet() {
   return `<h1>${v.title}</h1><div style="color:#777;margin-bottom:6px">${new Date().toLocaleDateString("fr-FR")}${v.nolegend ? "" : " · " + legend}</div>${v.body}`;
 }
 
+/* ===================== Calendrier de classe ===================== */
+let calMonth = today().slice(0, 7), calSel = today(), calEdit = null;
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+function viewCal() {
+  const [Y, M] = calMonth.split("-").map(Number), first = new Date(Y, M - 1, 1), start = dAdd(isoD(first), -((first.getDay() + 6) % 7));
+  const cells = []; for (let k = 0; k < 42; k++) cells.push(dAdd(start, k)); const last = Math.ceil(((new Date(Y, M, 0)).getDate() + (first.getDay() + 6) % 7) / 7) * 7;
+  const grid = cells.slice(0, last).map(d => {
+    const E = calOn(d), inM = d.slice(0, 7) === calMonth, off = E.find(e => e.cat === "vacances" || e.cat === "ferie");
+    return `<div class="calc ${inM ? "" : "out"} ${d === today() ? "today" : ""} ${d === calSel ? "sel" : ""}" data-cday="${d}" style="${off ? "background:" + catOf(off.cat)[2] : ""}"><div class="cnum">${+d.slice(8)}</div>${E.slice(0, 3).map(e => `<div class="cch" style="background:${catOf(e.cat)[2]}">${esc(evTitle(e))}</div>`).join("")}${E.length > 3 ? `<div class="cmore">+${E.length - 3}</div>` : ""}</div>`; }).join("");
+  const sel = calOn(calSel), ed = calEdit && (S.cal || []).find(e => e.id === calEdit), v = ed || { date: calSel, end: "", time: "", title: "", cat: "autre", note: "" };
+  const upcoming = (() => { const seen = new Set(), out = []; for (let k = 0; k < 150 && out.length < 8; k++) { const d = dAdd(today(), k); calOn(d).forEach(e => { if (seen.has(e.id) || out.length >= 8) return; seen.add(e.id); out.push({ ...e, date: d }); }); } return out; })();
+  return `<div class="card"><div class="row"><button class="btn" data-cmv="-1">◀</button><h2 style="margin:0;text-transform:capitalize">${MOIS[M - 1]} ${Y}</h2><button class="btn" data-cmv="1">▶</button><button class="btn sm" data-cmv="0">Aujourd'hui</button><span class="sp"></span><button class="btn sm" data-act="exportMonthImg" title="Télécharge le mois affiché en image (PNG)">🖼️ Image du mois</button></div>
+    <div class="calg" style="margin-top:8px">${["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map(x => `<div class="calh">${x}</div>`).join("")}${grid}</div>
+    <div class="row" style="margin-top:8px">${CATS.map(c => `<span class="cev" style="background:${c[2]}">${c[1]}</span>`).join("")}</div></div>
+  <div class="card"><h2>${dLong(calSel)}</h2>${sel.length ? sel.map(e => `<div class="row" style="padding:4px 0;border-top:1px solid #eef0f5"><span class="cev" style="background:${catOf(e.cat)[2]}">${catOf(e.cat)[1]}</span><span class="sp"><b>${esc(e.time ? tFr(e.time) + " · " : "")}${esc(evTitle(e))}</b>${e.end && e.end !== e.date ? ` <small class="muted">(du ${frDate(e.date)} au ${frDate(e.end)})</small>` : ""}${e.note ? `<br><small class="muted">${esc(e.note)}</small>` : ""}</span>${e.virtual ? '<small class="muted">fiche élève</small>' : `<button class="btn sm" data-cedit="${e.id}">Modifier</button><button class="btn sm dan" data-cdel="${e.id}">✕</button>`}</div>`).join("") : '<p class="muted">Aucun événement ce jour-là.</p>'}</div>
+  <div class="card"><h2>${ed ? "Modifier l'événement" : "Ajouter un événement"}</h2>
+    <div class="row"><input type="text" id="ev-title" class="sp" placeholder="Titre (ex. Sortie à la ferme)" value="${esc(v.title)}"></div>
+    <div class="row" style="margin-top:6px"><label>du <input type="date" id="ev-date" value="${v.date}"></label><label>au (facultatif) <input type="date" id="ev-end" value="${v.end && v.end !== v.date ? v.end : ""}"></label><label>heure <input type="time" id="ev-time" value="${esc(v.time || "")}"></label>
+      <select id="ev-cat">${CATS.map(c => `<option value="${c[0]}" ${c[0] === v.cat ? "selected" : ""}>${c[1]}</option>`).join("")}</select></div>
+    <div class="row" style="margin-top:6px"><input type="text" id="ev-note" class="sp" placeholder="Note (lieu, détail…)" value="${esc(v.note || "")}"></div>
+    <div class="row" style="margin-top:8px"><button class="btn pri" data-cadd>${ed ? "Enregistrer" : "Ajouter"}</button>${ed ? '<button class="btn" data-ccancel>Annuler</button>' : ""}</div></div>
+  ${upcoming.length ? `<div class="card"><h2>À venir</h2>${upcoming.map(e => `<div class="row" style="padding:3px 0"><span class="cev" style="background:${catOf(e.cat)[2]}">${frDate(e.date)}${e.end && e.end !== e.date ? " → " + frDate(e.end) : ""}</span><span class="sp">${esc(evTitle(e))}</span></div>`).join("")}</div>` : ""}
+  <div class="card"><h2>📥 Import / export iCal</h2><p class="muted">Importe un fichier <b>.ics</b> (calendrier scolaire, agenda Google/Apple/Outlook…). Pour <b>mettre à jour</b> un calendrier, réimporte simplement la nouvelle version : l'appli ajoute les nouveautés, met à jour les événements modifiés et retire ceux qui ont disparu, après t'avoir montré le détail.</p>
+    <div class="row"><label class="btn pri" style="cursor:pointer">📥 Importer un fichier .ics<input type="file" accept=".ics,text/calendar" data-ics style="display:none"></label><button class="btn" data-act="exportICS">⬇️ Exporter le calendrier (.ics)</button></div>${(() => { const m = {}; S.cal.filter(e => e.uid).forEach(e => m[e.src || ""] = (m[e.src || ""] || 0) + 1); const k = Object.keys(m); return k.length ? `<div style="margin-top:10px"><b>Calendriers importés</b>${k.map(x => `<div class="row" style="padding:3px 0"><span class="sp">${esc(x || "Import précédent")} <small class="muted">(${m[x]} événements)</small></span><button class="btn sm dan" data-cimpdel="${esc(x)}">Retirer</button></div>`).join("")}</div>` : ""; })()}</div>`;
+}
+function exportMonthImg() {
+  const [Y, M] = calMonth.split("-").map(Number), first = new Date(Y, M - 1, 1), start = dAdd(isoD(first), -((first.getDay() + 6) % 7)), rows = Math.ceil((new Date(Y, M, 0).getDate() + (first.getDay() + 6) % 7) / 7);
+  const W = 1800, cw = W / 7, top = 130, hh = 44, chh = 220, H = top + hh + rows * chh + 70, c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
+  const F = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", fit = (t, w) => { if (g.measureText(t).width <= w) return t; while (t.length > 1 && g.measureText(t + "…").width > w) t = t.slice(0, -1); return t + "…"; };
+  const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+  g.fillStyle = "#fff"; g.fillRect(0, 0, W, H); g.fillStyle = "#1c2340"; g.font = "800 62px " + F; g.textBaseline = "alphabetic";
+  const tt = MOIS[M - 1][0].toUpperCase() + MOIS[M - 1].slice(1) + " " + Y; g.fillText(tt, 30, 88);
+  ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].forEach((n, i) => { g.fillStyle = "#eef1fb"; g.fillRect(i * cw, top, cw, hh); g.fillStyle = "#2a45b0"; g.font = "700 24px " + F; g.textAlign = "center"; g.fillText(n, i * cw + cw / 2, top + 31); });
+  g.textAlign = "left";
+  for (let r = 0; r < rows; r++) for (let k = 0; k < 7; k++) {
+    const d = dAdd(start, r * 7 + k), x = k * cw, y = top + hh + r * chh, inM = d.slice(0, 7) === calMonth, E = calOn(d), off = E.find(e => e.cat === "vacances" || e.cat === "ferie");
+    g.fillStyle = off && inM ? catOf(off.cat)[2] : inM ? "#fff" : "#f4f5f9"; g.fillRect(x, y, cw, chh); g.strokeStyle = "#cfd6e6"; g.lineWidth = 2; g.strokeRect(x, y, cw, chh);
+    g.fillStyle = inM ? (d === today() ? "#3b5bdb" : "#1c2340") : "#a7adbf"; g.font = "800 30px " + F; g.fillText(String(+d.slice(8)), x + 12, y + 40);
+    if (!inM) continue;
+    E.slice(0, 5).forEach((e, i) => { const yy = y + 56 + i * 32; g.fillStyle = catOf(e.cat)[2]; rr(x + 8, yy, cw - 16, 28, 7); g.fill(); g.strokeStyle = "rgba(0,0,0,.08)"; g.lineWidth = 1; g.stroke(); g.fillStyle = "#1c2340"; g.font = "600 20px " + F; g.fillText(fit((e.time ? tFr(e.time) + " " : "") + evTitle(e), cw - 32), x + 14, yy + 21); });
+    if (E.length > 5) { g.fillStyle = "#667"; g.font = "600 20px " + F; g.fillText("+" + (E.length - 5) + " autres", x + 12, y + chh - 10); }
+  }
+  let lx = 30; const ly = H - 24; g.font = "600 22px " + F; CATS.forEach(cc => { const w = g.measureText(cc[1]).width + 28; g.fillStyle = cc[2]; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = "#1c2340"; g.fillText(cc[1], lx + 14, ly); lx += w + 12; });
+  c.toBlob(async blob => {
+    const name = "calendrier-" + calMonth + ".png", file = new File([blob], name, { type: "image/png" });
+    if (navigator.canShare && /iPad|iPhone|Android/i.test(navigator.userAgent) && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }, "image/png");
+}
+const icsDate = v => { const m = String(v).match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/); if (!m) return null; if (m[7]) { const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5])); return { date: isoD(t), time: String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0") }; } return { date: `${m[1]}-${m[2]}-${m[3]}`, time: m[4] ? `${m[4]}:${m[5]}` : "" }; };
+const icsUnesc = x => String(x || "").replace(/\\n/gi, "\n").replace(/\\([,;\\])/g, "$1").trim();
+function parseICS(txt) {
+  const lines = txt.replace(/\r\n?/g, "\n").replace(/\n[ \t]/g, "").split("\n"), evs = []; let cur = null, calname = "";
+  lines.forEach(ln => {
+    if (!cur && /^X-WR-CALNAME[;:]/i.test(ln)) calname = icsUnesc(ln.slice(ln.indexOf(":") + 1));
+    if (ln.trim() === "BEGIN:VEVENT") cur = { ex: [] }; else if (ln.trim() === "END:VEVENT") { if (cur) evs.push(cur); cur = null; }
+    else if (cur) { const i = ln.indexOf(":"); if (i < 0) return; const [name, ...pr] = ln.slice(0, i).split(";"), val = ln.slice(i + 1), N = name.toUpperCase(); if (N === "EXDATE") val.split(",").forEach(x => { const d = icsDate(x.trim()); d && cur.ex.push(d.date); }); else cur[N] = { v: val, p: pr.join(";") }; }
+  });
+  const out = [], cat = t => /anniversaire|birthday/i.test(t) ? "anniv" : /vacances|cong[ée]s|toussaint|no[ëe]l|hiver|printemps|[ée]t[ée]/i.test(t) ? "vacances" : /f[ée]ri[ée]|armistice|ascension|pentec|p[âa]ques|1er mai|8 mai|14 juillet|assomption/i.test(t) ? "ferie" : "autre";
+  evs.forEach(e => {
+    const a = e.DTSTART && icsDate(e.DTSTART.v); if (!a) return; const allDay = !/T/.test(e.DTSTART.v), b = e.DTEND && icsDate(e.DTEND.v);
+    let end = b ? b.date : ""; if (allDay && end) end = dAdd(end, -1); if (end && end <= a.date) end = "";
+    const span = end ? Math.round((new Date(end + "T12:00:00") - new Date(a.date + "T12:00:00")) / 864e5) : 0;
+    const title = icsUnesc(e.SUMMARY && e.SUMMARY.v) || "(sans titre)", note = [icsUnesc(e.LOCATION && e.LOCATION.v), icsUnesc(e.DESCRIPTION && e.DESCRIPTION.v)].filter(Boolean).join(" — ").slice(0, 400), uid0 = (e.UID && e.UID.v) || (title + a.date);
+    let dates = [a.date];
+    const rr = e.RRULE && Object.fromEntries(e.RRULE.v.split(";").map(p => p.split("="))); // RRULE simple : DAILY / WEEKLY(+BYDAY) / MONTHLY / YEARLY
+    if (rr && rr.FREQ) {
+      const inter = +rr.INTERVAL || 1, cnt = +rr.COUNT || 0, until = rr.UNTIL ? (icsDate(rr.UNTIL) || {}).date : "", cap = dAdd(a.date, 366 * 3), lim = until && until < cap ? until : cap, W = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 }, by = rr.BYDAY ? rr.BYDAY.split(",").map(x => W[x.slice(-2)]).filter(x => x !== undefined) : [];
+      dates = []; const push = d => { if (d <= lim && (!cnt || dates.length < cnt) && dates.length < 500) { dates.push(d); return true; } return false; };
+      if (rr.FREQ === "WEEKLY" && by.length) { const wk0 = dAdd(a.date, -((new Date(a.date + "T12:00:00").getDay() + 6) % 7)); for (let w = 0; w < 160; w++) { for (const wd of [...by].sort((x, y) => (x || 7) - (y || 7))) { const d = dAdd(wk0, w * 7 * inter + ((wd + 6) % 7)); if (d >= a.date && !push(d)) { if (d > lim || (cnt && dates.length >= cnt)) { w = 999; break; } } } } }
+      else { let d = a.date, k = 0; while (k < 500) { if (!push(d)) break; const t = new Date(d + "T12:00:00"); if (rr.FREQ === "DAILY") t.setDate(t.getDate() + inter); else if (rr.FREQ === "WEEKLY") t.setDate(t.getDate() + 7 * inter); else if (rr.FREQ === "MONTHLY") t.setMonth(t.getMonth() + inter); else if (rr.FREQ === "YEARLY") t.setFullYear(t.getFullYear() + inter); else break; d = isoD(t); k++; } }
+    }
+    if (cat(title) === "anniv") dates = [a.date];   // les anniversaires se répètent déjà chaque année
+    dates.filter(d => !e.ex.includes(d)).forEach(d => out.push({ uid: uid0 + "|" + d, date: d, end: span ? dAdd(d, span) : "", time: allDay ? "" : a.time, title, note, cat: cat(title) }));
+  });
+  out.calname = calname; return out;
+}
+function icsEsc(x) { return String(x || "").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n"); }
+function exportICSText() {
+  const c = d => d.replace(/-/g, ""), L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Ma classe CE1//FR", "CALSCALE:GREGORIAN"];
+  (S.cal || []).forEach(e => { L.push("BEGIN:VEVENT", "UID:" + e.id + "@ma-classe", "DTSTAMP:" + c(today()) + "T000000");
+    if (e.time) { L.push("DTSTART:" + c(e.date) + "T" + e.time.replace(":", "") + "00"); } else { L.push("DTSTART;VALUE=DATE:" + c(e.date), "DTEND;VALUE=DATE:" + c(dAdd(e.end || e.date, 1))); }
+    L.push("SUMMARY:" + icsEsc(e.title)); if (e.cat === "anniv") L.push("RRULE:FREQ=YEARLY"); if (e.note) L.push("DESCRIPTION:" + icsEsc(e.note)); L.push("END:VEVENT"); });
+  L.push("END:VCALENDAR"); return L.join("\r\n");
+}
 /* ===================== Cahier journal ===================== */
 let jdate = today();
 const dAdd = (d, n) => { const t = new Date(d + "T12:00:00"); t.setDate(t.getDate() + n); return isoD(t); };
@@ -573,29 +664,13 @@ const dLong = d => { const t = new Date(d + "T12:00:00").toLocaleDateString("fr-
 const tAdd = (t, m) => { const x = String(t || "").match(/^(\d{1,2}):(\d{2})$/); if (!x) return ""; const v = Math.min(23 * 60 + 59, +x[1] * 60 + +x[2] + m); return String(Math.floor(v / 60)).padStart(2, "0") + ":" + String(v % 60).padStart(2, "0"); };
 const tFr = t => t ? t.replace(/^0/, "").replace(":", "h") : "";
 const jget = d => (S.journal || {})[d] || [];
-const jviews = d => { jEnsure(d); return jget(d).map(jview); };
-/* Blocs « quotidiens » : un modèle (S.jdaily : créneau, titre et matière par défaut) ; chaque jour (jours de classe, à partir de sa création)
-   reçoit sa PROPRE copie, modifiable librement sans toucher aux autres jours. */
-const tplOf = id => (S.jdaily || []).find(t => t.id === id);
-const jview = b => Object.assign({}, b, { daily: !!(b.dailyOf && tplOf(b.dailyOf)) });
-const TPL_KEYS = ["type", "from", "to", "label", "title", "subjectId", "subId", "compId"];
-const fromTpl = t => { const b = { id: uid(), dailyOf: t.id }; TPL_KEYS.forEach(k => { if (t[k] !== undefined) b[k] = t[k]; }); if (t.type !== "sep") { b.text = ""; b.links = []; } return b; };
-function jEnsure(d) {
-  const wd = new Date(d + "T12:00:00").getDay(); if (!S.schoolDays.includes(wd)) return;
-  let arr = (S.journal = S.journal || {})[d], ch = false; const skip = (S.jskip || {})[d] || [];
-  (S.jdaily || []).forEach(t => {
-    if (t.since > d || skip.includes(t.id)) return; arr = arr || (S.journal[d] = []);
-    if (arr.some(x => x.dailyOf === t.id)) return;
-    let k = arr.findIndex(x => t.from && x.from && x.from > t.from); if (k < 0) k = arr.length;
-    arr.splice(k, 0, fromTpl(t)); ch = true;
-  });
-  if (ch) save();
-}
+const jviews = d => jget(d);
+const jview = b => b;
 function jfind(id) { for (const d in (S.journal || {})) { const i = S.journal[d].findIndex(x => x.id === id); if (i >= 0) { const raw = S.journal[d][i]; return { arr: S.journal[d], i, raw, b: raw, d }; } } return null; }
 const jpath = b => { const sj = subj(b.subjectId), sb = subOf(sj, b.subId), cp = compOf(sb, b.compId); return [sj, sb, cp].filter(Boolean).map(x => x.name).join(" › "); };
 const jtime = b => b.from || b.to ? `${tFr(b.from)}${b.to ? " – " + tFr(b.to) : ""}` : "";
 function jblock(b, i, n) {
-  const mv = `<button class="chip ${b.daily ? "on" : ""}" style="padding:4px 9px" data-jdaily="${b.id}" title="${b.daily ? "Bloc quotidien (jours de classe) : cliquer pour ne plus le répéter" : "Répéter ce bloc chaque jour de classe (chaque jour garde sa propre copie, modifiable)"}">🔁${b.daily ? " Quotidien" : ""}</button>${b.daily ? `<button class="btn sm" data-jtpl="${b.id}" title="Les prochains jours reprendront ce créneau, ce titre et cette matière">↻ Modèle</button>` : ""}<button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
+  const mv = `<button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
   const times = `<div class="jtime"><label>de<input type="time" data-jt="${b.id}|from" value="${esc(b.from || "")}"></label><label>à<input type="time" data-jt="${b.id}|to" value="${esc(b.to || "")}"></label></div>`;
   if (b.type === "sep") return `<div class="jsepb">${times}<input type="text" class="sp" data-jf="${b.id}|label" value="${esc(b.label || "")}" placeholder="Récréation, pause déjeuner…" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>`;
   const sj = subj(b.subjectId), sb = subOf(sj, b.subId);
@@ -609,26 +684,44 @@ function jblock(b, i, n) {
     <textarea data-jf="${b.id}|text" rows="4" placeholder="Déroulé, consignes, matériel, différenciation…" style="width:100%;margin-top:6px">${esc(b.text || "")}</textarea>
     <div class="row" style="margin-top:6px">${links}<button class="chip" style="padding:4px 9px" data-jlink="${b.id}">🔗 Ajouter un lien</button></div></div></div>`;
 }
+let jmode = (() => { try { return localStorage.getItem("classe-jmode") || "edit"; } catch (e) { return "edit"; } })(), jsrc = "", jwt = false;
+const CATS = [["sortie", "🚌 Sortie", "#d9f2e6"], ["reunion", "👥 Réunion", "#e3e9ff"], ["eval", "📝 Évaluation", "#fff1cc"], ["vacances", "🏖️ Vacances", "#ffe0e0"], ["ferie", "🎌 Férié", "#fde2f3"], ["anniv", "🎂 Anniversaire", "#ffe9c7"], ["autre", "📌 Autre", "#eceff4"]];
+const catOf = k => CATS.find(c => c[0] === k) || CATS[CATS.length - 1];
+const evTitle = e => (e.cat === "anniv" && !/🎂/.test(e.title) ? "🎂 " : "") + e.title;
+const calOn = d => {   // événements du jour : agenda + anniversaires (annuels) des événements « Anniversaire » et des fiches élèves
+  const md = d.slice(5), E = (S.cal || []).filter(e => e.cat === "anniv" && !e.end ? e.date.slice(5) === md && d >= e.date : e.date <= d && d <= (e.end || e.date));
+  S.students.forEach(s => { if (s.birth && s.birth.slice(5) === md && d >= s.birth) E.push({ id: "b-" + s.id, virtual: true, date: d, cat: "anniv", title: "🎂 " + s.name + (+d.slice(0, 4) - +s.birth.slice(0, 4) > 0 ? " (" + (+d.slice(0, 4) - +s.birth.slice(0, 4)) + " ans)" : "") }); });
+  return E.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+};
+const jEvents = d => { const E = calOn(d); return E.length ? `<div class="jev">📅 ${E.map(e => `<span class="cev" style="background:${catOf(e.cat)[2]}">${esc(e.time ? tFr(e.time) + " " : "")}${esc(evTitle(e))}</span>`).join(" ")}</div>` : ""; };
+const jPrevDays = () => Object.keys(S.journal || {}).filter(d => d < jdate && (S.journal[d] || []).length).sort().reverse().slice(0, 40);
+const jTitle = d => ((S.jtitles || {})[d] || "").trim();
+const jTitleHtml = d => jTitle(d) ? `<div class="jbig">${esc(jTitle(d))}</div>` : "";
+function jTable(d) {
+  return `<table class="jtab"><tbody>${jget(d).map(b => {
+    if (b.type === "sep") return `<tr class="jsep"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
+    const p = jpath(b), head = b.title ? `<div class="jh">${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh">${esc(p)}</div>` : "";
+    return `<tr><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table>`;
+}
 function viewJournal() {
   const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)), days = [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => S.schoolDays.includes(new Date(d + "T12:00:00").getDay()) || jget(d).length);
   if (!days.includes(jdate)) days.push(jdate);
   const names = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
   const chips = days.sort().map(d => { const t = new Date(d + "T12:00:00"); return `<button class="chip ${d === jdate ? "on" : ""}" data-jday="${d}">${names[t.getDay()]} ${t.getDate()}${jget(d).length ? " •" : ""}</button>`; }).join("");
-  const L = jviews(jdate);
-  return `<div class="card"><div class="row"><button class="btn" data-jnav="-1" title="Jour précédent">◀</button><input type="date" data-jdate value="${jdate}" style="font-size:1.05rem;font-weight:700;padding:8px"><button class="btn" data-jnav="1" title="Jour suivant">▶</button><button class="btn sm" data-jnav="0">Aujourd'hui</button><span class="sp"></span></div>
-    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div><div class="chips">${chips}</div></div>
-    ${L.map((b, i) => jblock(b, i, L.length)).join("") || `<div class="card muted">Aucun bloc pour cette journée. Ajoute le premier ci-dessous.</div>`}
-    <div class="card"><div class="row"><button class="btn pri" data-jadd="bloc">+ Bloc</button><button class="btn" data-jadd="sep|Récréation">☕ + Récréation</button><button class="btn" data-jadd="sep|Pause déjeuner">🍽️ + Pause déjeuner</button><button class="btn" data-jadd="sep|">➖ + Séparateur</button><span class="sp"></span><button class="btn sm" data-jsort title="Range les blocs par heure de début">⏱️ Trier par horaire</button></div>
-    <div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button><button class="btn" data-act="exportJournal">⬇️ Exporter (texte)</button><button class="btn" data-act="copyJournal">📋 Copier le texte</button></div></div>`;
+  const L = jget(jdate), prev = jPrevDays(), src = prev.includes(jsrc) ? jsrc : prev[0] || "";
+  const head = `<div class="card"><div class="row"><button class="btn" data-jnav="-1" title="Jour précédent">◀</button><input type="date" data-jdate value="${jdate}" style="font-size:1.05rem;font-weight:700;padding:8px"><button class="btn" data-jnav="1" title="Jour suivant">▶</button><button class="btn sm" data-jnav="0">Aujourd'hui</button><span class="sp"></span>${`<div class="row" style="gap:6px">${[["read", "👁️ Lecture"], ["edit", "✏️ Édition"]].map(([k, l]) => `<button class="chip ${jmode === k ? "on" : ""}" style="padding:8px 14px;font-weight:700" data-jmode="${k}">${l}</button>`).join("")}</div>`}</div>
+    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div>${jmode === "edit" ? `<input type="text" data-jtitle value="${esc((S.jtitles || {})[jdate] || "")}" placeholder="✍️ Titre de la journée (facultatif) — affiché en grand en lecture et à l'impression" style="width:100%;margin-bottom:8px;font-family:var(--cursive);font-size:1.15rem">` : ""}<div class="chips">${chips}</div>${jEvents(jdate)}${jmode === "read" ? `<div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="printJournalDay" title="Imprimer / PDF la journée">🖨️ Journée</button><button class="btn sm" data-act="printJournalWeek" title="Imprimer la semaine">🖨️ Semaine</button><button class="btn sm" data-act="exportJournal" title="Exporter en texte">⬇️ Texte</button><button class="btn sm" data-act="copyJournal" title="Copier le texte">📋 Copier</button></div>` : ""}</div>`;
+  const out = `<div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button><button class="btn" data-act="exportJournal">⬇️ Exporter (texte)</button><button class="btn" data-act="copyJournal">📋 Copier le texte</button></div>`;
+  if (jmode === "read") return head + (L.length || jTitle(jdate) ? `<div class="card jread">${jTitleHtml(jdate)}${jTable(jdate)}</div>` : `<div class="card muted">Rien de prévu pour cette journée. Passe en <b>✏️ Édition</b> pour la remplir${prev.length ? " ou copier une journée précédente" : ""}.</div>`) + "";
+  const copy = prev.length ? `<div class="card"><div class="row"><b>📋 Copier la configuration d'une autre journée</b><select data-jsrc class="sp">${prev.map(d => `<option value="${d}" ${d === src ? "selected" : ""}>${dLong(d)} (${jget(d).length} bloc${jget(d).length > 1 ? "s" : ""})</option>`).join("")}</select><label><input type="checkbox" data-jwt ${jwt ? "checked" : ""}> avec textes et liens</label><button class="btn" data-jcopy>Copier ici</button></div><div class="muted" style="margin-top:4px">Reprend les créneaux, titres et matières (et séparateurs) ; tu modifies ensuite ce que tu veux. Par défaut : la dernière journée remplie.</div></div>` : "";
+  return head + (L.length ? "" : copy) + (L.map((b, i) => jblock(b, i, L.length)).join("") || `<div class="card muted">Aucun bloc pour cette journée. Ajoute le premier ci-dessous${prev.length ? " ou copie une journée précédente" : ""}.</div>`) + (L.length ? copy : "") +
+    `<div class="card"><div class="row"><button class="btn pri" data-jadd="bloc">+ Bloc</button><button class="btn" data-jadd="sep|Récréation">☕ + Récréation</button><button class="btn" data-jadd="sep|Pause déjeuner">🍽️ + Pause déjeuner</button><button class="btn" data-jadd="sep|">➖ + Séparateur</button><span class="sp"></span><button class="btn sm" data-jsort title="Range les blocs par heure de début">⏱️ Trier par horaire</button></div>${out}</div>`;
 }
 function journalSheet(days) {
-  return days.map(d => { const L = jviews(d); return `<section class="jday"><h1>Cahier journal</h1><div class="jdate">${esc(dLong(d))}</div><table class="jtab"><tbody>${L.map(b => {
-    if (b.type === "sep") return `<tr class="jsep"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
-    const p = jpath(b), head = b.title ? `<div class="jh">${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh">${esc(p)}</div>` : "";
-    return `<tr><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(l.url)}">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table></section>`; }).join("");
+  return days.map(d => `<section class="jday"><h1>Cahier journal</h1><div class="jdate">${esc(dLong(d))}</div>${calOn(d).length ? `<div class="jev">📅 ${esc(calOn(d).map(e => (e.time ? tFr(e.time) + " " : "") + evTitle(e)).join(" · "))}</div>` : ""}${jTitleHtml(d)}${jTable(d)}</section>`).join("");
 }
 function journalText(d) {
-  const L = jviews(d); let t = `Cahier journal — ${dLong(d)}\n`;
+  const L = jviews(d); let t = `Cahier journal — ${dLong(d)}\n${jTitle(d) ? jTitle(d) + "\n" : ""}`;
   L.forEach(b => {
     if (b.type === "sep") { t += `\n— ${[jtime(b), b.label].filter(Boolean).join(" · ")} —\n`; return; }
     const p = jpath(b); t += `\n${jtime(b)}${jtime(b) ? "  " : ""}${[b.title, p].filter(Boolean).join(" — ")}\n`;
@@ -935,7 +1028,7 @@ window.addEventListener("beforeprint", buildSheet);
 
 /* ---------- Paramètres ---------- */
 function viewSettings() {
-  const studs = [...S.students].sort(byName).map(s => `<div class="row" style="padding:3px 0"><input type="text" value="${esc(s.name)}" data-rn="${s.id}" class="sp"><label class="muted" style="white-space:nowrap" title="Cet élève garde ses notes et son bilan, mais ne compte pas dans les moyennes de la classe"><input type="checkbox" data-excl="${s.id}" ${s.excl ? "checked" : ""}> hors moyenne</label><button class="btn sm dan" data-ds="${s.id}">✕</button></div>`).join("");
+  const studs = [...S.students].sort(byName).map(s => `<div class="row" style="padding:3px 0"><input type="text" value="${esc(s.name)}" data-rn="${s.id}" class="sp"><label class="muted" style="white-space:nowrap" title="Date de naissance : l'anniversaire apparaît chaque année dans le calendrier et le cahier journal">🎂 <input type="date" data-birth="${s.id}" value="${esc(s.birth || "")}"></label><label class="muted" style="white-space:nowrap" title="Cet élève garde ses notes et son bilan, mais ne compte pas dans les moyennes de la classe"><input type="checkbox" data-excl="${s.id}" ${s.excl ? "checked" : ""}> hors moyenne</label><button class="btn sm dan" data-ds="${s.id}">✕</button></div>`).join("");
   const itemList = mod => S.items[mod].map(it => `<div class="row" style="padding:3px 0"><input type="text" value="${esc(it.name)}" data-ri="${mod}|${it.id}" class="sp">
       ${mod === "vie" ? `<select data-emc="${it.id}" title="Compte pour une note automatique EMC"><option value="">pas de note EMC</option><option value="consignes" ${it.emc === "consignes" ? "selected" : ""}>EMC · consignes</option><option value="regles" ${it.emc === "regles" ? "selected" : ""}>EMC · règles de vie</option></select>
       <label class="muted">poids <input type="number" min="0" step="0.5" value="${it.w ?? 1}" data-w="${it.id}" style="width:62px"></label>` : ""}
@@ -961,10 +1054,10 @@ function viewSettings() {
       <p class="muted">Vie de classe et matériel se comptent par semaine (« Fin de semaine » les archive dans le cumul) ; sons et écriture se cumulent sur tout le trimestre. Les analyses utilisent le cumul + la semaine en cours.</p>
       <div class="row" style="margin-top:8px"><button class="btn" data-act="newWeek">🧹 Fin de semaine</button><button class="btn" data-act="parents">🖨️ Bilan parents</button><button class="btn dan" data-act="newTerm">Nouveau trimestre…</button></div></div>
     <div class="card"><h2>📅 Jours de classe</h2>
-      <p class="muted">Les blocs « quotidiens » du cahier journal se répètent uniquement ces jours-là, et les flèches ◀ ▶ du cahier sautent les autres jours.</p>
+      <p class="muted">Les flèches ◀ ▶ du cahier journal sautent les autres jours, et la bande de la semaine n'affiche que ces jours-là.</p>
       <div class="chips">${[[1, "Lundi"], [2, "Mardi"], [3, "Mercredi"], [4, "Jeudi"], [5, "Vendredi"], [6, "Samedi"], [0, "Dimanche"]].map(([n, l]) => `<button class="chip ${S.schoolDays.includes(n) ? "on" : ""}" data-sday="${n}">${l}</button>`).join("")}</div></div>
     <div class="card"><h2>📓 Cahier journal : archiver / supprimer</h2>
-      <p class="muted">${Object.keys(S.journal).length} journée(s) enregistrée(s). À la fin du trimestre, exporte le cahier puis supprime les journées anciennes. Les blocs « quotidiens » (modèles) sont conservés.</p>
+      <p class="muted">${Object.keys(S.journal).length} journée(s) enregistrée(s). À la fin du trimestre, exporte le cahier puis supprime les journées anciennes.</p>
       <div class="row"><button class="btn" data-act="exportJournalAll">⬇️ Exporter tout le cahier (texte)</button></div>
       <div class="row" style="margin-top:8px"><label>Supprimer les journées <b>avant le</b> <input type="date" id="jpurge" value="${today()}"></label><button class="btn dan" data-act="purgeJournal">🗑️ Supprimer</button></div></div>
     <div class="card"><h2>🎯 Bornes des notes automatiques</h2>
@@ -1117,13 +1210,16 @@ const actions = {
   printProg() { if (ptab === "edit") return toast("Choisis « Par matière » ou « Par période »"); printMode = "prog"; buildSheet(); window.print(); },
   printJournalDay() { if (!jviews(jdate).length) return toast("Rien à imprimer pour cette journée"); jprintDays = [jdate]; printMode = "journal"; buildSheet(); window.print(); },
   printJournalWeek() { jprintDays = jWeek(); if (!jprintDays.length) return toast("Aucune journée remplie cette semaine"); printMode = "journal"; buildSheet(); window.print(); },
+  copyDay() { /* remplacé par data-jcopy */ },
+  exportMonthImg() { exportMonthImg(); },
+  exportICS() { if (!(S.cal || []).length) return toast("Le calendrier est vide"); download("calendrier-classe.ics", exportICSText(), "text/calendar"); },
   exportJournalAll() { const ds = Object.keys(S.journal).filter(d => (S.journal[d] || []).length).sort(); if (!ds.length) return toast("Le cahier journal est vide"); download("cahier-journal-complet-" + today() + ".txt", ds.map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain"); },
   purgeJournal() {
     const lim = ($("#jpurge") || {}).value; if (!/^\d{4}-\d{2}-\d{2}$/.test(lim || "")) return toast("Choisis une date");
     const ds = Object.keys(S.journal).filter(d => d < lim); if (!ds.length) return toast("Aucune journée avant cette date");
     if (!confirm(`Supprimer ${ds.length} journée(s) du cahier journal antérieure(s) au ${frDate(lim)} ?\n\nUne copie en texte est d'abord téléchargée. Les blocs quotidiens sont conservés.`)) return;
     download("cahier-journal-avant-suppression-" + today() + ".txt", ds.filter(d => (S.journal[d] || []).length).sort().map(journalText).join("\n" + "=".repeat(40) + "\n\n"), "text/plain");
-    ds.forEach(d => { delete S.journal[d]; delete (S.jskip || {})[d]; }); save(); render(); toast(ds.length + " journée(s) supprimée(s) ✓");
+    ds.forEach(d => { delete S.journal[d]; delete S.jtitles[d]; }); save(); render(); toast(ds.length + " journée(s) supprimée(s) ✓");
   },
   exportJournal() { if (!jviews(jdate).length) return toast("Rien à exporter pour cette journée"); download("cahier-journal-" + jdate + ".txt", journalText(jdate), "text/plain"); },
   copyJournal() { if (!jviews(jdate).length) return toast("Rien à copier pour cette journée"); try { navigator.clipboard.writeText(journalText(jdate)).then(() => toast("Texte copié ✓"), () => toast("Copie impossible : utilise l'export")); } catch (e) { toast("Copie impossible : utilise l'export"); } },
@@ -1185,7 +1281,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-jdaily],[data-jtpl],[data-sday]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1224,27 +1320,31 @@ document.addEventListener("click", ev => {
     save(); return render(); }
   if (d.jnav !== undefined) { if (d.jnav === "0") jdate = today(); else { const st = +d.jnav; let n = dAdd(jdate, st); for (let k = 0; k < 7 && !S.schoolDays.includes(new Date(n + "T12:00:00").getDay()); k++) n = dAdd(n, st); jdate = n; } return render(); }   // ◀ ▶ sautent les jours sans classe
   if (d.sday) { const w = +d.sday, a = S.schoolDays.includes(w) ? S.schoolDays.filter(x => x !== w) : [...S.schoolDays, w]; if (!a.length) return toast("Garde au moins un jour de classe"); S.schoolDays = a.sort((x, y) => (x || 7) - (y || 7)); save(); return render(); }
+  if (d.cmv !== undefined) { if (d.cmv === "0") { calMonth = today().slice(0, 7); calSel = today(); } else { const [Y, M] = calMonth.split("-").map(Number), t = new Date(Y, M - 1 + +d.cmv, 1); calMonth = isoD(t).slice(0, 7); } return render(); }
+  if (d.cday) { calSel = d.cday; calEdit = null; if (d.cday.slice(0, 7) !== calMonth) calMonth = d.cday.slice(0, 7); return render(); }
+  if (d.cedit) { calEdit = d.cedit; const e = S.cal.find(x => x.id === d.cedit); if (e) calSel = e.date; return render(); }
+  if (d.ccancel !== undefined) { calEdit = null; return render(); }
+  if (d.cdel) { const e = S.cal.find(x => x.id === d.cdel); if (!e || !confirm("Supprimer « " + e.title + " » ?")) return; S.cal = S.cal.filter(x => x.id !== d.cdel); calEdit = null; save(); return render(); }
+  if (d.cimpdel !== undefined) { const n = S.cal.filter(e => e.uid && (e.src || "") === d.cimpdel).length; if (!n || !confirm("Retirer les " + n + " événements du calendrier importé « " + (d.cimpdel || "import précédent") + " » ? (Ceux que tu as créés toi-même sont conservés.)")) return; S.cal = S.cal.filter(e => !(e.uid && (e.src || "") === d.cimpdel)); save(); return render(); }
+  if (d.cadd !== undefined) { const title = $("#ev-title").value.trim(), date = $("#ev-date").value, end = $("#ev-end").value; if (!title || !date) return toast("Titre et date obligatoires"); if (end && end < date) return toast("La date de fin précède la date de début");
+    const o = { title, date, end: end && end !== date ? end : "", time: $("#ev-time").value, cat: $("#ev-cat").value, note: $("#ev-note").value.trim() };
+    if (calEdit) Object.assign(S.cal.find(x => x.id === calEdit) || {}, o); else S.cal.push({ id: uid(), ...o });
+    calEdit = null; calSel = date; calMonth = date.slice(0, 7); save(); return render(); }
   if (d.jday) { jdate = d.jday; return render(); }
+  if (d.jmode) { jmode = d.jmode; try { localStorage.setItem("classe-jmode", jmode); } catch (e) { } return render(); }
+  if (d.jcopy !== undefined) {
+    const prev = jPrevDays(), src = prev.includes(jsrc) ? jsrc : prev[0]; if (!src) return toast("Aucune journée à copier");
+    if (jget(jdate).length && !confirm("Cette journée contient déjà des blocs. Les remplacer par la copie du " + frDate(src) + " ?")) return;
+    S.journal[jdate] = JSON.parse(JSON.stringify(S.journal[src])).map(b => { b.id = uid(); delete b.dailyOf; if (!jwt && b.type !== "sep") { b.text = ""; b.links = []; } return b; });
+    save(); render(); return toast("Journée copiée : modifie maintenant ce que tu veux ✓"); }
   if (d.jadd) {
-    jEnsure(jdate); const [kind, label] = d.jadd.split("|"), arr = ((S.journal = S.journal || {})[jdate] = S.journal[jdate] || []), last = arr.length ? jview(arr[arr.length - 1]).to || "" : "";
+    const [kind, label] = d.jadd.split("|"), arr = ((S.journal = S.journal || {})[jdate] = S.journal[jdate] || []), last = arr.length ? arr[arr.length - 1].to || "" : "";
     const from = last || (arr.length ? "" : "08:30"), dur = kind === "sep" ? (/d[ée]jeuner|midi/i.test(label) ? 90 : 15) : 45;
     const b = { id: uid(), type: kind === "sep" ? "sep" : "bloc", from, to: tAdd(from, dur) };
     if (kind === "sep") b.label = label || ""; else { b.title = ""; b.text = ""; b.links = []; }
     arr.push(b); save(); render(); setTimeout(() => { const els = document.querySelectorAll(kind === "sep" ? '[data-jf$="|label"]' : '[data-jf$="|title"]'); const e = els[els.length - 1]; e && e.scrollIntoView({ block: "center" }); e && e.focus(); }, 30); return; }
   if (d.jmv) { const [id, k] = d.jmv.split("|"), r = jfind(id); if (!r) return; const j = r.i + +k; if (j < 0 || j >= r.arr.length) return; [r.arr[r.i], r.arr[j]] = [r.arr[j], r.arr[r.i]]; save(); return render(); }
-  if (d.jdaily) { const r = jfind(d.jdaily); if (!r) return;
-    if (r.raw.dailyOf && tplOf(r.raw.dailyOf)) {   // arrêter la répétition : chaque jour garde sa copie telle quelle
-      if (!confirm("Ce bloc ne sera plus ajouté chaque jour. Les journées où il figure déjà le gardent telles quelles. Continuer ?")) return;
-      const id = r.raw.dailyOf; Object.values(S.journal).forEach(a => a.forEach(x => { if (x.dailyOf === id) delete x.dailyOf; }));
-      S.jdaily = S.jdaily.filter(x => x.id !== id); Object.keys(S.jskip).forEach(dd => S.jskip[dd] = S.jskip[dd].filter(x => x !== id));
-    } else {   // rendre quotidien : modèle = créneau + titre + matière de ce bloc
-      const t = { id: uid(), since: jdate }; TPL_KEYS.forEach(k => { if (r.raw[k] !== undefined) t[k] = r.raw[k]; }); S.jdaily.push(t); r.raw.dailyOf = t.id;
-      toast("Bloc ajouté chaque jour de classe, à partir de cette date 🔁");
-    }
-    save(); return render(); }
-  if (d.jtpl) { const r = jfind(d.jtpl), t = r && tplOf(r.raw.dailyOf); if (!t) return; TPL_KEYS.forEach(k => { if (r.raw[k] !== undefined) t[k] = r.raw[k]; else delete t[k]; }); save(); return toast("Modèle mis à jour : les prochains jours reprendront ce bloc ✓"); }
-  if (d.jdel) { const r = jfind(d.jdel); if (!r) return;
-    if (r.raw.dailyOf && tplOf(r.raw.dailyOf)) { if (!confirm("Retirer ce bloc quotidien de cette journée seulement ?\n(Pour l'arrêter partout, clique sur « 🔁 Quotidien ».)")) return; ((S.jskip = S.jskip || {})[r.d] = S.jskip[r.d] || []).push(r.raw.dailyOf); r.arr.splice(r.i, 1); save(); return render(); } if ((r.b.text || r.b.title || (r.b.links || []).length) && !confirm("Supprimer ce bloc ?")) return; r.arr.splice(r.i, 1); save(); return render(); }
+  if (d.jdel) { const r = jfind(d.jdel); if (!r) return; if ((r.b.text || r.b.title || (r.b.links || []).length) && !confirm("Supprimer ce bloc ?")) return; r.arr.splice(r.i, 1); save(); return render(); }
   if (d.jsort !== undefined) { const a = (S.journal || {})[jdate]; if (!a) return; const k = a.map((x, i) => [x, i]).sort((p, q) => (jview(p[0]).from || "99:99").localeCompare(jview(q[0]).from || "99:99") || p[1] - q[1]).map(x => x[0]); a.splice(0, a.length, ...k); save(); return render(); }
   if (d.jlink) { const r = jfind(d.jlink); if (!r) return; let u = prompt("Adresse du lien (http…) :", ""); if (u === null) return; u = u.trim(); if (!u) return;
     if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = "https://" + u; if (!/^https?:\/\//i.test(u)) return toast("Le lien doit commencer par http ou https");
@@ -1297,6 +1397,22 @@ document.addEventListener("change", ev => {
   const t = ev.target, d = t.dataset;
   if (d.pn) { const [kind, a, b, c] = d.pn.split("|"), v = t.value.trim(); if (v) { if (kind === "sj") subj(a).name = v; else if (kind === "sb") subOf(subj(a), b).name = v; else subOf(subj(a), b).comps.find(x => x.id === c).name = v; save(); } return render(); }
   if (d.jdate !== undefined && t.type === "date") { if (/^\d{4}-\d{2}-\d{2}$/.test(t.value)) { jdate = t.value; render(); } return; }
+  if (d.ics !== undefined && t.type === "file") { const fl = t.files && t.files[0]; if (!fl) return; const fname = fl.name; t.value = "";
+    fl.text().then(txt => {
+      const ev = parseICS(txt); if (!ev.length) return toast("Aucun événement trouvé dans ce fichier");
+      const src = (ev.calname || fname.replace(/\.[^.]+$/, "")).trim(), byUid = new Map(S.cal.filter(e => e.uid).map(e => [e.uid, e])), seen = new Set();
+      let add = 0, upd = 0; const todo = [];
+      ev.forEach(e => { seen.add(e.uid); const o = byUid.get(e.uid), n = { date: e.date, end: e.end, time: e.time, title: e.title, note: e.note };
+        if (!o) { add++; todo.push(() => { S.cal.push({ id: uid(), uid: e.uid, src, cat: e.cat, ...n }); }); }
+        else if (["date", "end", "time", "title", "note"].some(k => (o[k] || "") !== (n[k] || ""))) { upd++; todo.push(() => Object.assign(o, n, { src })); }
+        else if (!o.src) todo.push(() => { o.src = src; }); });
+      const gone = S.cal.filter(e => e.uid && e.src === src && !seen.has(e.uid));
+      if (!add && !upd && !gone.length) { todo.forEach(f => f()); save(); render(); return toast(`« ${src} » est déjà à jour ✓`); }
+      if (!confirm(`Calendrier « ${src} »\n\n• ${add} événement(s) ajouté(s)\n• ${upd} mis à jour\n• ${gone.length} supprimé(s) (absents du nouveau fichier)\n\nAppliquer ?`)) return;
+      todo.forEach(f => f()); const gs = new Set(gone.map(e => e.id)); S.cal = S.cal.filter(e => !gs.has(e.id)); save(); render(); toast("Calendrier mis à jour ✓");
+    }).catch(() => toast("Lecture du fichier impossible")); return; }
+  if (d.jsrc !== undefined && t.tagName === "SELECT") { jsrc = t.value; return; }
+  if (d.jwt !== undefined && t.type === "checkbox") { jwt = t.checked; return; }
   if (d.jt) { const [id, k] = d.jt.split("|"), r = jfind(id); if (r) { r.b[k] = t.value; save(); } return; }
   if (d.jsel) { const [id, k] = d.jsel.split("|"), r = jfind(id); if (!r) return; r.b[k] = t.value; if (k === "subjectId") { r.b.subId = ""; r.b.compId = ""; } if (k === "subId") r.b.compId = ""; save(); return render(); }
   if (d.ab) { const [k, w] = d.ab.split("|"), v = parseFloat(String(t.value).replace(",", ".")); S.abounds = S.abounds || {}; const o = S.abounds[k] = S.abounds[k] || {}; const prev = o[w]; if (Number.isFinite(v)) o[w] = Math.max(0, Math.min(10, v)); if ((o.min ?? 3) > (o.max ?? 10)) { toast("Le minimum doit rester ≤ au maximum"); if (prev === undefined) delete o[w]; else o[w] = prev; } save(); return render(); }
@@ -1304,6 +1420,7 @@ document.addEventListener("change", ev => {
   if (d.pf) { if (d.pf === "subj") pfSubj = t.value; else pfPer = t.value; return render(); }
   if (d.selfiche !== undefined) { ficheSel = t.value; return render(); }
   if (d.fi) { const [s, f] = d.fi.split("|"); ((S.info = S.info || {})[s] = S.info[s] || {})[f] = t.value; save(); if (t.type === "tel" || t.type === "email") render(); return; }
+  if (d.birth) { const st = stud(d.birth); if (st) { st.birth = t.value || undefined; save(); render(); } return; }
   if (d.excl) { stud(d.excl).excl = t.checked; save(); return render(); }
   if (d.fname) { const f = S.fields.find(x => x.id === d.fname), v = t.value.trim(); if (v) { f.name = v; save(); } return render(); }
   if (d.ftype) { S.fields.find(x => x.id === d.ftype).type = t.value; save(); return render(); }
@@ -1332,6 +1449,7 @@ document.addEventListener("change", ev => {
   }
 });
 document.addEventListener("input", ev => {
+  if (ev.target.dataset.jtitle !== undefined) { const v = ev.target.value; if (v.trim()) S.jtitles[jdate] = v; else delete S.jtitles[jdate]; save(); return; }
   if (ev.target.dataset.jf) { const [id, k] = ev.target.dataset.jf.split("|"), r = jfind(id); if (r) { r.b[k] = ev.target.value; save(); } return; }
   const g = ev.target.dataset.g; if (g === undefined) return;
   const v = ev.target.value.replace(",", "."); if (v === "") delete draft.grades[g]; else draft.grades[g] = parseFloat(v);
