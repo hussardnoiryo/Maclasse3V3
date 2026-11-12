@@ -14,12 +14,15 @@ body{background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:cal
 button,input,select,textarea{font:inherit;font-size:16px;color:inherit;touch-action:manipulation}
 html{-webkit-text-size-adjust:100%}
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
-#nav{position:sticky;top:0;z-index:10;display:flex;gap:6px;background:var(--card);padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(60,70,100,.08);overflow-x:auto}
+#fab{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20;border:0;border-radius:999px;padding:14px 20px;background:var(--blue);color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(40,60,140,.35);cursor:pointer}
+@media print{#fab{display:none}}
+.idx{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.idx button{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid transparent;border-radius:18px;background:#fff;padding:18px 8px;cursor:pointer;font-weight:700;color:var(--ink,#2b2f4a);box-shadow:0 2px 8px rgba(60,70,100,.1)}.idx button b{font-size:2.3rem;line-height:1}.idx button.on{background:var(--blue-l);border-color:var(--blue);color:#2a45b0}
+#nav{position:sticky;top:0;z-index:10;display:flex;gap:6px;justify-content:space-between;align-items:center;background:var(--card);padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(60,70,100,.08);overflow-x:auto}
 #nav button{flex:1 0 auto;border:2px solid transparent;border-radius:13px;background:#f1f4f9;color:var(--muted);font-weight:700;padding:9px 6px;cursor:pointer;line-height:1.15;white-space:nowrap}
 #nav button.on{background:var(--blue-l);color:#2a45b0;border-color:var(--blue)}
 #sync{flex:none;align-self:center;font-size:.75rem;color:var(--muted);padding:0 6px;white-space:nowrap}
 #sync.err{color:var(--r);font-weight:700}
-main{max-width:980px;margin:0 auto;padding:12px}
+main{max-width:980px;margin:0 auto;padding:12px 12px 90px}.ntt{font-weight:800;font-size:1.05rem}
 .card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(60,70,100,.08)}
 h2{font-size:1.15rem;margin-bottom:8px}h3{font-size:1rem;margin:4px 0 8px}
 .muted{color:var(--muted);font-size:.85rem}
@@ -157,6 +160,7 @@ pre.sql{background:#1e1e2e;color:#d6e0ff;border-radius:10px;padding:10px;font-si
 </head>
 <body>
 <div id="nav"></div>
+<button id="fab" data-go="home" aria-label="Index">☰ Index</button>
 <main id="main"></main>
 <div id="toast"></div>
 <div id="modal"><div id="mbox"></div></div>
@@ -366,7 +370,7 @@ function classNotesTable(print) {
 
 /* ===================== Interface ===================== */
 const PAGES = [["prog", "🧭 Progressions"], ["journal", "📓 Cahier journal"], ["cal", "📅 Calendrier"], ["todo", "✅ À faire"], ["vie", "🙂 Vie de classe"], ["matos", "📦 Matériel"], ["sons", "🔊✍️ Sons & écriture"], ["notes", "📒 Notes"], ["fiches", "👤 Fiches"], ["an", "🔎 Analyses"], ["set", "⚙️ Paramètres"]];
-let page = localStorage.getItem(LS_PAGE) || "vie"; if (page === "ecriture") page = "sons"; if (!PAGES.some(p => p[0] === page)) page = "vie";
+let page = localStorage.getItem(LS_PAGE) || "home"; if (page === "ecriture") page = "sons"; if (!PAGES.some(p => p[0] === page)) page = "home";
 let sel = {};            // élève sélectionné par module
 let showTable = {};      // vue classe (tableau) par module
 let ntab = "saisie", histF = "";
@@ -375,13 +379,20 @@ function freshDate() { if (!draft.editId && !draft.dateManual && draft.date !== 
 const saveDraft = () => { try { localStorage.setItem("classe-ce1-v2-draft", JSON.stringify(draft)); } catch (e) {} };
 let anSel = "class";
 
-function go(p) { page = p; try { localStorage.setItem(LS_PAGE, p); } catch (e) {} render(); window.scrollTo(0, 0); }
+function viewHome() {
+  return `<div class="card"><h2 style="margin:0 0 10px">Où veux-tu aller ?</h2><div class="idx">${PAGES.map(([k, l]) => { const i = l.indexOf(" "); return `<button data-go="${k}" class="${k === lastPage ? "on" : ""}"><b>${l.slice(0, i)}</b>${l.slice(i + 1)}</button>`; }).join("")}</div></div>`;
+}
+let lastPage = "";
+function go(p) {
+  if (p === "journal") jmode = "read"; if (p === "prog") { ptab = "per"; goPerDefault(); } if (p === "todo") tdOpen = {}; if (p === "vie" || p === "matos") delete cview[p];   // affichages par défaut à l'arrivée
+  if (p === "home") lastPage = page; page = p; try { localStorage.setItem(LS_PAGE, p); } catch (e) {} render(); window.scrollTo(0, 0); }
 function render() {
   invalidate();
-  $("#nav").innerHTML = PAGES.map(([k, l]) => `<button data-go="${k}" class="${k === page ? "on" : ""}">${l}</button>`).join("") + `<span id="sync"></span>`;
+  $("#nav").innerHTML = `<span class="ntt">${page === "home" ? "🏠 Ma classe CE1" : (PAGES.find(x => x[0] === page) || ["", ""])[1]}</span><span id="sync"></span>`; $("#fab").style.display = page === "home" ? "none" : "";
   paintSync();
   const m = $("#main");
-  if (["vie", "matos", "sons", "ecriture"].includes(page)) m.innerHTML = viewCounters(page);
+  if (page === "home") m.innerHTML = viewHome();
+  else if (["vie", "matos", "sons", "ecriture"].includes(page)) m.innerHTML = viewCounters(page);
   else if (page === "notes") m.innerHTML = viewNotes();
   else if (page === "an") m.innerHTML = viewAnalyses();
   else if (page === "fiches") m.innerHTML = viewFiches();
@@ -413,7 +424,7 @@ function viewCounters(p) {
   if (!S.students.length) return emptyStudents();
   const combo = p === "sons" || p === "ecriture";                       // une seule page : Écriture en haut, Sons dessous
   const mods = combo ? ["ecriture", "sons"] : [p];
-  const key = combo ? "se" : mods[0], view = cview[skey(p)] || "eleve", sorted = [...S.students].sort(byName);
+  const key = combo ? "se" : mods[0], view = cview[skey(p)] || (p === "vie" || p === "matos" ? "classe" : "eleve"), sorted = [...S.students].sort(byName);
   if (!sel[key] || !stud(sel[key])) sel[key] = sorted[0].id;
   const sid = sel[key];
   const TITLE = { vie: "🙂 Vie de classe", sons: "🔊 Sons", ecriture: "✍️ Écriture", matos: "📦 Matériel prêté" };
@@ -603,11 +614,12 @@ function progSheet() {
 let calMonth = today().slice(0, 7), calSel = today(), calEdit = null;
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 /* ===================== À faire ===================== */
+let tdOpen = {};   // listes dépliées pendant cette visite (repliées par défaut à chaque arrivée sur la page)
 function tdBlock(b, i, n) {
   const st = S.students, isS = b.type === "stud", got = isS ? st.filter(s => b.got && b.got[s.id]).length : 0, open = b.items ? b.items.filter(x => !x.done) : [], done = b.items ? b.items.filter(x => x.done) : [];
   const badge = isS ? `<span class="cev" style="background:${got === st.length && st.length ? "#dff5e6" : "#fff1cc"}">${got}/${st.length}</span>` : `<span class="cev" style="background:${open.length ? "#fff1cc" : "#dff5e6"}">${open.length ? open.length + " à faire" : "✓ tout est fait"}</span>`;
-  const head = `<div class="row"><button class="btn sm pfold ${b.open !== false ? "on" : ""}" data-tdfold="${b.id}" title="Replier / déplier">${b.open !== false ? "−" : "+"}</button><input type="text" class="sp tdtitle" data-tdtitle="${b.id}" value="${esc(b.title || "")}" placeholder="${isS ? "Ex. Autorisation de sortie rendue" : "Titre de la liste (ex. Avant la rentrée)"}">${badge}<button class="btn sm" data-tdmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">↑</button><button class="btn sm" data-tdmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">↓</button><button class="btn sm dan" data-tddel="${b.id}" title="Supprimer cette liste">✕</button></div>`;
-  if (b.open === false) return `<div class="card">${head}</div>`;
+  const head = `<div class="row"><button class="btn sm pfold ${tdOpen[b.id] ? "on" : ""}" data-tdfold="${b.id}" title="Replier / déplier">${tdOpen[b.id] ? "−" : "+"}</button><input type="text" class="sp tdtitle" data-tdtitle="${b.id}" value="${esc(b.title || "")}" placeholder="${isS ? "Ex. Autorisation de sortie rendue" : "Titre de la liste (ex. Avant la rentrée)"}">${badge}<button class="btn sm" data-tdmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">↑</button><button class="btn sm" data-tdmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">↓</button><button class="btn sm dan" data-tddel="${b.id}" title="Supprimer cette liste">✕</button></div>`;
+  if (!tdOpen[b.id]) return `<div class="card">${head}</div>`;
   let body;
   if (isS) {
     const show = b.miss ? st.filter(s => !(b.got && b.got[s.id])) : st;
@@ -652,28 +664,44 @@ function viewCal() {
   <div class="card"><h2>📥 Import / export iCal</h2><p class="muted">Importe un fichier <b>.ics</b> (calendrier scolaire, agenda Google/Apple/Outlook…). Pour <b>mettre à jour</b> un calendrier, réimporte simplement la nouvelle version : l'appli ajoute les nouveautés, met à jour les événements modifiés et retire ceux qui ont disparu, après t'avoir montré le détail.</p>
     <div class="row"><label class="btn pri" style="cursor:pointer">📥 Importer un fichier .ics<input type="file" accept=".ics,text/calendar" data-ics style="display:none"></label><button class="btn" data-act="exportICS">⬇️ Exporter le calendrier (.ics)</button></div>${(() => { const m = {}; S.cal.filter(e => e.uid).forEach(e => m[e.src || ""] = (m[e.src || ""] || 0) + 1); const k = Object.keys(m); return k.length ? `<div style="margin-top:10px"><b>Calendriers importés</b>${k.map(x => `<div class="row" style="padding:3px 0"><span class="sp">${esc(x || "Import précédent")} <small class="muted">(${m[x]} événements)</small></span><button class="btn sm dan" data-cimpdel="${esc(x)}">Retirer</button></div>`).join("")}</div>` : ""; })()}</div>`;
 }
-function monthCanvas(K = 1) {
+function monthCanvas(K = 1) {   // image du mois, style « cahier d'écolier » pour les enfants
   const [Y, M] = calMonth.split("-").map(Number), first = new Date(Y, M - 1, 1), start = dAdd(isoD(first), -((first.getDay() + 6) % 7)), rows = Math.ceil((new Date(Y, M, 0).getDate() + (first.getDay() + 6) % 7) / 7);
-  const W = 1800, cw = W / 7, top = 130, hh = 44, chh = 220, H = top + hh + rows * chh + 70, c = document.createElement("canvas"); c.width = W * K; c.height = H * K; const g = c.getContext("2d"); g.scale(K, K);
-  const F = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif", fit = (t, w) => { if (g.measureText(t).width <= w) return t; while (t.length > 1 && g.measureText(t + "…").width > w) t = t.slice(0, -1); return t + "…"; };
+  const W = 1800, mg = 24, gw = W - 2 * mg, cw = gw / 7, ban = 160, wy = ban + 26, wh = 54, gy = wy + wh + 14, chh = 214, H = gy + rows * chh + 96, td = today();
+  const c = document.createElement("canvas"); c.width = W * K; c.height = H * K; const g = c.getContext("2d"); g.scale(K, K);
+  const F = "'Chalkboard SE','Comic Sans MS','Comic Neue','Marker Felt','Arial Rounded MT Bold','Trebuchet MS',sans-serif", EM = "'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji'";
+  const fit = (t, w) => { if (g.measureText(t).width <= w) return t; while (t.length > 1 && g.measureText(t + "…").width > w) t = t.slice(0, -1); return t + "…"; };
   const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
-  g.fillStyle = "#fff"; g.fillRect(0, 0, W, H); g.fillStyle = "#1c2340"; g.font = "800 62px " + F; g.textBaseline = "alphabetic";
-  const tt = MOIS[M - 1][0].toUpperCase() + MOIS[M - 1].slice(1) + " " + Y; g.fillText(tt, 30, 88);
-  ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].forEach((n, i) => { g.fillStyle = "#eef1fb"; g.fillRect(i * cw, top, cw, hh); g.fillStyle = "#2a45b0"; g.font = "700 24px " + F; g.textAlign = "center"; g.fillText(n, i * cw + cw / 2, top + 31); });
-  g.textAlign = "left";
+  const COL = ["#ff6b6b", "#ff9f43", "#f7c531", "#4cc97a", "#3fa7f5", "#9b72f2", "#f56fa8"], SOFT = ["#ffe3e3", "#ffedd6", "#fff6cc", "#dcf7e6", "#dcefff", "#ece3ff", "#ffe0ee"];
+  const SEAS = ["❄️", "💝", "🌷", "🐣", "🌸", "☀️", "🏖️", "🌞", "🍎", "🎃", "🍁", "⛄"], se = SEAS[M - 1];
+  // fond : dégradé doux + petits ronds colorés
+  const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#fff8e1"); bg.addColorStop(1, "#e6f5ff"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 70; i++) { const px = (i * 997 + M * 131) % W, py = (i * 613 + M * 71) % H; g.fillStyle = COL[i % 7] + "26"; g.beginPath(); g.arc(px, py, 6 + (i % 4) * 4, 0, 7); g.fill(); }
+  // bandeau du titre
+  const gr = g.createLinearGradient(mg, 0, W - mg, 0); gr.addColorStop(0, "#ff8a5c"); gr.addColorStop(.35, "#ffc83d"); gr.addColorStop(.65, "#4cc97a"); gr.addColorStop(1, "#3fa7f5");
+  g.save(); g.shadowColor = "rgba(0,0,0,.18)"; g.shadowBlur = 14; g.shadowOffsetY = 6; g.fillStyle = gr; rr(mg, 16, gw, ban - 16, 44); g.fill(); g.restore();
+  g.textBaseline = "middle"; g.textAlign = "center"; g.font = "800 92px " + F; const tt = MOIS[M - 1][0].toUpperCase() + MOIS[M - 1].slice(1) + " " + Y;
+  g.lineJoin = "round"; g.lineWidth = 14; g.strokeStyle = "#5b3b99"; g.strokeText(tt, W / 2, ban / 2 + 12); g.fillStyle = "#fff"; g.fillText(tt, W / 2, ban / 2 + 12);
+  g.font = "84px " + EM; const half = g.measureText(tt).width / 2; [[W / 2 - half - 90, 0], [W / 2 + half + 90, 1]].forEach(([ex]) => g.fillText(se, ex, ban / 2 + 14)); g.fillText("✏️", mg + 90, ban / 2 + 14); g.fillText("📚", W - mg - 90, ban / 2 + 14);
+  g.font = "800 92px " + F;
+  // jours de la semaine
+  ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].forEach((n, i) => { g.fillStyle = COL[i]; rr(mg + i * cw + 4, wy, cw - 8, wh, 27); g.fill(); g.fillStyle = i === 2 ? "#5a4300" : "#fff"; g.font = "800 28px " + F; g.fillText(n, mg + i * cw + cw / 2, wy + wh / 2 + 2); });
+  g.textAlign = "left"; g.textBaseline = "alphabetic";
   for (let r = 0; r < rows; r++) for (let k = 0; k < 7; k++) {
-    const d = dAdd(start, r * 7 + k), x = k * cw, y = top + hh + r * chh, inM = d.slice(0, 7) === calMonth, E = calOn(d), off = E.find(e => e.cat === "vacances" || e.cat === "ferie");
-    g.fillStyle = off && inM ? catOf(off.cat)[2] : inM ? "#fff" : "#f4f5f9"; g.fillRect(x, y, cw, chh);
-    if (inM && d === today()) { g.fillStyle = "rgba(255,214,0,0.5)"; g.fillRect(x, y, cw, chh); }   // jour en cours : jaune à 50 %
-    g.strokeStyle = "#cfd6e6"; g.lineWidth = 2; g.strokeRect(x, y, cw, chh);
-    g.fillStyle = inM ? (d === today() ? "#3b5bdb" : "#1c2340") : "#a7adbf"; g.font = "800 30px " + F; g.fillText(String(+d.slice(8)), x + 12, y + 40);
-    if (!inM) continue;
-    E.slice(0, 5).forEach((e, i) => { const yy = y + 56 + i * 32; g.fillStyle = catOf(e.cat)[2]; rr(x + 8, yy, cw - 16, 28, 7); g.fill(); g.strokeStyle = "rgba(0,0,0,.08)"; g.lineWidth = 1; g.stroke(); g.fillStyle = "#1c2340"; g.font = "600 20px " + F; g.fillText(fit((e.time ? tFr(e.time) + " " : "") + evTitle(e), cw - 32), x + 14, yy + 21); });
-    if (E.length > 5) { g.fillStyle = "#667"; g.font = "600 20px " + F; g.fillText("+" + (E.length - 5) + " autres", x + 12, y + chh - 10); }
-    if (d < today()) { g.fillStyle = "rgba(105,110,125,0.38)"; g.fillRect(x + 1, y + 1, cw - 2, chh - 2); }   // jours déjà passés : grisés
+    const d = dAdd(start, r * 7 + k), x = mg + k * cw + 4, y = gy + r * chh + 4, w = cw - 8, h = chh - 8, inM = d.slice(0, 7) === calMonth, E = inM ? calOn(d) : [], off = E.find(e => e.cat === "vacances" || e.cat === "ferie");
+    if (!inM) { g.setLineDash([10, 8]); g.strokeStyle = "#c9d2e4"; g.lineWidth = 3; rr(x, y, w, h, 20); g.stroke(); g.setLineDash([]); g.fillStyle = "#b3bbd0"; g.font = "800 28px " + F; g.fillText(String(+d.slice(8)), x + 14, y + 38); continue; }
+    g.fillStyle = off ? catOf(off.cat)[2] : k >= 5 ? SOFT[k] : "#fff"; rr(x, y, w, h, 20); g.fill(); g.strokeStyle = COL[k]; g.lineWidth = 5; g.stroke();
+    if (d === td) { g.fillStyle = "rgba(255,214,0,0.5)"; rr(x, y, w, h, 20); g.fill(); }   // jour en cours : jaune à 50 %
+    g.fillStyle = COL[k]; g.beginPath(); g.arc(x + 34, y + 34, 25, 0, 7); g.fill(); g.fillStyle = k === 2 ? "#5a4300" : "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "800 30px " + F; g.fillText(String(+d.slice(8)), x + 34, y + 36); g.textAlign = "left"; g.textBaseline = "alphabetic";
+    if (d === td) { g.font = "40px " + EM; g.fillText("⭐", x + w - 56, y + 46); }
+    const show = E.length > 4 ? E.slice(0, 3) : E;
+    show.forEach((e, i) => { const yy = y + 66 + i * 36, ic = catOf(e.cat)[1].split(" ")[0], t0 = (e.time ? tFr(e.time) + " " : "") + evTitle(e), t1 = t0.startsWith(ic) ? t0 : ic + " " + t0; g.fillStyle = catOf(e.cat)[2]; rr(x + 8, yy, w - 16, 32, 16); g.fill(); g.strokeStyle = "rgba(0,0,0,.12)"; g.lineWidth = 2; g.stroke(); g.fillStyle = "#2b2f4a"; g.font = "700 21px " + F + "," + EM; g.fillText(fit(t1, w - 44), x + 18, yy + 23); });
+    if (E.length > 4) { g.fillStyle = "#6b5fa8"; g.font = "800 22px " + F; g.fillText("➕ " + (E.length - 3) + " autres", x + 16, y + 66 + 3 * 36 + 24); }
+    if (d < td) { g.save(); rr(x, y, w, h, 20); g.clip(); g.fillStyle = "rgba(105,110,125,0.38)"; g.fillRect(x, y, w, h); g.restore(); }   // jours déjà passés : grisés
   }
-  let lx = 30; const ly = H - 24; g.font = "600 22px " + F; CATS.forEach(cc => { const w = g.measureText(cc[1]).width + 28; g.fillStyle = cc[2]; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = "#1c2340"; g.fillText(cc[1], lx + 14, ly); lx += w + 12; });
-  [["Jour en cours", "rgba(255,214,0,0.5)"], ["Jours passés", "rgba(105,110,125,0.38)"]].forEach(([t, col]) => { const w = g.measureText(t).width + 28; g.fillStyle = "#fff"; rr(lx, ly - 26, w, 34, 9); g.fill(); g.fillStyle = col; rr(lx, ly - 26, w, 34, 9); g.fill(); g.strokeStyle = "#cfd6e6"; g.lineWidth = 1.5; g.stroke(); g.fillStyle = "#1c2340"; g.fillText(t, lx + 14, ly); lx += w + 12; });
+  // légende
+  let lx = mg + 6; const ly = H - 30; g.font = "700 24px " + F + "," + EM;
+  CATS.forEach(cc => { const w = g.measureText(cc[1]).width + 30; g.fillStyle = cc[2]; rr(lx, ly - 30, w, 42, 21); g.fill(); g.strokeStyle = "rgba(0,0,0,.12)"; g.lineWidth = 2; g.stroke(); g.fillStyle = "#2b2f4a"; g.fillText(cc[1], lx + 15, ly); lx += w + 12; });
+  [["⭐ Aujourd'hui", "rgba(255,214,0,0.5)"], ["Jours passés", "rgba(105,110,125,0.38)"]].forEach(([t, col]) => { const w = g.measureText(t).width + 30; g.fillStyle = "#fff"; rr(lx, ly - 30, w, 42, 21); g.fill(); g.fillStyle = col; rr(lx, ly - 30, w, 42, 21); g.fill(); g.strokeStyle = "#c9d2e4"; g.lineWidth = 2; g.stroke(); g.fillStyle = "#2b2f4a"; g.fillText(t, lx + 15, ly); lx += w + 12; });
   return c;
 }
 function exportMonthImg() {
@@ -1391,7 +1419,7 @@ const actions = {
 document.addEventListener("click", ev => {
   const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
   if (!t) return; const d = t.dataset;
-  if (d.go) { if (d.go === "journal") jmode = "read"; if (d.go === "prog") { ptab = "per"; goPerDefault(); } return go(d.go); }
+  if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
   if (d.nav) { const [m, k] = d.nav.split("|"), so = [...S.students].sort(byName), cur = m === "fiche" ? ficheSel : sel[m], i = so.findIndex(s => s.id === cur), nid = so[(i + (+k) + so.length) % so.length].id; if (m === "fiche") ficheSel = nid; else sel[m] = nid; return render(); }
   if (d.dec2) { ev.stopPropagation(); const [m, s, it] = d.dec2.split("|"); bump(s, m, it, -1); save(); return render(); }
@@ -1422,8 +1450,8 @@ document.addEventListener("click", ev => {
   if (d.ptab) { ptab = d.ptab; return render(); }
   if (d.tdadd || d.tdfold || d.tddel || d.tdmv || d.tdnewbtn || d.tdchk || d.tdx || d.tdclear || d.tdsd || d.tdst || d.tdall || d.tdmiss) {
     const T = S.todo, B = id => T.find(x => x.id === id);
-    if (d.tdadd) { const b = d.tdadd === "stud" ? { id: uid(), type: "stud", title: "", got: {}, open: true, miss: false } : { id: uid(), type: "list", title: "", items: [], open: true }; T.push(b); save(); render(); setTimeout(() => { const e = document.querySelector(`[data-tdtitle="${b.id}"]`); e && e.focus(); }, 30); return; }
-    if (d.tdfold) { const b = B(d.tdfold); b.open = b.open === false; }
+    if (d.tdadd) { const b = d.tdadd === "stud" ? { id: uid(), type: "stud", title: "", got: {}, open: true, miss: false } : { id: uid(), type: "list", title: "", items: [], open: true }; T.push(b); tdOpen[b.id] = true; save(); render(); setTimeout(() => { const e = document.querySelector(`[data-tdtitle="${b.id}"]`); e && e.focus(); }, 30); return; }
+    if (d.tdfold) { tdOpen[d.tdfold] = !tdOpen[d.tdfold]; }
     else if (d.tddel) { const b = B(d.tddel); if ((b.title || (b.items && b.items.length) || Object.keys(b.got || {}).length) && !confirm("Supprimer la liste « " + (b.title || "sans titre") + " » ?")) return; S.todo = T.filter(x => x !== b); }
     else if (d.tdmv) { const [id, dir] = d.tdmv.split("|"), i = T.findIndex(x => x.id === id), j = i + +dir; if (j < 0 || j >= T.length) return; [T[i], T[j]] = [T[j], T[i]]; }
     else if (d.tdnewbtn) { const b = B(d.tdnewbtn), inp = document.getElementById("tdn-" + b.id), t = inp.value.trim(); if (!t) return inp.focus(); b.items.push({ id: uid(), t, done: false }); save(); render(); setTimeout(() => { const e = document.getElementById("tdn-" + b.id); e && e.focus(); }, 30); return; }
