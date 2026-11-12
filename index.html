@@ -108,6 +108,8 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 #sheetIn .jsep td{background:#eef1fb;text-align:center;font-weight:700;color:#2a45b0;padding:4px;font-size:10.5px}
 .tdst{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border:1px solid #d5daea;border-radius:999px;background:#fff;margin:3px;cursor:pointer}.tdst.ok{background:#dff5e6;border-color:#9bd7ae}
 .tdst input,.tdrow input[type=checkbox]{flex:none;width:22px;height:22px;margin:0}.tdrow{padding:3px 0;border-top:1px solid #eef0f5}.tdtxt{border:0!important;background:transparent!important;box-shadow:none!important}.tdtitle{font-weight:800;font-size:1.1rem}.tdrow.dn .tdtxt{text-decoration:line-through;color:#8a90a5}
+.swc{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #c9d2e4;cursor:pointer;padding:0;font-size:.8rem;color:#8a90a5}.swc.on{box-shadow:0 0 0 3px #2a45b0}
+.jread .jtab tr.jnow td{background:#fff1a8}.jread .jtab tr.jnow td.jt{background:#ffd43b;font-weight:800}.jread .jtab tr.jnow td:first-child{box-shadow:inset 6px 0 0 #f08c00}
 .jins{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:-4px 0 12px}.jins .btn{opacity:.85}
 .jread{padding:6px 10px}.jread .jtab{width:100%;border-collapse:collapse}.jread .jtab td{padding:9px 8px;border-bottom:1px solid #e6e9f2;vertical-align:top;text-align:left}.jread .jt{width:78px;font-weight:800;color:#2a45b0;white-space:nowrap}.jread .jh{font-weight:800;font-size:1.02rem}.jread .jp{color:#777;font-size:.82rem}.jread .jx{white-space:pre-wrap;margin-top:4px}.jread .jl{margin-top:6px}.jread .jl a{color:#2a45b0;font-weight:600}.jread .jsep td{background:#eef1fb;text-align:center;font-weight:700;color:#2a45b0}
 .jev{margin-top:8px}.cev{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.82rem;font-weight:600}#sheetIn .jev{margin:0 0 8px;font-size:11px}
@@ -760,6 +762,14 @@ const jviews = d => jget(d);
 const jview = b => b;
 function jfind(id) { for (const d in (S.journal || {})) { const i = S.journal[d].findIndex(x => x.id === id); if (i >= 0) { const raw = S.journal[d][i]; return { arr: S.journal[d], i, raw, b: raw, d }; } } return null; }
 const jpath = b => { const sj = subj(b.subjectId), sb = subOf(sj, b.subId), cp = compOf(sb, b.compId); return [sj, sb, cp].filter(Boolean).map(x => x.name).join(" › "); };
+const JPAL = ["", "#d6336c", "#e8590c", "#c98a00", "#2f9e44", "#1c7ed6", "#7048e8", "#c92a2a"];
+let jLastNow = "";
+function jNowId(d) {   // bloc en cours à l'heure actuelle (aujourd'hui seulement)
+  if (d !== today()) return "";
+  const t = new Date(), now = String(t.getHours()).padStart(2, "0") + ":" + String(t.getMinutes()).padStart(2, "0"), L = jget(d);
+  for (let i = 0; i < L.length; i++) { const b = L[i]; if (!b.from) continue; let end = b.to; if (!end) { const nx = L.slice(i + 1).find(x => x.from); end = nx ? nx.from : ""; } if (b.from <= now && (!end || now < end)) return b.id; }
+  return "";
+}
 const jtime = b => b.from || b.to ? `${tFr(b.from)}${b.to ? " – " + tFr(b.to) : ""}` : "";
 function jblock(b, i, n) {
   const mv = `<button class="btn sm" data-jmv="${b.id}|-1" ${i === 0 ? "disabled" : ""} title="Monter">▲</button><button class="btn sm" data-jmv="${b.id}|1" ${i === n - 1 ? "disabled" : ""} title="Descendre">▼</button><button class="btn sm dan" data-jdel="${b.id}" title="Supprimer">✕</button>`;
@@ -769,7 +779,8 @@ function jblock(b, i, n) {
   const opt = (arr, cur) => `<option value="">—</option>` + arr.map(x => `<option value="${x.id}" ${x.id === cur ? "selected" : ""}>${esc(x.name)}</option>`).join("");
   const links = (b.links || []).map((l, k) => `<span class="jlk"><a href="${esc(fixUrl(l.url))}" target="_blank" rel="noopener">🔗 ${esc(l.label || l.url)}</a><button class="btn sm dan" data-jldel="${b.id}|${k}" title="Retirer ce lien">✕</button></span>`).join("");
   return `<div class="jb" id="jb-${b.id}">${times}<div class="jmain">
-    <div class="row"><input type="text" class="sp" data-jf="${b.id}|title" value="${esc(b.title || "")}" placeholder="Titre (ex. Lecture – Le loup et les 7 chevreaux)" style="font-weight:700"><span class="row" style="gap:4px">${mv}</span></div>
+    <div class="row"><input type="text" class="sp" data-jf="${b.id}|title" value="${esc(b.title || "")}" placeholder="Titre (ex. Lecture – Le loup et les 7 chevreaux)" style="font-weight:700${b.color ? ";color:" + b.color : ""}"><span class="row" style="gap:4px">${mv}</span></div>
+    <div class="row" style="margin-top:6px;gap:7px"><span class="muted">🎨 Couleur du titre</span>${JPAL.map(c => `<button class="swc ${(b.color || "") === c ? "on" : ""}" data-jcol="${b.id}|${c}" style="background:${c || "#fff"}" title="${c ? "Colorer le titre" : "Couleur par défaut"}">${c ? "" : "∅"}</button>`).join("")}</div>
     <div class="row" style="margin-top:6px"><select data-jsel="${b.id}|subjectId" class="sp" title="Matière (issue des Progressions)">${opt(S.subjects, b.subjectId)}</select>
       <select data-jsel="${b.id}|subId" class="sp" ${sj ? "" : "disabled"} title="Sous-matière">${opt(sj ? sj.subs : [], b.subId)}</select>
       <select data-jsel="${b.id}|compId" class="sp" ${sb ? "" : "disabled"} title="Compétence">${opt(sb ? (sb.comps || []) : [], b.compId)}</select></div>
@@ -799,11 +810,12 @@ const jEvents = d => { const E = calOn(d); return E.length ? `<div class="jev">�
 const jPrevDays = () => Object.keys(S.journal || {}).filter(d => d < jdate && (S.journal[d] || []).length).sort().reverse().slice(0, 40);
 const jTitle = d => { const T = S.jtitles || {}; if (d in T) return (T[d] || "").trim(); let best = ""; for (const k in T) if (k < d && k > best) best = k; return best ? (T[best] || "").trim() : ""; };   // titre propre au jour, sinon celui du jour précédent
 const jTitleHtml = d => jTitle(d) ? `<div class="jbig">${esc(jTitle(d))}</div>` : "";
-function jTable(d) {
+function jTable(d, live) {
+  const nowId = live ? jNowId(d) : ""; if (live) jLastNow = nowId;
   return `<table class="jtab"><tbody>${jget(d).map(b => {
-    if (b.type === "sep") return `<tr class="jsep" data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
-    const p = jpath(b), head = b.title ? `<div class="jh">${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh">${esc(p)}</div>` : "";
-    return `<tr data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(fixUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table>`;
+    if (b.type === "sep") return `<tr class="jsep ${b.id === nowId ? "jnow" : ""}" data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td colspan="2">${esc(jtime(b))}${jtime(b) && b.label ? " · " : ""}${esc(b.label || "")}</td></tr>`;
+    const p = jpath(b), cs = b.color ? ` style="color:${b.color}"` : "", head = b.title ? `<div class="jh"${cs}>${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh"${cs}>${esc(p)}</div>` : "";
+    return `<tr class="${b.id === nowId ? "jnow" : ""}" data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(fixUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table>`;
 }
 function viewJournal() {
   const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)), days = [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => S.schoolDays.includes(new Date(d + "T12:00:00").getDay()) || jget(d).length);
@@ -814,7 +826,7 @@ function viewJournal() {
   const head = `<div class="card"><div class="row"><button class="btn" data-jnav="-1" title="Jour précédent">◀</button><input type="date" data-jdate value="${jdate}" style="font-size:1.05rem;font-weight:700;padding:8px"><button class="btn" data-jnav="1" title="Jour suivant">▶</button><button class="btn sm" data-jnav="0">Aujourd'hui</button><span class="sp"></span>${`<div class="row" style="gap:6px">${[["read", "👁️ Lecture"], ["edit", "✏️ Édition"]].map(([k, l]) => `<button class="chip ${jmode === k ? "on" : ""}" style="padding:8px 14px;font-weight:700" data-jmode="${k}">${l}</button>`).join("")}</div>`}</div>
     <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div>${jmode === "edit" ? `<input type="text" data-jtitle value="${esc(jTitle(jdate))}" placeholder="✍️ Titre du cahier journal (facultatif) — conservé d'un jour à l'autre, modifiable à tout moment" style="width:100%;margin-bottom:8px;font-family:var(--cursive);font-size:1.15rem">` : ""}<div class="chips">${chips}</div>${jEvents(jdate)}${jmode === "read" ? `<div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="printJournalDay" title="Imprimer / PDF la journée">🖨️ Journée</button><button class="btn sm" data-act="printJournalWeek" title="Imprimer la semaine">🖨️ Semaine</button></div>` : ""}</div>`;
   const out = `<div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button></div>`;
-  if (jmode === "read") return head + (L.length || (S.jtitles || {})[jdate] ? `<div class="card jread">${jTitleHtml(jdate)}${jTable(jdate)}</div>` : `<div class="card muted">Rien de prévu pour cette journée. Passe en <b>✏️ Édition</b> pour la remplir${prev.length ? " ou copier une journée précédente" : ""}.</div>`) + "";
+  if (jmode === "read") return head + (L.length || (S.jtitles || {})[jdate] ? `<div class="card jread">${jTitleHtml(jdate)}${jTable(jdate, true)}</div>` : `<div class="card muted">Rien de prévu pour cette journée. Passe en <b>✏️ Édition</b> pour la remplir${prev.length ? " ou copier une journée précédente" : ""}.</div>`) + "";
   const copy = prev.length ? `<div class="card"><div class="row"><b>📋 Copier la configuration d'une autre journée</b><select data-jsrc class="sp">${prev.map(d => `<option value="${d}" ${d === src ? "selected" : ""}>${dLong(d)} (${jget(d).length} bloc${jget(d).length > 1 ? "s" : ""})</option>`).join("")}</select><label><input type="checkbox" data-jwt ${jwt ? "checked" : ""}> avec textes et liens</label><button class="btn" data-jcopy>Copier ici</button></div><div class="muted" style="margin-top:4px">Reprend les créneaux, titres et matières (et séparateurs) ; tu modifies ensuite ce que tu veux. Par défaut : la dernière journée remplie.</div></div>` : "";
   return head + (L.length ? "" : copy) + (L.map((b, i) => jblock(b, i, L.length) + `<div class="jins"><button class="btn sm pri" data-jadd="bloc||${b.id}" title="Ajouter un bloc juste après celui-ci">+ Bloc ici</button><button class="btn sm" data-jadd="sep|Récréation|${b.id}">☕ Récré</button><button class="btn sm" data-jadd="sep|Pause déjeuner|${b.id}">🍽️ Déjeuner</button><button class="btn sm" data-jadd="sep||${b.id}">➖ Séparateur</button></div>`).join("") || `<div class="card muted">Aucun bloc pour cette journée. Ajoute le premier ci-dessous${prev.length ? " ou copie une journée précédente" : ""}.</div>`) + (L.length ? copy : "") +
     `<div class="card"><div class="row">${L.length ? "" : `<button class="btn pri" data-jadd="bloc">+ Bloc</button><button class="btn" data-jadd="sep|Récréation">☕ + Récréation</button><button class="btn" data-jadd="sep|Pause déjeuner">🍽️ + Pause déjeuner</button><button class="btn" data-jadd="sep|">➖ + Séparateur</button>`}<span class="sp"></span><button class="btn sm" data-jsort title="Range les blocs par heure de début">⏱️ Trier par horaire</button></div>${out}</div>`;
@@ -1418,7 +1430,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-top],[data-gofiche],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-jcol],[data-top],[data-gofiche],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1466,6 +1478,7 @@ document.addEventListener("click", ev => {
   }
   if (d.gofiche) { ficheSel = d.gofiche; ficheTable = false; return go("fiches"); }
   if (d.top !== undefined) return window.scrollTo({ top: 0, behavior: "smooth" });
+  if (d.jcol) { const [id, col] = d.jcol.split("|"), r = jfind(id); if (r) { r.b.color = col; save(); render(); } return; }
   if (d.pgo) { const [a, b, c] = d.pgo.split("|"); ptab = "edit"; popen[a] = true; if (b) popen[b] = true; render(); return goTo("pe-" + (c || b || a)); }
   if (d.jgo) { if (ev.target.closest("a")) return; jmode = "edit"; try { localStorage.setItem("classe-jmode", jmode); } catch (e) { } render(); return goTo("jb-" + d.jgo); }
   if (d.ptog) { popen[d.ptog] = !popen[d.ptog]; return render(); }
@@ -1620,6 +1633,7 @@ document.addEventListener("input", ev => {
   const p = $("#gp-" + g); if (p) p.innerHTML = pill(on10(draft.grades[g], draft.max)); updDraftMean();
 });
 
+setInterval(() => { if (!document.hidden && page === "journal" && jmode === "read" && jNowId(jdate) !== jLastNow) render(); }, 30000);   // la surbrillance suit l'heure
 document.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target.dataset && ev.target.dataset.tdnew) { ev.preventDefault(); const b = document.querySelector(`[data-tdnewbtn="${ev.target.dataset.tdnew}"]`); b && b.click(); } });
 render(); updDraftMean();
 if (lockedNow()) showLock(); else if (cloudOn()) pull(false);
