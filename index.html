@@ -160,6 +160,7 @@ pre.sql{background:#1e1e2e;color:#d6e0ff;border-radius:10px;padding:10px;font-si
 <div id="modal"><div id="mbox"></div></div>
 <div id="sheet"><div id="sheetIn"></div></div>
 
+<script src="config.js" onerror="void 0"></script>
 <script>
 /* =====================================================================
    Ma classe CE1 — appli unique. Un seul jeu de données (S), un seul CSV,
@@ -438,8 +439,9 @@ function curPer() {   // période du moment : 1 + nombre de vacances déjà term
   const t = today(), r0 = rentree() + "-09-01", V = (S.cal || []).filter(e => !e.rec && e.cat === "vacances" && e.date >= r0).map(e => [e.date, e.end || e.date]).sort(), M = [];
   V.forEach(([x, y]) => { const l = M[M.length - 1]; if (l && x <= dAdd(l[1], 4)) { if (y > l[1]) l[1] = y; } else M.push([x, y]); });   // fusionne les vacances accolées
   let n = M.filter(v => v[1] < t).length;
-  if (!M.length) { const m = +t.slice(5, 7); n = m >= 11 ? 1 : m >= 9 ? 0 : m >= 5 ? 4 : m >= 3 ? 3 : m >= 1 ? 2 : 0; }
-  return "P" + (n + 1);
+  const md = t.slice(5), m = +t.slice(5, 7), fl = m >= 9 ? (md >= "11-03" ? 1 : 0) : md >= "05-11" ? 4 : md >= "03-09" ? 3 : md >= "01-05" ? 2 : 1;   // plancher d'après la date (limites prudentes, valables pour toutes les zones) si des vacances manquent au calendrier
+  const mo = m >= 11 ? 1 : m >= 9 ? 0 : m >= 5 ? 4 : m >= 3 ? 3 : 2;   // aucune vacances saisie : découpage par mois
+  return "P" + (Math.max(n, M.length ? fl : mo) + 1);
 }
 function goPerDefault() {
   const keys = new Set(); S.subjects.forEach(sj => sj.subs.forEach(sb => (sb.comps || []).forEach(c => periodsOf(c).forEach(p => keys.add(p)))));
@@ -545,7 +547,8 @@ function progSuivi() {
 function viewProg() {
   if (!pfInit) { pfInit = true; goPerDefault(); }
   const tabs = `<div class="chips">${[["edit", "✏️ Modifier"], ["mat", "📚 Par matière"], ["per", "🗓️ Par période"], ["suivi", "📈 Suivi annuel"]].map(([k, l]) => `<button class="chip ${ptab === k ? "on" : ""}" data-ptab="${k}">${l}</button>`).join("")}</div>`;
-  return tabs + (ptab === "edit" ? progEdit() : ptab === "mat" ? progViewCard(progMatiere()) : ptab === "suivi" ? progViewCard(progSuivi()) : progViewCard(progPeriode()));
+  const cp = curPer(), note = ptab === "per" ? `<div class="muted" style="margin:2px 0 6px">📍 Période du moment : <b>${cp}</b>${pfPer !== "all" && pfPer !== cp ? " — aucune compétence prévue en " + cp + ", affichage de " + pfPer : ""}</div>` : "";
+  return tabs + note + (ptab === "edit" ? progEdit() : ptab === "mat" ? progViewCard(progMatiere()) : ptab === "suivi" ? progViewCard(progSuivi()) : progViewCard(progPeriode()));
 }
 function progEdit() {
   const note = `<div class="card muted">Les matières, sous-matières et compétences sont les mêmes que dans <b>📒 Notes</b> et ⚙️ Paramètres : ce que tu ajoutes ici s'y retrouve tout de suite (et inversement). Une compétence passe en <b style="color:#b02a2a">rouge</b> quand elle est abordée, en <b style="color:#1d7a50">vert</b> quand elle est évaluée — automatiquement si une note lui est rattachée.</div>`;
@@ -1119,6 +1122,10 @@ function viewSettings() {
       <label>Clé « anon public »<br><input type="password" id="c-key" value="${esc(cfg.key || "")}" style="width:100%"></label>
       <label>Code secret de la classe<br><input type="text" id="c-code" value="${esc(cfg.code || "")}" placeholder="8 caractères minimum" style="width:100%"></label></div>
       <div class="row" style="margin-top:10px"><button class="btn pri" data-act="cfgSave">Enregistrer et synchroniser</button><button class="btn" data-act="pull">Récupérer depuis le cloud</button><button class="btn" data-act="cfgOff">Désactiver</button></div>
+      <h3 style="margin-top:14px">🔒 Mot de passe à la place des identifiants</h3>
+      <p class="muted">${window.CLASSE_LOCK ? "Un fichier <b>config.js</b> est présent : l'appli s'ouvre avec ton mot de passe, sans rien à saisir d'autre." : "Crée un fichier <b>config.js</b> qui contient URL, clé et code <b>chiffrés</b>. Une fois déposé à côté de index.html (sur GitHub), chaque appareil demande seulement ton mot de passe."}
+      Choisis un mot de passe long (10 caractères minimum, pas un mot courant) : le fichier est public sur GitHub, seul le mot de passe le protège. <b>Dépose config.js une seule fois</b> : les mises à jour d'index.html ne l'écrasent pas.</p>
+      <div class="row"><input type="password" id="lk-pw" placeholder="Nouveau mot de passe" autocomplete="new-password" style="min-width:12em"><button class="btn pri" data-act="lkCreate">Créer config.js</button>${window.CLASSE_LOCK ? '<button class="btn" data-act="lkNow">🔒 Verrouiller maintenant</button>' : ""}</div>
       <h3 style="margin-top:14px">Mise en place (une seule fois)</h3>${SETUP_HELP}</div>`;
 }
 const cfgStatus = () => cfg.url && cfg.key && cfg.code ? "Synchronisation activée." : "Pas de synchronisation : les données restent dans ce navigateur (pense à la sauvegarde JSON).";
@@ -1184,7 +1191,24 @@ async function rpc(fn, body) {
   if (!r.ok) throw new Error((await r.text()).slice(0, 160) || r.status);
   return r.json();
 }
-function saveCfg() { try { localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch (e) {} }
+function saveCfg() { try { localStorage.setItem(LS_CFG, JSON.stringify(window.CLASSE_LOCK && !cfg.remember ? { rev: cfg.rev } : cfg)); } catch (e) {} }   // verrouillé et appareil non mémorisé : on ne garde pas les identifiants
+/* ----- verrouillage par mot de passe : config.js contient URL + clé + code chiffrés (AES-GCM, clé dérivée du mot de passe par PBKDF2) ----- */
+const b64 = u => btoa(String.fromCharCode(...u)), unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+async function lkKey(pw, salt, it) { const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]); return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: it, hash: "SHA-256" }, km, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]); }
+async function lkEncrypt(pw, o) { const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), it = 300000, k = await lkKey(pw, salt, it); const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, new TextEncoder().encode(JSON.stringify(o)))); return "window.CLASSE_LOCK=" + JSON.stringify({ v: 1, it, salt: b64(salt), iv: b64(iv), data: b64(ct) }) + ";\n"; }
+async function lkDecrypt(pw) { const L = window.CLASSE_LOCK, k = await lkKey(pw, unb64(L.salt), L.it); return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(L.iv) }, k, unb64(L.data)))); }
+const lockedNow = () => !!window.CLASSE_LOCK && !(cfg.remember && cfg.code);
+function showLock() {
+  let el = $("#lock"); if (!el) { el = document.createElement("div"); el.id = "lock"; document.body.appendChild(el); }
+  el.style.cssText = "position:fixed;inset:0;z-index:99999;background:#eef1fb;display:flex;align-items:center;justify-content:center;padding:16px";
+  el.innerHTML = `<div style="background:#fff;border-radius:16px;padding:22px;max-width:340px;width:100%;box-shadow:0 8px 30px #0002;text-align:center"><div style="font-size:2.2rem">🔒</div><h2 style="margin:6px 0 12px">Ma classe CE1</h2><input type="password" id="lk-in" placeholder="Mot de passe" autocomplete="current-password" style="width:100%;font-size:1.1rem;padding:10px"><label style="display:block;margin:10px 0;font-size:.9rem"><input type="checkbox" id="lk-keep" checked> Rester connecté sur cet appareil</label><button class="btn pri" id="lk-go" style="width:100%">Ouvrir</button><div id="lk-err" style="color:#c0392b;margin-top:8px;min-height:1.2em"></div></div>`;
+  const go = async () => {
+    $("#lk-err").textContent = "";
+    try { if (!window.crypto || !crypto.subtle) throw new Error("nocrypto"); const o = await lkDecrypt($("#lk-in").value); cfg = { url: o.url, key: o.key, code: o.code, rev: cfg.rev || 0, remember: $("#lk-keep").checked }; saveCfg(); el.remove(); render(); pull(false); }
+    catch (e) { $("#lk-err").textContent = e.message === "nocrypto" ? "Ce navigateur ne permet pas le déverrouillage (ouvre la page en https)." : "Mot de passe incorrect."; }
+  };
+  $("#lk-go").onclick = go; $("#lk-in").onkeydown = e => { if (e.key === "Enter") go(); }; setTimeout(() => $("#lk-in").focus(), 50);
+}
 function schedulePush() { if (!cloudOn()) return; clearTimeout(pushTimer); setSync("⏳ à envoyer…"); pushTimer = setTimeout(() => push(false), 1500); }
 async function push(force) {
   if (!cloudOn()) return;
@@ -1314,7 +1338,7 @@ const actions = {
   import() { $("#imp").click(); },
   copySql() { (navigator.clipboard ? navigator.clipboard.writeText(SQL) : Promise.reject()).then(() => toast("Script copié ✓"), () => { const p = document.querySelector("pre.sql"); const r = document.createRange(); r.selectNodeContents(p); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Sélectionné : copie avec Ctrl+C"); }); },
   async cfgSave() {
-    cfg = { url: $("#c-url").value.trim(), key: $("#c-key").value.trim(), code: $("#c-code").value.trim(), rev: cfg.code === $("#c-code").value.trim() ? cfg.rev : 0 };
+    cfg = { url: $("#c-url").value.trim(), key: $("#c-key").value.trim(), code: $("#c-code").value.trim(), rev: cfg.code === $("#c-code").value.trim() ? cfg.rev : 0, remember: cfg.remember };
     if (!cfg.url || !cfg.key) return toast("URL et clé requises");
     if (cfg.code.length < 8) return toast("Le code doit faire 8 caractères minimum");
     saveCfg();
@@ -1327,6 +1351,13 @@ const actions = {
     render();
   },
   pull() { pull(true); },
+  async lkCreate() {
+    if (!cloudOn()) return toast("Renseigne d'abord URL, clé et code, puis « Enregistrer et synchroniser »");
+    const pw = $("#lk-pw").value; if (pw.length < 10) return toast("Mot de passe : 10 caractères minimum");
+    if (!window.crypto || !crypto.subtle) return toast("Ouvre la page en https pour créer le fichier");
+    download("config.js", await lkEncrypt(pw, { url: cfg.url, key: cfg.key, code: cfg.code }), "text/javascript"); $("#lk-pw").value = ""; toast("config.js créé ✓ — dépose-le à côté de index.html");
+  },
+  lkNow() { cfg = { rev: cfg.rev }; saveCfg(); showLock(); },
   cfgOff() { cfg = {}; saveCfg(); render(); toast("Synchronisation désactivée"); }
 };
 
@@ -1516,7 +1547,7 @@ document.addEventListener("input", ev => {
 });
 
 render(); updDraftMean();
-if (cloudOn()) pull(false);
+if (lockedNow()) showLock(); else if (cloudOn()) pull(false);
 </script>
 </body>
 </html>
