@@ -108,7 +108,7 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 .jev{margin-top:8px}.cev{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.82rem;font-weight:600}#sheetIn .jev{margin:0 0 8px;font-size:11px}
 .calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.calh{text-align:center;font-weight:700;font-size:.8rem;color:#667}.calc{min-height:78px;border:1.5px solid #e1e5ee;border-radius:9px;padding:3px 4px;cursor:pointer;background:#fff;overflow:hidden}.calc.out{opacity:.45}.calc.today{border-color:#3b5bdb}.calc.sel{box-shadow:0 0 0 2px #3b5bdb inset}.cnum{font-weight:800;font-size:.85rem}.cch{font-size:.68rem;border-radius:5px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmore{font-size:.68rem;color:#667}
 @media(max-width:640px){.calc{min-height:54px}.cch{font-size:.6rem}}
-:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jh1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;overflow:hidden}#sheetIn .jtt{font-family:var(--cursive);font-size:15px;font-weight:700;color:#2a45b0;overflow:hidden;text-overflow:ellipsis}#sheetIn .jbig{font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
+:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jh1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;overflow:hidden}#sheetIn .jtt{font-family:var(--cursive);font-size:26px;line-height:1.1;font-weight:700;color:#2a45b0;overflow:hidden;text-overflow:ellipsis}#sheetIn .jbig{font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
 .plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
@@ -433,7 +433,19 @@ function viewCounters(p) {
 /* ===================== Progressions =====================
    Même arbre que les notes : S.subjects[matière › sous-matière › compétence]. Ajouter ou renommer ici = visible dans Notes (et inversement).
    Par compétence : période (champ libre : P1, P2…), « abordée » (rouge), « évaluée » (vert, automatique si une note existe). */
-let ptab = "edit", popen = {}, pfSubj = "all", pfPer = "all";
+let ptab = "per", popen = {}, pfSubj = "all", pfPer = "all", pfInit = false;
+function curPer() {   // période du moment : 1 + nombre de vacances déjà terminées depuis la rentrée (d'après le calendrier) ; à défaut, d'après le mois
+  const t = today(), r0 = rentree() + "-09-01", V = (S.cal || []).filter(e => !e.rec && e.cat === "vacances" && e.date >= r0).map(e => [e.date, e.end || e.date]).sort(), M = [];
+  V.forEach(([x, y]) => { const l = M[M.length - 1]; if (l && x <= dAdd(l[1], 4)) { if (y > l[1]) l[1] = y; } else M.push([x, y]); });   // fusionne les vacances accolées
+  let n = M.filter(v => v[1] < t).length;
+  if (!M.length) { const m = +t.slice(5, 7); n = m >= 11 ? 1 : m >= 9 ? 0 : m >= 5 ? 4 : m >= 3 ? 3 : m >= 1 ? 2 : 0; }
+  return "P" + (n + 1);
+}
+function goPerDefault() {
+  const keys = new Set(); S.subjects.forEach(sj => sj.subs.forEach(sb => (sb.comps || []).forEach(c => periodsOf(c).forEach(p => keys.add(p)))));
+  let p = curPer(); while (!keys.has(p) && +p.slice(1) > 1) p = "P" + (+p.slice(1) - 1);
+  pfPer = keys.has(p) ? p : "all";
+}
 function goTo(id) { setTimeout(() => { const e = document.getElementById(id); if (!e) return; e.scrollIntoView({ block: "center", behavior: "smooth" }); e.classList.add("flash"); setTimeout(() => e.classList.remove("flash"), 1900); }, 30); }
 const goBtn = (a, b = "", c = "") => `<button class="goedit" data-pgo="${a}|${b}|${c}" title="Modifier dans l'onglet ✏️ Modifier">✏️</button>`;
 const compEvals = c => S.evals.filter(e => e.compId === c.id && Object.values(e.grades || {}).some(v => typeof v === "number"));
@@ -531,6 +543,7 @@ function progSuivi() {
   return { title: "Suivi annuel des compétences", filter: "", body: body || '<p class="muted">Aucun suivi activé. Dans « ✏️ Modifier », une compétence présente sur plusieurs périodes (ex. P1 P2 P3) a un bouton « 📈 Suivi annuel ».</p>', nolegend: true };
 }
 function viewProg() {
+  if (!pfInit) { pfInit = true; goPerDefault(); }
   const tabs = `<div class="chips">${[["edit", "✏️ Modifier"], ["mat", "📚 Par matière"], ["per", "🗓️ Par période"], ["suivi", "📈 Suivi annuel"]].map(([k, l]) => `<button class="chip ${ptab === k ? "on" : ""}" data-ptab="${k}">${l}</button>`).join("")}</div>`;
   return tabs + (ptab === "edit" ? progEdit() : ptab === "mat" ? progViewCard(progMatiere()) : ptab === "suivi" ? progViewCard(progSuivi()) : progViewCard(progPeriode()));
 }
@@ -705,7 +718,7 @@ function jblock(b, i, n) {
     <textarea data-jf="${b.id}|text" rows="4" placeholder="Déroulé, consignes, matériel, différenciation…" style="width:100%;margin-top:6px">${esc(b.text || "")}</textarea>
     <div class="row" style="margin-top:6px">${links}<button class="chip" style="padding:4px 9px" data-jlink="${b.id}">🔗 Ajouter un lien</button></div></div></div>`;
 }
-let jmode = (() => { try { return localStorage.getItem("classe-jmode") || "edit"; } catch (e) { return "edit"; } })(), jsrc = "", jwt = false;
+let jmode = "read", jsrc = "", jwt = false;
 const CATS = [["sortie", "🚌 Sortie", "#d9f2e6"], ["reunion", "👥 Réunion", "#e3e9ff"], ["eval", "📝 Évaluation", "#fff1cc"], ["vacances", "🏖️ Vacances", "#ffe0e0"], ["ferie", "🎌 Férié", "#fde2f3"], ["anniv", "🎂 Anniversaire", "#ffe9c7"], ["autre", "📌 Autre", "#eceff4"]];
 const catOf = k => CATS.find(c => c[0] === k) || CATS[CATS.length - 1];
 const evTitle = e => (e.cat === "anniv" && !/🎂/.test(e.title) ? "🎂 " : "") + e.title;
@@ -1321,7 +1334,7 @@ const actions = {
 document.addEventListener("click", ev => {
   const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo]");
   if (!t) return; const d = t.dataset;
-  if (d.go) return go(d.go);
+  if (d.go) { if (d.go === "journal") jmode = "read"; if (d.go === "prog") { ptab = "per"; goPerDefault(); } return go(d.go); }
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
   if (d.nav) { const [m, k] = d.nav.split("|"), so = [...S.students].sort(byName), cur = m === "fiche" ? ficheSel : sel[m], i = so.findIndex(s => s.id === cur), nid = so[(i + (+k) + so.length) % so.length].id; if (m === "fiche") ficheSel = nid; else sel[m] = nid; return render(); }
   if (d.dec2) { ev.stopPropagation(); const [m, s, it] = d.dec2.split("|"); bump(s, m, it, -1); save(); return render(); }
