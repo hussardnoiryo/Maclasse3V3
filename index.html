@@ -16,7 +16,7 @@ html{-webkit-text-size-adjust:100%}
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 #fab2{position:fixed;right:14px;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 62px);z-index:20;border:0;border-radius:999px;padding:14px 20px;background:#f08c00;color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(120,70,0,.35);cursor:pointer}
 @media print{#fab2{display:none!important}}
-#fab{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20;border:0;border-radius:999px;padding:14px 20px;background:var(--blue);color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(40,60,140,.35);cursor:pointer}
+#fab{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20;border-radius:999px;padding:14px 20px;background:#2b2d42;color:#fff;border:2px solid #fff;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.4);cursor:pointer}
 @media print{#fab{display:none}}
 .idx{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.idx button{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid transparent;border-radius:18px;background:#fff;padding:18px 8px;cursor:pointer;font-weight:700;color:var(--ink,#2b2f4a);box-shadow:0 2px 8px rgba(60,70,100,.1)}.idx button b{font-size:2.3rem;line-height:1}.idx button.on{background:var(--blue-l);border-color:var(--blue);color:#2a45b0}
 #nav{position:sticky;top:0;z-index:10;display:flex;gap:6px;justify-content:space-between;align-items:center;background:var(--card);padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(60,70,100,.08);overflow-x:auto}
@@ -390,7 +390,8 @@ function viewHome() {
 let lastPage = "";
 function go(p) {
   if (p === "journal") jmode = "read"; if (p === "prog") { ptab = "per"; goPerDefault(); } if (p === "todo") tdOpen = {}; if (p === "vie" || p === "matos") delete cview[p];   // affichages par défaut à l'arrivée
-  if (p === "home") lastPage = page; page = p; try { localStorage.setItem(LS_PAGE, p); } catch (e) {} render(); window.scrollTo(0, 0); }
+  if (p === "home") lastPage = page; page = p; try { localStorage.setItem(LS_PAGE, p); } catch (e) {} render(); window.scrollTo(0, 0); if (p === "journal") jScrollNow(); }
+function jScrollNow() { const r = document.querySelector("#main tr.jnow"); if (r) window.scrollTo({ top: Math.max(0, window.scrollY + r.getBoundingClientRect().top - 90), behavior: "instant" }); }   // ouvre le cahier journal en face du créneau en cours
 function render() {
   invalidate();
   $("#nav").innerHTML = `<span class="ntt" data-top title="Remonter en haut de la page">${page === "home" ? "🏠 Ma classe CE1" : (PAGES.find(x => x[0] === page) || ["", ""])[1]}</span><span id="sync"></span>`; $("#fab").style.display = page === "home" ? "none" : ""; if (ptab !== "edit") progRead = ptab; { const f2 = $("#fab2"), on = page === "journal" || page === "prog"; f2.style.display = on ? "" : "none"; if (on) f2.textContent = (page === "journal" ? jmode === "read" : ptab !== "edit") ? "✏️ Éditer" : "👁️ Lire"; }
@@ -1511,7 +1512,7 @@ document.addEventListener("click", ev => {
     if (kind === "suivi") { const v = !g.suivi; g.cs.forEach(c => { c.suivi = v; if (!v) c.suiviAn = false; }); }
     else { const v = !g.an; g.cs.forEach(c => { c.suiviAn = v; if (v) c.suivi = true; }); }
     save(); return render(); }
-  if (d.jnav !== undefined) { if (d.jnav === "0") jdate = today(); else { const st = +d.jnav; let n = dAdd(jdate, st); for (let k = 0; k < 7 && !S.schoolDays.includes(new Date(n + "T12:00:00").getDay()); k++) n = dAdd(n, st); jdate = n; } return render(); }   // ◀ ▶ sautent les jours sans classe
+  if (d.jnav !== undefined) { if (d.jnav === "0") jdate = today(); else { const st = +d.jnav; let n = dAdd(jdate, st); for (let k = 0; k < 7 && !S.schoolDays.includes(new Date(n + "T12:00:00").getDay()); k++) n = dAdd(n, st); jdate = n; } render(); return jdate === today() && jmode === "read" ? jScrollNow() : window.scrollTo(0, 0); }   // ◀ ▶ sautent les jours sans classe
   if (d.sday) { const w = +d.sday, a = S.schoolDays.includes(w) ? S.schoolDays.filter(x => x !== w) : [...S.schoolDays, w]; if (!a.length) return toast("Garde au moins un jour de classe"); S.schoolDays = a.sort((x, y) => (x || 7) - (y || 7)); save(); return render(); }
   if (d.cmv !== undefined) { if (d.cmv === "0") { calMonth = today().slice(0, 7); calSel = today(); } else { const [Y, M] = calMonth.split("-").map(Number), t = new Date(Y, M - 1 + +d.cmv, 1); calMonth = isoD(t).slice(0, 7); } return render(); }
   if (d.cday) { calSel = d.cday; calEdit = null; if (d.cday.slice(0, 7) !== calMonth) calMonth = d.cday.slice(0, 7); return render(); }
