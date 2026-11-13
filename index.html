@@ -14,6 +14,8 @@ body{background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:cal
 button,input,select,textarea{font:inherit;font-size:16px;color:inherit;touch-action:manipulation}
 html{-webkit-text-size-adjust:100%}
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+#fab2{position:fixed;right:14px;bottom:calc(max(14px,env(safe-area-inset-bottom)) + 62px);z-index:20;border:0;border-radius:999px;padding:14px 20px;background:#f08c00;color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(120,70,0,.35);cursor:pointer}
+@media print{#fab2{display:none!important}}
 #fab{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20;border:0;border-radius:999px;padding:14px 20px;background:var(--blue);color:#fff;font-weight:800;box-shadow:0 6px 18px rgba(40,60,140,.35);cursor:pointer}
 @media print{#fab{display:none}}
 .idx{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.idx button{display:flex;flex-direction:column;align-items:center;gap:6px;border:2px solid transparent;border-radius:18px;background:#fff;padding:18px 8px;cursor:pointer;font-weight:700;color:var(--ink,#2b2f4a);box-shadow:0 2px 8px rgba(60,70,100,.1)}.idx button b{font-size:2.3rem;line-height:1}.idx button.on{background:var(--blue-l);border-color:var(--blue);color:#2a45b0}
@@ -22,7 +24,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 #nav button.on{background:var(--blue-l);color:#2a45b0;border-color:var(--blue)}
 #sync{flex:none;align-self:center;font-size:.75rem;color:var(--muted);padding:0 6px;white-space:nowrap}
 #sync.err{color:var(--r);font-weight:700}
-main{max-width:980px;margin:0 auto;padding:12px 12px 90px}.ntt{font-weight:800;font-size:1.05rem;cursor:pointer;flex:1;padding:6px 0;-webkit-tap-highlight-color:transparent}.ntt::after{content:" ⌃";opacity:.35;font-size:.8em}
+main{max-width:980px;margin:0 auto;padding:12px 12px 150px}.ntt{font-weight:800;font-size:1.05rem;cursor:pointer;flex:1;padding:6px 0;-webkit-tap-highlight-color:transparent}.ntt::after{content:" ⌃";opacity:.35;font-size:.8em}
 .card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(60,70,100,.08)}
 h2{font-size:1.15rem;margin-bottom:8px}h3{font-size:1rem;margin:4px 0 8px}
 .muted{color:var(--muted);font-size:.85rem}
@@ -115,7 +117,7 @@ th{font-size:.78rem;color:var(--muted);vertical-align:bottom}
 .jev{margin-top:8px}.cev{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.82rem;font-weight:600}#sheetIn .jev{margin:0 0 8px;font-size:11px}
 .calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.calh{text-align:center;font-weight:700;font-size:.8rem;color:#667}.calc{min-height:78px;border:1.5px solid #e1e5ee;border-radius:9px;padding:3px 4px;cursor:pointer;background:#fff;overflow:hidden}.calc.out{opacity:.45}.calc.today{border-color:#3b5bdb}.calc.sel{box-shadow:0 0 0 2px #3b5bdb inset}.cnum{font-weight:800;font-size:.85rem}.cch{font-size:.68rem;border-radius:5px;padding:1px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmore{font-size:.68rem;color:#667}
 @media(max-width:640px){.calc{min-height:54px}.cch{font-size:.6rem}}
-:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jh1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;overflow:hidden}#sheetIn .jtt{font-family:var(--cursive);font-size:26px;line-height:1.1;font-weight:700;color:#2a45b0;overflow:hidden;text-overflow:ellipsis}#sheetIn .jbig{font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
+:root{--cursive:"Snell Roundhand","Segoe Script","Bradley Hand","Apple Chancery","Brush Script MT","Lucida Handwriting",cursive}.jbig{text-align:center;font-family:var(--cursive);font-size:2rem;font-weight:700;color:#2a45b0;line-height:1.25;margin:6px 8px 10px}#sheetIn .jh1{display:flex;align-items:baseline;gap:14px;white-space:nowrap;overflow:hidden}#sheetIn .jtt{font-family:var(--cursive);font-size:26px;line-height:1.1;font-weight:700;color:#2a45b0;overflow:hidden;text-overflow:ellipsis}#sheetIn .jbig{text-align:center;font-family:var(--cursive);font-size:26px;font-weight:700;color:#2a45b0;margin:4px 0 12px}
 .plk{text-decoration:none;font-weight:700;color:#3b5bdb}.pbts{display:flex;gap:6px;flex-wrap:wrap}.pgrp{display:inline-flex;gap:4px;align-items:center;padding:2px 5px;border-radius:9px;border:1px solid #e1e5ee;background:#fff}.pgrp.ab{background:#fde8e8;border-color:#e9a3a3}.pgrp.ev{background:#e3f5ec;border-color:#8cc9a8}.pgrp b{font-size:.8rem}
 .pcomp .pnm{min-width:11em;flex:1 1 11em}.pper{width:4.8em;text-align:center}
 .pst{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.78rem;font-weight:700;white-space:nowrap}.pno{background:#eef0f5;color:#666}.pab{background:#fde4e4;color:#b02a2a}.pev{background:#dff3e8;color:#1d7a50}
@@ -162,6 +164,7 @@ pre.sql{background:#1e1e2e;color:#d6e0ff;border-radius:10px;padding:10px;font-si
 </head>
 <body>
 <div id="nav"></div>
+<button id="fab2" data-fab2="1" aria-label="Lecture / édition" style="display:none"></button>
 <button id="fab" data-go="home" aria-label="Index">☰ Index</button>
 <main id="main"></main>
 <div id="toast"></div>
@@ -390,7 +393,7 @@ function go(p) {
   if (p === "home") lastPage = page; page = p; try { localStorage.setItem(LS_PAGE, p); } catch (e) {} render(); window.scrollTo(0, 0); }
 function render() {
   invalidate();
-  $("#nav").innerHTML = `<span class="ntt" data-top title="Remonter en haut de la page">${page === "home" ? "🏠 Ma classe CE1" : (PAGES.find(x => x[0] === page) || ["", ""])[1]}</span><span id="sync"></span>`; $("#fab").style.display = page === "home" ? "none" : "";
+  $("#nav").innerHTML = `<span class="ntt" data-top title="Remonter en haut de la page">${page === "home" ? "🏠 Ma classe CE1" : (PAGES.find(x => x[0] === page) || ["", ""])[1]}</span><span id="sync"></span>`; $("#fab").style.display = page === "home" ? "none" : ""; if (ptab !== "edit") progRead = ptab; { const f2 = $("#fab2"), on = page === "journal" || page === "prog"; f2.style.display = on ? "" : "none"; if (on) f2.textContent = (page === "journal" ? jmode === "read" : ptab !== "edit") ? "✏️ Éditer" : "👁️ Lire"; }
   paintSync();
   const m = $("#main");
   if (page === "home") m.innerHTML = viewHome();
@@ -450,7 +453,7 @@ function viewCounters(p) {
 /* ===================== Progressions =====================
    Même arbre que les notes : S.subjects[matière › sous-matière › compétence]. Ajouter ou renommer ici = visible dans Notes (et inversement).
    Par compétence : période (champ libre : P1, P2…), « abordée » (rouge), « évaluée » (vert, automatique si une note existe). */
-let ptab = "per", popen = {}, pfSubj = "all", pfPer = "all", pfInit = false;
+let progRead = "per", ptab = "per", popen = {}, pfSubj = "all", pfPer = "all", pfInit = false;
 function curPer() {   // période du moment : 1 + nombre de vacances déjà terminées depuis la rentrée (d'après le calendrier) ; à défaut, d'après le mois
   const t = today(), r0 = rentree() + "-09-01", V = (S.cal || []).filter(e => !e.rec && e.cat === "vacances" && e.date >= r0).map(e => [e.date, e.end || e.date]).sort(), M = [];
   V.forEach(([x, y]) => { const l = M[M.length - 1]; if (l && x <= dAdd(l[1], 4)) { if (y > l[1]) l[1] = y; } else M.push([x, y]); });   // fusionne les vacances accolées
@@ -635,6 +638,20 @@ function tdBlock(b, i, n) {
   }
   return `<div class="card">${head}${body}</div>`;
 }
+function anchorGet() {
+  const line = 64, sel = page === "journal" ? (jmode === "read" ? "tr[data-jgo]" : ".jb,.jsepb") : ptab === "edit" ? "[id^='pe-']" : "[data-pgo]", els = [...document.querySelectorAll("#main " + sel)];
+  const el = els.find(e => e.getBoundingClientRect().top >= line - 4) || [...els].reverse().find(e => e.getBoundingClientRect().bottom > line);
+  if (!el) return null;
+  const pgo = page === "prog" && ptab !== "edit" ? (el.dataset.pgo || "").split("|") : null, id = page === "journal" ? (jmode === "read" ? el.dataset.jgo : el.id.slice(3)) : ptab === "edit" ? el.id.slice(3) : pgo.filter(Boolean).pop();
+  return { id, off: el.getBoundingClientRect().top, pgo };
+}
+function anchorSet(an, fallbackY) {
+  let el = null;
+  if (an && an.id) { const all = [...document.querySelectorAll("#main " + (page === "journal" ? (jmode === "read" ? "tr[data-jgo]" : ".jb,.jsepb") : ptab === "edit" ? "[id^='pe-']" : "[data-pgo]"))];
+    el = all.find(e => page === "journal" ? (jmode === "read" ? e.dataset.jgo : e.id.slice(3)) === an.id : ptab === "edit" ? e.id === "pe-" + an.id : (e.dataset.pgo || "").split("|").includes(an.id)); }
+  const top = el ? window.scrollY + el.getBoundingClientRect().top - an.off : fallbackY;
+  window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+}
 function viewTodo() {
   const T = S.todo, bar = `<div class="card"><div class="row"><h2 style="margin:0">✅ À faire</h2><span class="sp"></span><button class="btn pri" data-tdadd="list">＋ Liste de tâches</button><button class="btn pri" data-tdadd="stud">＋ Liste d'élèves</button></div>
     <p class="muted" style="margin-top:6px"><b>Liste de tâches</b> : coche une tâche quand c'est fait, elle passe dans « les faits » (tu peux les vider ensuite). <b>Liste d'élèves</b> : tous tes élèves apparaissent, coche ceux qui ont rendu le papier, ou affiche seulement ceux qui manquent.</p></div>`;
@@ -809,7 +826,7 @@ const calOn = d => {   // événements du jour : agenda + anniversaires (annuels
 const jEvents = d => { const E = calOn(d); return E.length ? `<div class="jev">📅 ${E.map(e => `<span class="cev" style="background:${catOf(e.cat)[2]}">${esc(e.time ? tFr(e.time) + " " : "")}${esc(evTitle(e))}</span>`).join(" ")}</div>` : ""; };
 const jPrevDays = () => Object.keys(S.journal || {}).filter(d => d < jdate && (S.journal[d] || []).length).sort().reverse().slice(0, 40);
 const jTitle = d => { const T = S.jtitles || {}; if (d in T) return (T[d] || "").trim(); let best = ""; for (const k in T) if (k < d && k > best) best = k; return best ? (T[best] || "").trim() : ""; };   // titre propre au jour, sinon celui du jour précédent
-const jTitleHtml = d => jTitle(d) ? `<div class="jbig">${esc(jTitle(d))}</div>` : "";
+const jTitleHtml = d => jTitle(d) ? `<div class="jbig"${S.jtcol ? ` style="color:${S.jtcol}"` : ""}>${esc(jTitle(d))}</div>` : "";
 function jTable(d, live) {
   const nowId = live ? jNowId(d) : ""; if (live) jLastNow = nowId;
   return `<table class="jtab"><tbody>${jget(d).map(b => {
@@ -817,22 +834,83 @@ function jTable(d, live) {
     const p = jpath(b), cs = b.color ? ` style="color:${b.color}"` : "", head = b.title ? `<div class="jh"${cs}>${esc(b.title)}</div>${p ? `<div class="jp">${esc(p)}</div>` : ""}` : p ? `<div class="jh"${cs}>${esc(p)}</div>` : "";
     return `<tr class="${b.id === nowId ? "jnow" : ""}" data-jgo="${b.id}" title="Cliquer pour modifier ce bloc"><td class="jt">${esc(jtime(b)).replace(" – ", "<br>")}</td><td class="jc">${head}${b.text ? `<div class="jx">${esc(b.text)}</div>` : ""}${(b.links || []).length ? `<div class="jl">${b.links.map(l => `🔗 <a href="${esc(fixUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>`).join(" &nbsp; ")}</div>` : ""}</td></tr>`; }).join("")}</tbody></table>`;
 }
+/* ===== PDF du cahier journal avec liens cliquables (pdf-lib, chargé à la demande) : le PDF « Imprimer » de l'iPhone/iPad perd les liens ===== */
+let pdflibP = null;
+function loadPdfLib() {
+  if (window.PDFLib) return Promise.resolve(window.PDFLib);
+  if (!pdflibP) pdflibP = new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"; s.onload = () => res(window.PDFLib); s.onerror = () => { pdflibP = null; rej(new Error("cdn")); }; document.head.appendChild(s); });
+  return pdflibP;
+}
+const pdfTxt = t => String(t || "").replace(/[\t\r‍️]/g, " ").replace(/ {2,}/g, " ").trim();
+const pdfNeedImg = s => /[^\x20-\x7E\xA0-\xFFŒœ–—‘’“”…€\n]/.test(s);
+async function jpdfBuild(L, days) {
+  const doc = await L.PDFDocument.create(), F = { r: await doc.embedFont(L.StandardFonts.Helvetica), b: await doc.embedFont(L.StandardFonts.HelveticaBold), i: await doc.embedFont(L.StandardFonts.HelveticaBoldOblique) };
+  const PW = 595.28, PH = 841.89, M = 40, TX = M + 74, CW = PW - M - TX, rgb = h => { h = (h || "#222222").replace("#", ""); return L.rgb(parseInt(h.slice(0, 2), 16) / 255, parseInt(h.slice(2, 4), 16) / 255, parseInt(h.slice(4, 6), 16) / 255); };
+  const cv = document.createElement("canvas"), cx = cv.getContext("2d"), SC = 3, SANS = 'Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif', CURS = getComputedStyle(document.documentElement).getPropertyValue("--cursive") || "cursive";
+  const cfont = (f, size) => (f === "c" ? `700 ${size * SC}px ${CURS}` : `${f === "b" || f === "i" ? "700" : "400"} ${size * SC}px ${SANS}`);
+  const imgW = (t, f, size) => { cx.font = cfont(f, size); return cx.measureText(t).width / SC; };
+  const W = (t, f, size) => (f === "c" || pdfNeedImg(t)) ? imgW(t, f, size) : F[f].widthOfTextAtSize(t, size);
+  const imgCache = new Map();
+  let page, y;
+  const newPage = () => { page = doc.addPage([PW, PH]); y = M; };
+  const txt = async (t, x, top, size, f, color) => {
+    if (f !== "c" && !pdfNeedImg(t)) return page.drawText(t, { x, y: PH - top, size, font: F[f], color: rgb(color) });
+    const w = Math.ceil(imgW(t, f, size) + 2), h = Math.ceil(size * 1.5), k = t + "|" + f + size + color;
+    let im = imgCache.get(k);
+    if (!im) { cv.width = w * SC; cv.height = h * SC; cx.clearRect(0, 0, cv.width, cv.height); cx.font = cfont(f, size); cx.fillStyle = color || "#222222"; cx.textBaseline = "alphabetic"; cx.fillText(t, 0, size * 1.15 * SC); im = await doc.embedPng(cv.toDataURL("image/png")); imgCache.set(k, im); }
+    page.drawImage(im, { x, y: PH - top - size * 0.35, width: w, height: h });
+  };
+  const wrap = (t, f, size, w) => { const out = []; String(t).split("\n").forEach(par => { if (!par.trim()) return out.push(""); let line = ""; par.split(/\s+/).filter(Boolean).forEach(word => { while (W(word, f, size) > w) { let k = word.length; while (k > 1 && W(word.slice(0, k), f, size) > w) k--; if (line) { out.push(line); line = ""; } out.push(word.slice(0, k)); word = word.slice(k); } const t2 = line ? line + " " + word : word; if (W(t2, f, size) <= w) line = t2; else { out.push(line); line = word; } }); out.push(line); }); return out; };
+  const addLink = (x, top, w, h, url) => { const c = doc.context, ref = c.register(c.obj({ Type: "Annot", Subtype: "Link", Rect: [x, PH - top - 2, x + w, PH - top + h - 2], Border: [0, 0, 0], A: { Type: "Action", S: "URI", URI: L.PDFString.of(url) } })); page.node.addAnnot(ref); };
+  const head = async d => {
+    await txt("Cahier journal", M, y + 18, 20, "b", "#222222");
+    await txt(pdfTxt(dLong(d)), M, y + 36, 11.5, "r", "#555555"); y += 48;
+    let tt = pdfTxt(jTitle(d));
+    if (tt) { let sz = 28; while (sz > 12 && W(tt, "c", sz) > PW - 2 * M) sz -= 1; await txt(tt, (PW - W(tt, "c", sz)) / 2, y + sz, sz, "c", S.jtcol || "#2a45b0"); y += sz * 1.4 + 4; }
+    y += 6;
+  };
+  for (const d of days) {
+    newPage(); await head(d);
+    for (const b of jget(d)) {
+      if (b.type === "sep") { if (y + 24 > PH - M) newPage(); page.drawRectangle({ x: M, y: PH - y - 20, width: PW - 2 * M, height: 20, color: rgb("#eef1fb") }); const t = pdfTxt([jtime(b), b.label].filter(Boolean).join("  ·  ")); await txt(t, (PW - W(t, "b", 10)) / 2, y + 14, 10, "b", "#2a45b0"); y += 26; continue; }
+      const p = pdfTxt(jpath(b)), title = pdfTxt(b.title || p) || " ", sub = b.title ? p : "", tl = wrap(title, "b", 11.5, CW), xl = b.text ? wrap(pdfTxt(b.text), "r", 10, CW) : [], lks = (b.links || []).map(l => ({ label: pdfTxt(l.label || l.url) || "lien", url: fixUrl(l.url) }));
+      const hh = tl.length * 14 + (sub ? 12 : 0) + xl.length * 12.5 + lks.length * 14 + 8;
+      if (y + Math.min(hh, 200) > PH - M) newPage();
+      let yy = y + 11;
+      const tms = pdfTxt(jtime(b)).split(" – "); for (let k = 0; k < tms.length; k++) await txt(tms[k], M, y + 11 + k * 11, 10, "b", "#2a45b0");
+      for (const l of tl) { if (yy > PH - M) { newPage(); yy = y + 11; } await txt(l, TX, yy, 11.5, "b", b.color); yy += 14; }
+      if (sub) { await txt(sub, TX, yy - 1, 9, "r", "#777777"); yy += 12; }
+      for (const l of xl) { if (yy > PH - M) { newPage(); yy = y + 11; } if (l) await txt(l, TX, yy, 10, "r", "#222222"); yy += 12.5; }
+      for (const l of lks) { if (yy > PH - M) { newPage(); yy = y + 11; } const lab = W(l.label, "r", 10) > CW ? l.label.slice(0, 60) + "…" : l.label, w = W(lab, "r", 10); await txt(lab, TX, yy, 10, "r", "#1c5fd4"); page.drawLine({ start: { x: TX, y: PH - yy - 1.5 }, end: { x: TX + w, y: PH - yy - 1.5 }, thickness: 0.6, color: rgb("#1c5fd4") }); addLink(TX, yy - 9, w, 12, l.url); yy += 14; }
+      y = Math.max(yy, y + 24) + 3; page.drawLine({ start: { x: M, y: PH - y + 4 }, end: { x: PW - M, y: PH - y + 4 }, thickness: 0.5, color: rgb("#d9dde8") });
+    }
+  }
+  return doc.save();
+}
+async function jpdfExport(days, name) {
+  if (!days.length) return toast("Rien à exporter");
+  let L; try { L = await loadPdfLib(); } catch (e) { return toast("Impossible de charger le module PDF (connexion ?)"); }
+  const file = new File([await jpdfBuild(L, days)], name, { type: "application/pdf" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: name }); return; } catch (e) { if (e && e.name === "AbortError") return; } }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 4000);
+}
 function viewJournal() {
+  if (jmode === "read") loadPdfLib().catch(() => { });   // préchargé pour que le partage se fasse tout de suite au clic
   const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)), days = [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => S.schoolDays.includes(new Date(d + "T12:00:00").getDay()) || jget(d).length);
   if (!days.includes(jdate)) days.push(jdate);
   const names = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
   const chips = days.sort().map(d => { const t = new Date(d + "T12:00:00"); return `<button class="chip ${d === jdate ? "on" : ""}" data-jday="${d}">${names[t.getDay()]} ${t.getDate()}${jget(d).length ? " •" : ""}</button>`; }).join("");
   const L = jget(jdate), prev = jPrevDays(), src = prev.includes(jsrc) ? jsrc : prev[0] || "";
   const head = `<div class="card"><div class="row"><button class="btn" data-jnav="-1" title="Jour précédent">◀</button><input type="date" data-jdate value="${jdate}" style="font-size:1.05rem;font-weight:700;padding:8px"><button class="btn" data-jnav="1" title="Jour suivant">▶</button><button class="btn sm" data-jnav="0">Aujourd'hui</button><span class="sp"></span>${`<div class="row" style="gap:6px">${[["read", "👁️ Lecture"], ["edit", "✏️ Édition"]].map(([k, l]) => `<button class="chip ${jmode === k ? "on" : ""}" style="padding:8px 14px;font-weight:700" data-jmode="${k}">${l}</button>`).join("")}</div>`}</div>
-    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div>${jmode === "edit" ? `<input type="text" data-jtitle value="${esc(jTitle(jdate))}" placeholder="✍️ Titre du cahier journal (facultatif) — conservé d'un jour à l'autre, modifiable à tout moment" style="width:100%;margin-bottom:8px;font-family:var(--cursive);font-size:1.15rem">` : ""}<div class="chips">${chips}</div>${jEvents(jdate)}${jmode === "read" ? `<div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="printJournalDay" title="Imprimer / PDF la journée">🖨️ Journée</button><button class="btn sm" data-act="printJournalWeek" title="Imprimer la semaine">🖨️ Semaine</button></div>` : ""}</div>`;
-  const out = `<div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button></div>`;
+    <div style="font-size:1.15rem;font-weight:800;margin:8px 0 6px;">${dLong(jdate)}</div>${jmode === "edit" ? `<input type="text" data-jtitle value="${esc(jTitle(jdate))}" placeholder="✍️ Titre du cahier journal (facultatif) — conservé d'un jour à l'autre, modifiable à tout moment" style="width:100%;margin-bottom:8px;font-family:var(--cursive);font-size:1.15rem"><div class="row" style="margin:-2px 0 8px;gap:7px"><span class="muted">🎨 Couleur du titre</span>${JPAL.map(c => `<button class="swc ${(S.jtcol || "") === c ? "on" : ""}" data-jtcol="${c || "-"}" style="background:${c || "#fff"}" title="${c ? "Colorer le titre" : "Couleur par défaut"}"></button>`).join("")}</div>` : ""}<div class="chips">${chips}</div>${jEvents(jdate)}${jmode === "read" ? `<div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="printJournalDay" title="Imprimer / PDF la journée">🖨️ Journée</button><button class="btn sm" data-act="printJournalWeek" title="Imprimer la semaine">🖨️ Semaine</button><button class="btn sm" data-act="pdfJournalDay" title="PDF dont les liens sont cliquables (journée)">📎 PDF liens · jour</button><button class="btn sm" data-act="pdfJournalWeek" title="PDF dont les liens sont cliquables (semaine)">📎 semaine</button></div>` : ""}</div>`;
+  const out = `<div class="row" style="margin-top:10px"><button class="btn pri" data-act="printJournalDay">🖨️ Imprimer / PDF la journée</button><button class="btn" data-act="printJournalWeek">🖨️ Imprimer la semaine</button></div><div class="row" style="margin-top:6px"><button class="btn" data-act="pdfJournalDay" title="PDF simplifié dont les liens sont cliquables (utile sur iPhone / iPad)">📎 PDF avec liens cliquables · journée</button><button class="btn" data-act="pdfJournalWeek">📎 · semaine</button></div>`;
   if (jmode === "read") return head + (L.length || (S.jtitles || {})[jdate] ? `<div class="card jread">${jTitleHtml(jdate)}${jTable(jdate, true)}</div>` : `<div class="card muted">Rien de prévu pour cette journée. Passe en <b>✏️ Édition</b> pour la remplir${prev.length ? " ou copier une journée précédente" : ""}.</div>`) + "";
   const copy = prev.length ? `<div class="card"><div class="row"><b>📋 Copier la configuration d'une autre journée</b><select data-jsrc class="sp">${prev.map(d => `<option value="${d}" ${d === src ? "selected" : ""}>${dLong(d)} (${jget(d).length} bloc${jget(d).length > 1 ? "s" : ""})</option>`).join("")}</select><label><input type="checkbox" data-jwt ${jwt ? "checked" : ""}> avec textes et liens</label><button class="btn" data-jcopy>Copier ici</button></div><div class="muted" style="margin-top:4px">Reprend les créneaux, titres et matières (et séparateurs) ; tu modifies ensuite ce que tu veux. Par défaut : la dernière journée remplie.</div></div>` : "";
   return head + (L.length ? "" : copy) + (L.map((b, i) => jblock(b, i, L.length) + `<div class="jins"><button class="btn sm pri" data-jadd="bloc||${b.id}" title="Ajouter un bloc juste après celui-ci">+ Bloc ici</button><button class="btn sm" data-jadd="sep|Récréation|${b.id}">☕ Récré</button><button class="btn sm" data-jadd="sep|Pause déjeuner|${b.id}">🍽️ Déjeuner</button><button class="btn sm" data-jadd="sep||${b.id}">➖ Séparateur</button></div>`).join("") || `<div class="card muted">Aucun bloc pour cette journée. Ajoute le premier ci-dessous${prev.length ? " ou copie une journée précédente" : ""}.</div>`) + (L.length ? copy : "") +
     `<div class="card"><div class="row">${L.length ? "" : `<button class="btn pri" data-jadd="bloc">+ Bloc</button><button class="btn" data-jadd="sep|Récréation">☕ + Récréation</button><button class="btn" data-jadd="sep|Pause déjeuner">🍽️ + Pause déjeuner</button><button class="btn" data-jadd="sep|">➖ + Séparateur</button>`}<span class="sp"></span><button class="btn sm" data-jsort title="Range les blocs par heure de début">⏱️ Trier par horaire</button></div>${out}</div>`;
 }
 function journalSheet(days) {
-  return days.map(d => `<section class="jday"><h1 class="jh1">Cahier journal${jTitle(d) ? `<span class="jtt">${esc(jTitle(d))}</span>` : ""}</h1><div class="jdate">${esc(dLong(d))}</div>${calOn(d).length ? `<div class="jev">📅 ${esc(calOn(d).map(e => (e.time ? tFr(e.time) + " " : "") + evTitle(e)).join(" · "))}</div>` : ""}${jTable(d)}</section>`).join("");
+  return days.map(d => `<section class="jday"><h1 class="jh1">Cahier journal</h1><div class="jdate">${esc(dLong(d))}</div>${jTitleHtml(d)}${calOn(d).length ? `<div class="jev">📅 ${esc(calOn(d).map(e => (e.time ? tFr(e.time) + " " : "") + evTitle(e)).join(" · "))}</div>` : ""}${jTable(d)}</section>`).join("");
 }
 function journalText(d) {
   const L = jviews(d); let t = `Cahier journal — ${dLong(d)}\n${jTitle(d) ? jTitle(d) + "\n" : ""}`;
@@ -1348,6 +1426,8 @@ function evalFromDraft() {
 const actions = {
   printProg() { if (ptab === "edit") return toast("Choisis « Par matière » ou « Par période »"); printMode = "prog"; buildSheet(); window.print(); },
   printJournalDay() { if (!jviews(jdate).length) return toast("Rien à imprimer pour cette journée"); jprintDays = [jdate]; printMode = "journal"; buildSheet(); window.print(); },
+  pdfJournalDay() { jpdfExport(jviews(jdate).length ? [jdate] : [], "cahier-journal-" + jdate + ".pdf"); },
+  pdfJournalWeek() { const w = jWeek(); jpdfExport(w, "cahier-journal-semaine-" + (w[0] || jdate) + ".pdf"); },
   printJournalWeek() { jprintDays = jWeek(); if (!jprintDays.length) return toast("Aucune journée remplie cette semaine"); printMode = "journal"; buildSheet(); window.print(); },
   copyDay() { /* remplacé par data-jcopy */ },
   exportMonthImg() { exportMonthImg(); },
@@ -1430,7 +1510,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-jcol],[data-top],[data-gofiche],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-fab2],[data-jcol],[data-jtcol],[data-top],[data-gofiche],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1478,7 +1558,13 @@ document.addEventListener("click", ev => {
   }
   if (d.gofiche) { ficheSel = d.gofiche; ficheTable = false; return go("fiches"); }
   if (d.top !== undefined) return window.scrollTo({ top: 0, behavior: "smooth" });
+  if (d.jtcol !== undefined) { S.jtcol = d.jtcol === "-" ? "" : d.jtcol; save(); render(); return; }
   if (d.jcol) { const [id, col] = d.jcol.split("|"), r = jfind(id); if (r) { r.b.color = col; save(); render(); } return; }
+  if (d.fab2 !== undefined) {   // bascule lecture ↔ édition en gardant la même position à l'écran (ancrée sur le bloc / la compétence visible)
+    const y0 = window.scrollY, an = anchorGet();
+    if (page === "journal") jmode = jmode === "read" ? "edit" : "read"; else { if (ptab !== "edit" && an && an.id) { const ps = an.pgo || []; ps.forEach(k => { if (k) popen[k] = true; }); } ptab = ptab === "edit" ? progRead || "per" : "edit"; }
+    render(); return anchorSet(an, y0);
+  }
   if (d.pgo) { const [a, b, c] = d.pgo.split("|"); ptab = "edit"; popen[a] = true; if (b) popen[b] = true; render(); return goTo("pe-" + (c || b || a)); }
   if (d.jgo) { if (ev.target.closest("a")) return; jmode = "edit"; try { localStorage.setItem("classe-jmode", jmode); } catch (e) { } render(); return goTo("jb-" + d.jgo); }
   if (d.ptog) { popen[d.ptog] = !popen[d.ptog]; return render(); }
