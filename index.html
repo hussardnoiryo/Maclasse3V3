@@ -389,12 +389,12 @@ function viewHome() {
 }
 let lastPage = "";
 function go(p) {
-  if (p === "journal") jmode = "read"; if (p === "prog") { ptab = "per"; goPerDefault(); } if (p === "todo") tdOpen = {}; if (p === "vie" || p === "matos") delete cview[p];   // affichages par défaut à l'arrivée
+  if (p === "journal") jmode = "read"; if (p === "prog") { ptab = "per"; goPerDefault(); } if (p === "todo") tdOpen = {}; if (p === "fiches") fmode = "read"; if (p === "vie" || p === "matos") delete cview[p];   // affichages par défaut à l'arrivée
   if (p === "home") lastPage = page; page = p; try { localStorage.setItem(LS_PAGE, p); } catch (e) {} render(); window.scrollTo(0, 0); if (p === "journal") jScrollNow(); }
 function jScrollNow() { const r = document.querySelector("#main tr.jnow"); if (r) window.scrollTo({ top: Math.max(0, window.scrollY + r.getBoundingClientRect().top - 90), behavior: "instant" }); }   // ouvre le cahier journal en face du créneau en cours
 function render() {
   invalidate();
-  $("#nav").innerHTML = `<span class="ntt" data-top title="Remonter en haut de la page">${page === "home" ? "🏠 Ma classe CE1" : (PAGES.find(x => x[0] === page) || ["", ""])[1]}</span><span id="sync"></span>`; $("#fab").style.display = page === "home" ? "none" : ""; if (ptab !== "edit") progRead = ptab; { const f2 = $("#fab2"), on = page === "journal" || page === "prog"; f2.style.display = on ? "" : "none"; if (on) f2.textContent = (page === "journal" ? jmode === "read" : ptab !== "edit") ? "✏️ Éditer" : "👁️ Lire"; }
+  $("#nav").innerHTML = `<span class="ntt" data-top title="Remonter en haut de la page">${page === "home" ? "🏠 Ma classe CE1" : (PAGES.find(x => x[0] === page) || ["", ""])[1]}</span><span id="sync"></span>`; $("#fab").style.display = page === "home" ? "none" : ""; if (ptab !== "edit") progRead = ptab; { const f2 = $("#fab2"), on = page === "journal" || page === "prog" || (page === "fiches" && !ficheTable && S.students.length && S.fields.length > 0); f2.style.display = on ? "" : "none"; if (on) f2.textContent = (page === "journal" ? jmode === "read" : page === "fiches" ? fmode === "read" : ptab !== "edit") ? "✏️ Éditer" : "👁️ Lire"; }
   paintSync();
   const m = $("#main");
   if (page === "home") m.innerHTML = viewHome();
@@ -640,6 +640,7 @@ function tdBlock(b, i, n) {
   return `<div class="card">${head}${body}</div>`;
 }
 function anchorGet() {
+  if (page === "fiches") { const els = [...document.querySelectorAll(fmode === "read" ? "#main [data-fgo]" : "#main [id^='fe-']")], el = els.find(e => e.getBoundingClientRect().top >= 60) || [...els].reverse().find(e => e.getBoundingClientRect().bottom > 60); return el ? { id: fmode === "read" ? el.dataset.fgo : el.id.slice(3), off: el.getBoundingClientRect().top } : null; }
   const line = 64, sel = page === "journal" ? (jmode === "read" ? "tr[data-jgo]" : ".jb,.jsepb") : ptab === "edit" ? "[id^='pe-']" : "[data-pgo]", els = [...document.querySelectorAll("#main " + sel)];
   const el = els.find(e => e.getBoundingClientRect().top >= line - 4) || [...els].reverse().find(e => e.getBoundingClientRect().bottom > line);
   if (!el) return null;
@@ -648,6 +649,7 @@ function anchorGet() {
 }
 function anchorSet(an, fallbackY) {
   let el = null;
+  if (page === "fiches") { el = an && an.id ? document.getElementById(fmode === "read" ? "fr-" + an.id : "fe-" + an.id) : null; return window.scrollTo({ top: el ? Math.max(0, window.scrollY + el.getBoundingClientRect().top - an.off) : fallbackY, behavior: "instant" }); }
   if (an && an.id) { const all = [...document.querySelectorAll("#main " + (page === "journal" ? (jmode === "read" ? "tr[data-jgo]" : ".jb,.jsepb") : ptab === "edit" ? "[id^='pe-']" : "[data-pgo]"))];
     el = all.find(e => page === "journal" ? (jmode === "read" ? e.dataset.jgo : e.id.slice(3)) === an.id : ptab === "edit" ? e.id === "pe-" + an.id : (e.dataset.pgo || "").split("|").includes(an.id)); }
   const top = el ? window.scrollY + el.getBoundingClientRect().top - an.off : fallbackY;
@@ -865,7 +867,7 @@ function journalText(d) {
 }
 const jWeek = () => { const dt = new Date(jdate + "T12:00:00"), mon = dAdd(jdate, -((dt.getDay() + 6) % 7)); return [0, 1, 2, 3, 4, 5, 6].map(k => dAdd(mon, k)).filter(d => jviews(d).length); };
 
-let ficheSel = null, ficheTable = false;
+let ficheSel = null, ficheTable = false, fmode = "read";
 const rentree = () => { const t = new Date(); return t.getMonth() >= 7 ? t.getFullYear() : t.getFullYear() - 1; };   // année de la rentrée scolaire en cours
 const redoAuto = sid => { const s = stud(sid); if (!s || !s.birth) return ""; return +s.birth.slice(0, 4) < rentree() - 7 ? "Oui" : "Non"; };   // CE1 = nés l'année (rentrée − 7)
 function infoOf(sid, fid) {
@@ -896,9 +898,12 @@ function viewFiches() {
   if (!S.fields.length) return head + `<div class="card muted">Aucun champ défini. Ajoute-en dans ⚙️ Paramètres › Fiches élèves.</div>`;
   if (ficheTable) return head + `<div class="card"><div class="row" style="margin-bottom:10px"><span class="muted sp">Les colonnes s'ajustent au contenu. Fais défiler vers la droite s'il y a beaucoup de champs.</span><button class="btn pri" data-act="printFiches">🖨️ Imprimer le tableau</button></div><div class="scroll">${fichesTable(false)}</div></div>`;
   const sid = ficheSel;
+  const picker = `<div class="row" style="margin-bottom:12px"><button class="btn" data-nav="fiche|-1">◀</button>
+    <select data-selfiche class="sp" style="font-size:1.1rem;font-weight:700;padding:10px">${sorted.map(s => `<option value="${s.id}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select><button class="btn" data-nav="fiche|1">▶</button></div>`;
+  if (fmode === "read") return head + `<div class="card">${picker}${S.fields.map(f => { const v = infoOf(sid, f.id), vv = v ? (f.type === "tel" ? `<a href="tel:${esc(v.replace(/\s+/g, ""))}">${esc(v)}</a>` : f.type === "email" ? `<a href="mailto:${esc(v)}">${esc(v)}</a>` : esc(v)) : '<span class="muted">—</span>'; return `<div id="fr-${f.id}" data-fgo="${f.id}" title="Cliquer pour modifier" style="padding:8px 4px;border-bottom:1px solid var(--bd,#e3e6ee);cursor:pointer"><div class="muted" style="font-size:.85rem">${esc(f.name)}</div><div style="font-weight:600;white-space:pre-wrap">${vv}</div></div>`; }).join("")}</div>`;
   return head + `<div class="card"><div class="row" style="margin-bottom:12px"><button class="btn" data-nav="fiche|-1">◀</button>
     <select data-selfiche class="sp" style="font-size:1.1rem;font-weight:700;padding:10px">${sorted.map(s => `<option value="${s.id}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select><button class="btn" data-nav="fiche|1">▶</button></div>
-    ${S.fields.map((f, i) => `<div style="margin-bottom:14px"><div class="row" style="margin-bottom:4px"><b class="sp">${esc(f.name)}</b>
+    ${S.fields.map((f, i) => `<div id="fe-${f.id}" style="margin-bottom:14px"><div class="row" style="margin-bottom:4px"><b class="sp">${esc(f.name)}</b>
       <button class="btn sm" data-fmove="${f.id}|-1" title="Monter" ${i === 0 ? "disabled" : ""}>▲</button><button class="btn sm" data-fmove="${f.id}|1" title="Descendre" ${i === S.fields.length - 1 ? "disabled" : ""}>▼</button>
       <button class="chip ${f.inAn ? "on" : ""}" data-fan="${f.id}" title="Afficher ce champ en bas de la fiche d'analyse (écran et PDF)" style="padding:5px 12px">${f.inAn ? "✓ Dans l'analyse" : "Hors analyse"}</button></div>${ficheInput(sid, f)}</div>`).join("")}
     <p class="muted">▲ ▼ changent l'ordre des champs · « Dans l'analyse » ajoute le champ (s'il est rempli) en bas de la fiche d'analyse de l'élève.</p></div>`;
@@ -1449,7 +1454,7 @@ const actions = {
 
 /* ---------- Événements ---------- */
 document.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-fab2],[data-jcol],[data-jtcol],[data-top],[data-gofiche],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
+  const t = ev.target.closest("[data-go],[data-cat],[data-cv],[data-nav],[data-dec2],[data-decm2],[data-inc],[data-dec],[data-decm],[data-lend],[data-lend2],[data-inc2],[data-tbl],[data-nt],[data-edit],[data-deval],[data-an],[data-act],[data-ds],[data-di],[data-dsj],[data-dsb],[data-add],[data-addsb],[data-addcp],[data-dcp],[data-dfield],[data-bdet],[data-fmove],[data-fgo],[data-fan],[data-sort],[data-ptab],[data-ptog],[data-pmv],[data-pdel],[data-padd],[data-pab],[data-pev],[data-plink],[data-pall],[data-eexcl],[data-psv],[data-jadd],[data-jmv],[data-jdel],[data-jlink],[data-jldel],[data-jnav],[data-jday],[data-jsort],[data-sday],[data-jmode],[data-jcopy],[data-cmv],[data-cday],[data-cedit],[data-cdel],[data-cadd],[data-ccancel],[data-cimpdel],[data-pgo],[data-jgo],[data-fab2],[data-jcol],[data-jtcol],[data-top],[data-gofiche],[data-tdadd],[data-tdfold],[data-tddel],[data-tdmv],[data-tdnewbtn],[data-tdchk],[data-tdx],[data-tdclear],[data-tdsd],[data-tdst],[data-tdall],[data-tdmiss]");
   if (!t) return; const d = t.dataset;
   if (d.go) return go(d.go);
   if (d.cv) { cview[skey(page)] = d.cv; return render(); }
@@ -1501,9 +1506,10 @@ document.addEventListener("click", ev => {
   if (d.jcol) { const [id, col] = d.jcol.split("|"), r = jfind(id); if (r) { r.b.color = col; save(); render(); } return; }
   if (d.fab2 !== undefined) {   // bascule lecture ↔ édition en gardant la même position à l'écran (ancrée sur le bloc / la compétence visible)
     const y0 = window.scrollY, an = anchorGet();
-    if (page === "journal") jmode = jmode === "read" ? "edit" : "read"; else { if (ptab !== "edit" && an && an.id) { const ps = an.pgo || []; ps.forEach(k => { if (k) popen[k] = true; }); } ptab = ptab === "edit" ? progRead || "per" : "edit"; }
+    if (page === "journal") jmode = jmode === "read" ? "edit" : "read"; else if (page === "fiches") fmode = fmode === "read" ? "edit" : "read"; else { if (ptab !== "edit" && an && an.id) { const ps = an.pgo || []; ps.forEach(k => { if (k) popen[k] = true; }); } ptab = ptab === "edit" ? progRead || "per" : "edit"; }
     render(); return anchorSet(an, y0);
   }
+  if (d.fgo) { if (ev.target.closest("a")) return; fmode = "edit"; render(); return goTo("fe-" + d.fgo); }
   if (d.pgo) { const [a, b, c] = d.pgo.split("|"); ptab = "edit"; popen[a] = true; if (b) popen[b] = true; render(); return goTo("pe-" + (c || b || a)); }
   if (d.jgo) { if (ev.target.closest("a")) return; jmode = "edit"; try { localStorage.setItem("classe-jmode", jmode); } catch (e) { } render(); return goTo("jb-" + d.jgo); }
   if (d.ptog) { popen[d.ptog] = !popen[d.ptog]; return render(); }
